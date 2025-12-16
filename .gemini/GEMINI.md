@@ -4,12 +4,22 @@
 
 A mobile-first web application that solves the "what do we watch?" argument. It separates the **Discovery Phase** (adding things to the list when you hear about them) from the **Decision Phase** (filtering that list based on current mood to find a winner).
 
-### 2\. Tech Stack Recommendation
+### 2\. Tech Stack
 
-  * **Frontend:** React (great ecosystem for swipe components) + Tailwind CSS (fast styling).
-  * **Swipe Logic:** `motion` for smooth, physics-based gestures.
-  * **Backend/Database:** Supabase (Free tier). We need a real-time database so the list persists across devices.
-  * **Data Source:** **The Movie Database (TMDB) API**. It is free, authoritative, and provides posters, runtime, genres, and ratings.
+* **Frontend:** React (great ecosystem for swipe components) + Tailwind CSS (fast styling).
+* **Swipe Logic:** `motion` for smooth, physics-based gestures.
+* **Backend/Database:** Supabase (Free tier). We need a real-time database so the list persists across devices.
+* **Data Source:** **The Movie Database (TMDB) API**. It is free, authoritative, and provides posters, runtime, genres, and ratings.
+
+#### react-router Features
+
+- 🚀 Server-side rendering (disabled)
+- ⚡️ Hot Module Replacement (HMR)
+- 📦 Asset bundling and optimization
+- 🔄 Data loading and mutations
+- 🔒 TypeScript by default
+- 🎉 TailwindCSS for styling
+- 📖 [React Router docs](https://reactrouter.com/)
 
 -----
 
