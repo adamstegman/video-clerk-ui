@@ -99,18 +99,25 @@ This schema organizes the information into four related tables: `entries`, `tmdb
 ### 5\. UI/UX "Vibe Check"
 
 Since this is for personal use, the UI should feel friendly, not corporate.
+The primary color is electric indigo, `indigo-500` in Tailwind CSS.
+According to [the Material color tool](https://m2.material.io/inline-tools/color/), that also leads to the following colors:
 
-  * **The Dashboard (Future Feature):**
+* Complementary: `#f1ef63` (approx. `yellow-200`)
+* Analagous:
+    * `#63acf1` (approx. `blue-300`)
+    * `#a863f1` (approx. `purple-400`)
+* Triadic:
+    * `#ef63f1` (approx. `fuchsia-300`)
+    * `#f16365` (approx. `red-400`)
 
-      * Add a small **"Toggle Switch"** in the top right corner.
-      * *Toggle Off:* "Date Night Mode" (The Tinder Swipe interface).
-      * *Toggle On:* "Power User Mode" (A dense table view where you can sort by Rotten Tomatoes score, release date, or manually delete items).
-
-  * **Visual Feedback:**
-
-      * When you swipe right, the card should show a "Thumbs Up" overlay.
-      * When you swipe left, the card should show a "Thumbs Down" overlay.
-      * When you match 3, throw some confetti (using a library like `canvas-confetti`) to celebrate the decision.
+* **Visual Feedback:**
+    * When you swipe right, the card should show a "Thumbs Up" overlay.
+    * When you swipe left, the card should show a "Thumbs Down" overlay.
+    * When you match 3, throw some confetti (using a library like `canvas-confetti`) to celebrate the decision.
+* **The Dashboard (Future Feature):**
+    * Add a small **"Toggle Switch"** in the top right corner.
+    * *Toggle Off:* "Date Night Mode" (The Tinder Swipe interface).
+    * *Toggle On:* "Power User Mode" (A dense table view where you can sort by Rotten Tomatoes score, release date, or manually delete items).
 
 -----
 
