@@ -6,7 +6,7 @@ export default function MainLayout() {
   return (
     <div className="flex h-screen flex-col bg-gray-100 dark:bg-gray-900">
       <Header />
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex flex-col overflow-hidden">
         <Outlet />
       </main>
       <NavBar />

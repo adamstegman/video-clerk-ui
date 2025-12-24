@@ -8,6 +8,9 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { TMDBAPIProvider } from "./tmdb-api/tmdb-api-provider";
+import { TMDBConfiguration } from "./tmdb-api/tmdb-configuration";
+import { TMDBGenres } from "./tmdb-api/tmdb-genres";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -42,7 +45,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <TMDBAPIProvider>
+      <TMDBConfiguration>
+        <TMDBGenres>
+          <Outlet />
+        </TMDBGenres>
+      </TMDBConfiguration>
+    </TMDBAPIProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

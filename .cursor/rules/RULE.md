@@ -139,7 +139,7 @@ According to [the Material color tool](https://m2.material.io/inline-tools/color
 
 ### 6\. Implementation Plan (Step-by-Step)
 
-**Phase 1: The Connector**
+✅ **Phase 1: The Connector**
 
   * Get a TMDB API Key.
   * Build a simple page that logs `console.log` results when you type a movie name.

@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
-    "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
+    "build": "dotenvx run -- react-router build",
+    "dev": "dotenvx run -- react-router dev",
+    "start": "dotenvx run -- react-router-serve ./build/server/index.js",
+    "test": "vitest",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
@@ -17,14 +18,20 @@
     "react-router": "7.10.1"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.51.2",
     "@react-router/dev": "7.10.1",
     "@tailwindcss/vite": "^4.1.13",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "jsdom": "^24.1.1",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.0.4"
   }
 }
