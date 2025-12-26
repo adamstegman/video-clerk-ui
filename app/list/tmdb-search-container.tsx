@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect, useCallback } from 'react';
 
 import { TMDBSearch } from './tmdb-search';
 import { type TMDBGenre, type TMDBSearchResult as TMDBRawSearchResult } from '../tmdb-api/tmdb-api';
@@ -57,14 +57,18 @@ function createSearchResultItem(
   };
 }
 
-export function TMDBSearchContainer() {
+interface TMDBSearchContainerProps {
+  initialQuery?: string;
+}
+
+export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) {
   const api = useContext(TMDBAPIContext);
   const genreData = useContext(TMDBGenresContext);
   const [results, setResults] = useState<any>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSearch = async (term: string) => {
+  const handleSearch = useCallback(async (term: string) => {
     setError(null);
     if (!term || !api) {
       setResults([]);
@@ -92,7 +96,13 @@ export function TMDBSearchContainer() {
     }
     setResults(results);
     setLoading(false);
-  };
+  }, [api, genreData]);
 
-  return <TMDBSearch onSearch={handleSearch} results={results} error={error} loading={loading} />;
+  useEffect(() => {
+    if (initialQuery) {
+      handleSearch(initialQuery);
+    }
+  }, [initialQuery, handleSearch]);
+
+  return <TMDBSearch onSearch={handleSearch} results={results} error={error} loading={loading} initialQuery={initialQuery} />;
 }

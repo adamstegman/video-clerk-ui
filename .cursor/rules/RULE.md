@@ -27,6 +27,7 @@ A mobile-first web application that solves the "what do we watch?" argument. It 
 
 #### Coding practices
 
+* After modifying the routes, run `npm run typecheck` to generate types.
 * Use container components for things like API requests, and keep presentational components pure.
 * When rendering a context, do not use `.Provider` - this is now legacy. Render the context directly, e.g. `<TMDBAPIContext></TMDBAPIContext>`.
 
@@ -36,6 +37,7 @@ A mobile-first web application that solves the "what do we watch?" argument. It 
   * Create unit tests for classes and public methods
   * Create interaction tests for pages and features
 * Write tests in a spec style, e.g. `it('does something')` with a verb and then the expected effect. Do not start tests with "should."
+* After making changes, run `npm test` to validate your changes.
 
 -----
 

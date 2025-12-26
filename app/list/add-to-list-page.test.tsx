@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ListPage } from './list-page';
+import { createMemoryRouter, RouterProvider } from 'react-router';
+import { AddToListPage } from './add-to-list-page';
 import { TMDBAPI } from '../tmdb-api/tmdb-api';
 import { TMDBAPIContext } from '../tmdb-api/tmdb-api-provider';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
@@ -13,7 +14,7 @@ vi.mock('../tmdb-api/tmdb-primary-long-blue.svg', () => ({
   default: 'tmdb-logo.svg',
 }));
 
-describe('ListPage', () => {
+describe('AddToListPage', () => {
   let mockAPI: TMDBAPI;
   let mockMultiSearch: ReturnType<typeof vi.fn>;
 
@@ -64,16 +65,31 @@ describe('ListPage', () => {
     vi.clearAllMocks();
   });
 
-  const renderWithProviders = () => {
-    return render(
-      <TMDBAPIContext value={mockAPI}>
-        <TMDBConfigurationContext value={mockConfigurationState}>
-          <TMDBGenresContext value={mockGenresState}>
-            <ListPage />
-          </TMDBGenresContext>
-        </TMDBConfigurationContext>
-      </TMDBAPIContext>
+  const renderWithProviders = (initialEntries: string[] = ['/']) => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          element: (
+            <TMDBAPIContext value={mockAPI}>
+              <TMDBConfigurationContext value={mockConfigurationState}>
+                <TMDBGenresContext value={mockGenresState}>
+                  <AddToListPage />
+                </TMDBGenresContext>
+              </TMDBConfigurationContext>
+            </TMDBAPIContext>
+          ),
+        },
+      ],
+      {
+        initialEntries,
+        future: {
+          v7_startTransition: true,
+        },
+      }
     );
+
+    return render(<RouterProvider router={router} />);
   };
 
   it('displays search results after typing and waiting for debounce', async () => {
@@ -396,7 +412,7 @@ describe('ListPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Movie Title')).toBeInTheDocument();
-      
+
       // Only the TMDB logo image should be present, not a poster
       const images = screen.getAllByRole('img');
       expect(images).toHaveLength(1);
@@ -434,4 +450,3 @@ describe('ListPage', () => {
     expect(screen.queryByText(/Results by/)).not.toBeInTheDocument();
   });
 });
-

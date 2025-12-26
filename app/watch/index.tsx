@@ -1,5 +1,5 @@
-import type { Route } from "./+types/watch";
-import { ListPage } from "../list/list-page";
+import type { Route } from "./+types/index";
+import { WatchPage } from "../watch/watch-page";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -11,6 +11,6 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
-export default function List() {
-  return <ListPage />;
+export default function Watch() {
+  return <WatchPage />;
 }
