@@ -1,5 +1,6 @@
 import { ListIcon } from './list-icon';
 import { NavItem } from './nav-item';
+import { SettingsIcon } from './settings-icon';
 import { WatchIcon } from './watch-icon';
 
 export function NavBar() {
@@ -10,6 +11,9 @@ export function NavBar() {
       </NavItem>
       <NavItem to="/app/list" text="List">
         <ListIcon />
+      </NavItem>
+      <NavItem to="/app/settings" text="Settings">
+        <SettingsIcon />
       </NavItem>
     </nav>
   );

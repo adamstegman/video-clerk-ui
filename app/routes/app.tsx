@@ -28,8 +28,10 @@ export default function App() {
         <TMDBGenres>
           <div className="flex h-screen flex-col bg-zinc-100 dark:bg-zinc-900">
             <Header leftAction={leftAction} rightAction={rightAction} />
-            <main className="flex-1 flex flex-col overflow-hidden">
-              <Outlet />
+            <main className="flex-1 flex flex-col overflow-hidden h-full">
+              <div className="mx-auto w-full max-w-5xl px-4 md:px-8 lg:px-12 xl:px-16 flex-1 flex flex-col min-h-0">
+                <Outlet />
+              </div>
             </main>
             <NavBar />
           </div>

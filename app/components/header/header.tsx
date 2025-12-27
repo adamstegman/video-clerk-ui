@@ -19,7 +19,7 @@ export function Header({ leftAction, rightAction }: HeaderProps) {
           {leftAction && (
             <Link
               to={leftAction.to}
-              className="text-white hover:opacity-80 transition-opacity"
+              className="px-2 text-white hover:opacity-80 transition-opacity"
             >
               {leftAction.icon}
             </Link>
@@ -30,7 +30,7 @@ export function Header({ leftAction, rightAction }: HeaderProps) {
           {rightAction && (
             <Link
               to={rightAction.to}
-              className="text-white hover:opacity-80 transition-opacity"
+              className="px-2 text-white hover:opacity-80 transition-opacity"
             >
               {rightAction.icon}
             </Link>
