@@ -1,4 +1,4 @@
-import type { Route } from "./+types/index";
+import type { Route } from "./+types/watch";
 import { WatchPage } from "../watch/watch-page";
 
 export function meta({ }: Route.MetaArgs) {

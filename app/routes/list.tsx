@@ -1,4 +1,4 @@
-import type { Route } from "./+types/index";
+import type { Route } from "./+types/list";
 import { ListPage } from "../list/list-page";
 
 export function meta({ }: Route.MetaArgs) {

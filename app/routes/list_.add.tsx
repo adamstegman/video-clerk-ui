@@ -1,4 +1,4 @@
-import type { Route } from "./+types/add";
+import type { Route } from "./+types/list_.add";
 import { useSearchParams } from "react-router";
 import { AddToListPage } from "../list/add-to-list-page";
 import { CheckmarkIcon } from "~/header/checkmark-icon";

@@ -5,13 +5,21 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useMatches,
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { Header, type HeaderAction } from './header/header';
+import { NavBar } from './nav-bar/nav-bar';
 import { TMDBAPIProvider } from "./tmdb-api/tmdb-api-provider";
 import { TMDBConfiguration } from "./tmdb-api/tmdb-configuration";
 import { TMDBGenres } from "./tmdb-api/tmdb-genres";
 import "./app.css";
+
+export interface RouteHandle {
+  leftHeaderAction?: HeaderAction;
+  rightHeaderAction?: HeaderAction;
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,11 +53,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const matches = useMatches();
+  const currentMatch = matches[matches.length - 1];
+  const handle = currentMatch?.handle as RouteHandle | undefined;
+  const leftAction = handle?.leftHeaderAction;
+  const rightAction = handle?.rightHeaderAction;
+
   return (
     <TMDBAPIProvider>
       <TMDBConfiguration>
         <TMDBGenres>
-          <Outlet />
+          <div className="flex h-screen flex-col bg-zinc-100 dark:bg-zinc-900">
+            <Header leftAction={leftAction} rightAction={rightAction} />
+            <main className="flex-1 flex flex-col overflow-hidden">
+              <Outlet />
+            </main>
+            <NavBar />
+          </div>
         </TMDBGenres>
       </TMDBConfiguration>
     </TMDBAPIProvider>
