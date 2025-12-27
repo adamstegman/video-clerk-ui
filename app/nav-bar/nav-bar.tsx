@@ -4,7 +4,7 @@ import { WatchIcon } from './watch-icon';
 
 export function NavBar() {
   return (
-    <nav className="flex items-center justify-around border-t border-gray-200 bg-gray-50 py-3 dark:border-gray-700 dark:bg-gray-800">
+    <nav className="flex items-center justify-around border-t border-zinc-200 bg-zinc-50 py-3 dark:border-zinc-700 dark:bg-zinc-800">
       <NavItem to="/watch" text="Watch">
         <WatchIcon />
       </NavItem>

@@ -19,9 +19,9 @@ export function TMDBSearchResult({ result }: { result: TMDBSearchResultItem }) {
         />
       )}
       <div className="flex-1 min-w-0">
-        <h3 className="font-bold text-base md:text-lg lg:text-xl">{result.name}</h3>
-        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">{result.release_year} - {result.media_type}</p>
-        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">{result.genres.join(', ')}</p>
+        <h3 className="font-bold text-base md:text-lg lg:text-xl text-zinc-900 dark:text-zinc-100">{result.name}</h3>
+        <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400">{result.release_year} - {result.media_type}</p>
+        <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400">{result.genres.join(', ')}</p>
       </div>
     </div>
   );

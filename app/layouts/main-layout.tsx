@@ -15,7 +15,7 @@ export default function MainLayout() {
   const rightAction = handle?.rightHeaderAction;
 
   return (
-    <div className="flex h-screen flex-col bg-gray-100 dark:bg-gray-900">
+    <div className="flex h-screen flex-col bg-zinc-100 dark:bg-zinc-900">
       <Header leftAction={leftAction} rightAction={rightAction} />
       <main className="flex-1 flex flex-col overflow-hidden">
         <Outlet />

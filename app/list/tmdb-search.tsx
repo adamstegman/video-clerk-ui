@@ -73,7 +73,7 @@ export function TMDBSearch({
     <div className="flex h-full flex-col">
       <div className="mx-auto w-full max-w-7xl flex-1 flex flex-col min-h-0">
         <div className="flex-shrink-0 px-4 pb-2 pt-4 md:px-8 lg:px-12 xl:px-16">
-          <p className="mb-3 text-xl text-gray-700 dark:text-gray-200 md:text-2xl">Search for titles to add to your list</p>
+          <p className="mb-3 text-xl text-zinc-700 dark:text-zinc-200 md:text-2xl">Search for titles to add to your list</p>
           <Form onSubmit={handleSubmit}>
             <input
               ref={inputRef}
@@ -81,7 +81,7 @@ export function TMDBSearch({
               name="q"
               placeholder="Type a title..."
               value={searchValue}
-              className="w-full p-2 border rounded text-black dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 md:p-3 md:text-lg"
+              className="w-full p-2 border rounded text-black dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-600 md:p-3 md:text-lg"
               onChange={(e) => {
                 setSearchValue(e.target.value);
                 handleDebouncedSearch(e.target.value);
@@ -96,8 +96,8 @@ export function TMDBSearch({
           {loading && !displayError && results.length === 0 && (
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-4">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-indigo-500"></div>
-                <p className="text-gray-600 dark:text-gray-400">Searching...</p>
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-indigo-500"></div>
+                <p className="text-zinc-600 dark:text-zinc-400">Searching...</p>
               </div>
             </div>
           )}

@@ -12,7 +12,7 @@ export function NavItem({ to, text, children }: NavItemProps) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex flex-col items-center gap-1 dark:text-gray-400 dark:hover:text-indigo-400 ${isActive ? 'text-indigo-500' : 'text-gray-500 hover:text-indigo-500'
+        `flex flex-col items-center gap-1 dark:text-zinc-400 dark:hover:text-indigo-400 ${isActive ? 'text-indigo-500' : 'text-zinc-500 hover:text-indigo-500'
         }`
       }
     >

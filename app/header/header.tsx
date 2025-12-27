@@ -13,13 +13,13 @@ interface HeaderProps {
 
 export function Header({ leftAction, rightAction }: HeaderProps) {
   return (
-    <header className="bg-indigo-500 px-4 py-4 text-gray-100 shadow-md">
+    <header className="bg-indigo-500 px-4 py-4 text-white shadow-md">
       <div className="flex items-center justify-between">
         <div className="flex w-12 justify-start">
           {leftAction && (
             <Link
               to={leftAction.to}
-              className="text-gray-100 hover:opacity-80 transition-opacity"
+              className="text-white hover:opacity-80 transition-opacity"
             >
               {leftAction.icon}
             </Link>
@@ -30,7 +30,7 @@ export function Header({ leftAction, rightAction }: HeaderProps) {
           {rightAction && (
             <Link
               to={rightAction.to}
-              className="text-gray-100 hover:opacity-80 transition-opacity"
+              className="text-white hover:opacity-80 transition-opacity"
             >
               {rightAction.icon}
             </Link>
