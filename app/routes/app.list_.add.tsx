@@ -1,12 +1,12 @@
-import type { Route } from "./+types/list_.add";
+import type { Route } from "./+types/app.list_.add";
 import { useSearchParams } from "react-router";
 import { AddToListPage } from "../list/add-to-list-page";
-import { CheckmarkIcon } from "~/header/checkmark-icon";
-import type { RouteHandle } from "~/layouts/main-layout";
+import { CheckmarkIcon } from "~/components/header/checkmark-icon";
+import type { RouteHandle } from "./app";
 
 export const handle: RouteHandle = {
   rightHeaderAction: {
-    to: "/list",
+    to: "/app/list",
     icon: <CheckmarkIcon />,
   },
 };

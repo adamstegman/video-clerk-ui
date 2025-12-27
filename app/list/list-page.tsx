@@ -5,7 +5,7 @@ export function ListPage() {
   return (
     <>
       <p className="text-xl text-zinc-700 dark:text-zinc-200">List of saved items</p>
-      <ActionLink to="/list/add">
+      <ActionLink to="/app/list/add">
         <PlusIcon />
       </ActionLink>
     </>

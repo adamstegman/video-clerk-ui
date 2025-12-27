@@ -64,14 +64,20 @@ interface TMDBSearchContainerProps {
 export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) {
   const api = useContext(TMDBAPIContext);
   const genreData = useContext(TMDBGenresContext);
-  const [results, setResults] = useState<any>([]);
+  const [results, setResults] = useState<TMDBSearchResultItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSearch = useCallback(async (term: string) => {
     setError(null);
-    if (!term || !api) {
+    if (!term) {
       setResults([]);
+      setLoading(false);
+      return;
+    }
+
+    if (!api) {
+      setError('TMDB API is not available. Please refresh the page.');
       setLoading(false);
       return;
     }

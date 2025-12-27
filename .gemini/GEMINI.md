@@ -2,7 +2,7 @@
 
 ### 1\. The Core Concept
 
-A mobile-first web application that solves the "what do we watch?" argument. It separates the **Discovery Phase** (adding things to the list when you hear about them) from the **Decision Phase** (filtering that list based on current mood to find a winner).
+A mobile-first web application that solves the "what do we watch?" conundrum. It separates the **Discovery Phase** (adding things to the list when you hear about them) from the **Decision Phase** (filtering that list based on current mood to find a winner).
 
 ### 2\. Tech Stack
 
@@ -24,11 +24,21 @@ A mobile-first web application that solves the "what do we watch?" argument. It 
 #### Design practices
 
 * Use responsive design: make it work on small screens by default, then add Tailwind CSS classes that give things a little more space on medium or large screens.
+* The primary color is electric indigo, `indigo-500` in Tailwind CSS. According to [the Material color tool](https://m2.material.io/inline-tools/color/), that also leads to the following colors:
+  * Complementary: `#f1ef63` (approx. `yellow-200`)
+  * Analagous:
+    * `#63acf1` (approx. `blue-300`)
+    * `#a863f1` (approx. `purple-400`)
+  * Triadic:
+    * `#ef63f1` (approx. `fuchsia-300`)
+    * `#f16365` (approx. `red-400`)
+* Backgrounds, dark mode foregrounds, and other muted colors are based on `zinc`
 
 #### Coding practices
 
 * After modifying the routes, run `npm run typecheck` to generate types.
 * Use container components for things like API requests, and keep presentational components pure.
+* Keep Components Small and Focused: A component should ideally do one thing well. Large, “God components” are hard to test and maintain. Split big components into smaller, reusable ones.
 * When rendering a context, do not use `.Provider` - this is now legacy. Render the context directly, e.g. `<TMDBAPIContext></TMDBAPIContext>`.
 
 #### Testing practices
@@ -117,16 +127,6 @@ This schema organizes the information into four related tables: `entries`, `tmdb
 ### 5\. UI/UX "Vibe Check"
 
 Since this is for personal use, the UI should feel friendly, not corporate.
-The primary color is electric indigo, `indigo-500` in Tailwind CSS.
-According to [the Material color tool](https://m2.material.io/inline-tools/color/), that also leads to the following colors:
-
-* Complementary: `#f1ef63` (approx. `yellow-200`)
-* Analagous:
-    * `#63acf1` (approx. `blue-300`)
-    * `#a863f1` (approx. `purple-400`)
-* Triadic:
-    * `#ef63f1` (approx. `fuchsia-300`)
-    * `#f16365` (approx. `red-400`)
 
 * **Visual Feedback:**
     * When you swipe right, the card should show a "Thumbs Up" overlay.
