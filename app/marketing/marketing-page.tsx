@@ -3,6 +3,7 @@ import { FeatureCard } from "./feature-card";
 import { LightbulbIcon } from "./lightbulb-icon";
 import { AddToListIcon } from "./add-to-list-icon";
 import { FilterIcon } from "./filter-icon";
+import { primaryHeadingClasses, pageTitleClasses, cn } from "../lib/utils";
 
 const ICON_CLASSES = "w-6 h-6 md:w-8 md:h-8";
 
@@ -13,10 +14,10 @@ export function MarketingPage() {
         <div className="w-full max-w-4xl lg:max-w-6xl mx-auto text-center space-y-8 md:space-y-12">
           {/* Hero Section */}
           <div className="space-y-6 md:space-y-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-zinc-900 dark:text-zinc-100">
+            <h1 className={cn("text-4xl md:text-5xl lg:text-6xl font-bold", primaryHeadingClasses)}>
               Video Clerk
             </h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-zinc-700 dark:text-zinc-200 max-w-2xl mx-auto">
+            <p className={cn("text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto", pageTitleClasses)}>
               Solve the "what do we watch?" conundrum
             </p>
             <div className="pt-4">
@@ -58,4 +59,3 @@ export function MarketingPage() {
     </div>
   );
 }
-

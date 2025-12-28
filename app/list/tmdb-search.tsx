@@ -4,6 +4,7 @@ import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import type { TMDBSearchResultItem } from './tmdb-search-container';
 import { TMDBSearchResult } from './tmdb-search-result';
 import tmdbLogo from '../tmdb-api/tmdb-primary-long-blue.svg';
+import { pageTitleClasses, sectionSpacingClasses, secondaryTextClasses, cn } from '../lib/utils';
 
 export function TMDBSearch({
   onSearch,
@@ -71,8 +72,8 @@ export function TMDBSearch({
 
   return (
     <>
-      <div className="flex-shrink-0 pb-2 pt-4">
-        <p className="mb-3 text-xl text-zinc-700 dark:text-zinc-200 md:text-2xl">Search for titles to add to your list</p>
+      <div className={sectionSpacingClasses}>
+        <p className={cn("mb-3", pageTitleClasses)}>Search for titles to add to your list</p>
         <Form onSubmit={handleSubmit}>
           <input
             ref={inputRef}
@@ -80,7 +81,7 @@ export function TMDBSearch({
             name="q"
             placeholder="Type a title..."
             value={searchValue}
-            className="w-full p-2 border rounded text-black dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-600 md:p-3 md:text-lg"
+            className="w-full p-2 border rounded text-black dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-600"
             onChange={(e) => {
               setSearchValue(e.target.value);
               handleDebouncedSearch(e.target.value);
@@ -96,7 +97,7 @@ export function TMDBSearch({
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-4">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-indigo-500"></div>
-              <p className="text-zinc-600 dark:text-zinc-400">Searching...</p>
+              <p className={secondaryTextClasses}>Searching...</p>
             </div>
           </div>
         )}

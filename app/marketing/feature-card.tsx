@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { primaryHeadingClasses, secondaryTextClasses, cn } from '../lib/utils';
 
 interface FeatureCardProps {
   icon: ReactNode;
@@ -22,13 +23,12 @@ export function FeatureCard({
       >
         <div className={iconTextColor}>{icon}</div>
       </div>
-      <h2 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-3 md:mb-4">
+      <h2 className={cn("text-xl md:text-2xl font-semibold mb-3 md:mb-4", primaryHeadingClasses)}>
         {title}
       </h2>
-      <p className="text-zinc-600 dark:text-zinc-300 text-sm md:text-base">
+      <p className={cn("text-sm md:text-base", secondaryTextClasses, "dark:text-zinc-300")}>
         {description}
       </p>
     </div>
   );
 }
-
