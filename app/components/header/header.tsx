@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
+import { TvMinimalPlay } from "lucide-react";
 
 export interface HeaderAction {
   to: string;
@@ -25,7 +26,10 @@ export function Header({ leftAction, rightAction }: HeaderProps) {
             </Link>
           )}
         </div>
-        <h1 className="text-lg font-bold flex-1 text-center">Video Clerk</h1>
+        <h1 className="text-lg font-bold flex-1 text-center flex items-center justify-center gap-2">
+          <TvMinimalPlay className="h-5 w-5 text-white" />
+          Video Clerk
+        </h1>
         <div className="flex w-12 justify-end">
           {rightAction && (
             <Link

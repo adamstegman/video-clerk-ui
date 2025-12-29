@@ -11,6 +11,30 @@ import type { Route } from "./+types/root";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
+  {
+    rel: "icon",
+    type: "image/svg+xml",
+    href: "/tv-minimal-play.light.svg",
+    media: "(prefers-color-scheme: light)",
+  },
+  {
+    rel: "icon",
+    type: "image/svg+xml",
+    href: "/tv-minimal-play.dark.svg",
+    media: "(prefers-color-scheme: dark)",
+  },
+  {
+    rel: "icon",
+    type: "image/png",
+    href: "/tv-minimal-play.light.png",
+    media: "(prefers-color-scheme: light)",
+  },
+  {
+    rel: "icon",
+    type: "image/png",
+    href: "/tv-minimal-play.dark.png",
+    media: "(prefers-color-scheme: dark)",
+  },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
