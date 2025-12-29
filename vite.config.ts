@@ -6,6 +6,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { type UserConfig as VitestConfig } from "vitest/node";
 
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [
     tailwindcss(),
     // Only apply React Router plugin when not in test mode to avoid import.meta.env issues
