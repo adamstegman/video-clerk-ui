@@ -22,7 +22,7 @@ export function MarketingPage() {
             </p>
             <div className="pt-4">
               <Link
-                to="/app"
+                to="/login"
                 className="inline-block px-8 py-3 md:px-10 md:py-4 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg text-lg md:text-xl transition-colors shadow-lg hover:shadow-xl"
               >
                 Log In

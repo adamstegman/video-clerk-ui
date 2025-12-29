@@ -1,5 +1,6 @@
 import {
   Outlet,
+  redirect,
   useMatches,
 } from "react-router";
 
@@ -9,10 +10,28 @@ import { NavBar } from '../components/nav-bar/nav-bar';
 import { TMDBAPIProvider } from "../tmdb-api/tmdb-api-provider";
 import { TMDBConfiguration } from "../tmdb-api/tmdb-configuration";
 import { TMDBGenres } from "../tmdb-api/tmdb-genres";
+import { createClient } from "~/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export interface RouteHandle {
   leftHeaderAction?: HeaderAction;
   rightHeaderAction?: HeaderAction;
+}
+
+export interface AppClientLoaderData {
+  user: User | null;
+}
+
+export async function clientLoader({ request }: { request: Request }): Promise<AppClientLoaderData | Response> {
+  const supabase = createClient()
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data?.user) {
+    // Include returnTo parameter with the current URL
+    const url = new URL(request.url)
+    const returnTo = url.pathname + url.search
+    return redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+  }
+  return data
 }
 
 export default function App() {
@@ -40,4 +59,3 @@ export default function App() {
     </TMDBAPIProvider>
   );
 }
-
