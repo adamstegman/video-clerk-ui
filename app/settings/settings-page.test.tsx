@@ -33,10 +33,10 @@ describe('SettingsPage', () => {
     expect(attributionText).toBeInTheDocument();
   });
 
-  it('navigates to root path when Log Out button is clicked', async () => {
+  it('links to the logout route when Log Out button is clicked', async () => {
     renderWithRouter();
     const logOutButton = screen.getByRole('link', { name: /log out/i });
     // Verify the link is set up correctly
-    expect(logOutButton).toHaveAttribute('href', '/');
+    expect(logOutButton).toHaveAttribute('href', '/logout');
   });
 });

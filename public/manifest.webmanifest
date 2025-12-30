@@ -1,0 +1,18 @@
+{
+  "name": "Video Clerk",
+  "short_name": "Video Clerk",
+  "description": "Solve the 'what do we watch?' conundrum.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0f",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "/tv-minimal-play.light.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}
+
