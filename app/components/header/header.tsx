@@ -14,7 +14,7 @@ interface HeaderProps {
 
 export function Header({ leftAction, rightAction }: HeaderProps) {
   return (
-    <header className="bg-indigo-500 px-4 py-4 text-white shadow-md">
+    <header className="bg-indigo-500 px-4 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] text-white shadow-md">
       <div className="flex items-center justify-between">
         <div className="flex w-12 justify-start">
           {leftAction && (
