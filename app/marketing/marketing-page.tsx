@@ -1,9 +1,6 @@
 import { Link } from "react-router";
-import { TvMinimalPlay } from "lucide-react";
+import { TvMinimalPlay, Lightbulb, ListPlus, Filter } from "lucide-react";
 import { FeatureCard } from "./feature-card";
-import { LightbulbIcon } from "./lightbulb-icon";
-import { AddToListIcon } from "./add-to-list-icon";
-import { FilterIcon } from "./filter-icon";
 import { primaryHeadingClasses, pageTitleClasses, cn } from "../lib/utils";
 
 const ICON_CLASSES = "w-6 h-6 md:w-8 md:h-8";
@@ -41,21 +38,21 @@ export function MarketingPage() {
           {/* Feature Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 pt-8 md:pt-12">
             <FeatureCard
-              icon={<LightbulbIcon className={ICON_CLASSES} />}
+              icon={<Lightbulb className={ICON_CLASSES} />}
               iconBgColor="bg-yellow-200 dark:bg-yellow-300/20"
               iconTextColor="text-yellow-700 dark:text-yellow-300"
               title='Solve the "what do we watch?" conundrum'
               description="Never waste time deciding what to watch again. Video Clerk helps you make quick, satisfying choices."
             />
             <FeatureCard
-              icon={<AddToListIcon className={ICON_CLASSES} />}
+              icon={<ListPlus className={ICON_CLASSES} />}
               iconBgColor="bg-blue-300 dark:bg-blue-400/20"
               iconTextColor="text-blue-700 dark:text-blue-300"
               title="Add things to watch to your list when you hear about them"
               description="Build your watchlist over time. When someone recommends a show or movie, add it instantly—no decision needed."
             />
             <FeatureCard
-              icon={<FilterIcon className={ICON_CLASSES} />}
+              icon={<Filter className={ICON_CLASSES} />}
               iconBgColor="bg-purple-400 dark:bg-purple-500/20"
               iconTextColor="text-purple-700 dark:text-purple-300"
               title="Filter that list based on your mood to find a winner"

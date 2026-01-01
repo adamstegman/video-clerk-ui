@@ -1,13 +1,13 @@
 import type { Route } from "./+types/app.list_.add";
 import { useSearchParams } from "react-router";
+import { Check } from "lucide-react";
 import { AddToListPage } from "../list/add-to-list-page";
-import { CheckmarkIcon } from "~/components/header/checkmark-icon";
 import type { RouteHandle } from "./app";
 
 export const handle: RouteHandle = {
   rightHeaderAction: {
     to: "/app/list",
-    icon: <CheckmarkIcon />,
+    icon: <Check />,
   },
 };
 
@@ -26,4 +26,3 @@ export default function ListAdd() {
   const query = searchParams.get("q") || "";
   return <AddToListPage initialQuery={query} />;
 }
-
