@@ -14,6 +14,13 @@ vi.mock('../tmdb-api/tmdb-primary-long-blue.svg', () => ({
   default: 'tmdb-logo.svg',
 }));
 
+const mockRpc = vi.hoisted(() => vi.fn());
+vi.mock('../lib/supabase/client', () => ({
+  createClient: () => ({
+    rpc: mockRpc,
+  }),
+}));
+
 describe('AddToListPage', () => {
   let mockAPI: TMDBAPI;
   let mockMultiSearch: ReturnType<typeof vi.fn>;
@@ -59,6 +66,7 @@ describe('AddToListPage', () => {
     mockAPI = {
       multiSearch: mockMultiSearch,
     } as unknown as TMDBAPI;
+    mockRpc.mockReset();
   });
 
   afterEach(() => {
@@ -448,5 +456,59 @@ describe('AddToListPage', () => {
 
     // Verify that no results are shown while loading
     expect(screen.queryByText(/Results by/)).not.toBeInTheDocument();
+  });
+
+  it('allows saving a search result to the database', async () => {
+    const user = userEvent.setup();
+    const mockResults: TMDBSearchResults = {
+      page: 1,
+      results: [
+        {
+          adult: false,
+          backdrop_path: '/backdrop.jpg',
+          genre_ids: [28, 12],
+          id: 1,
+          media_type: 'movie',
+          original_language: 'en',
+          overview: 'A great movie',
+          popularity: 100.5,
+          poster_path: '/poster.jpg',
+          release_date: '2023-01-01',
+          title: 'Test Movie',
+          vote_average: 8.5,
+          vote_count: 1000,
+        },
+      ],
+      total_pages: 1,
+      total_results: 1,
+    };
+
+    mockMultiSearch.mockResolvedValue(mockResults);
+    mockRpc.mockResolvedValue({ data: 123, error: null });
+
+    renderWithProviders();
+
+    const searchInput = screen.getByPlaceholderText('Type a title...');
+    await user.type(searchInput, 'test');
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Movie')).toBeInTheDocument();
+    });
+
+    const saveButton = screen.getByRole('button', { name: 'Save Test Movie' });
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockRpc).toHaveBeenCalledWith('save_tmdb_result_to_list', expect.objectContaining({
+        p_tmdb_id: 1,
+        p_media_type: 'movie',
+        p_title: 'Test Movie',
+        p_genres: ['Action', 'Adventure'],
+      }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Saved Test Movie' })).toBeInTheDocument();
+    });
   });
 });

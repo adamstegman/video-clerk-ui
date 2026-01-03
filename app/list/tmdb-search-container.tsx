@@ -19,6 +19,7 @@ export interface TMDBSearchResultItem
   name: string;
   release_date: string;
   release_year: string;
+  media_type_display: string;
 }
 
 const mediaTypeDisplay = {
@@ -50,7 +51,10 @@ function createSearchResultItem(
   return {
     ...result,
     genres,
-    media_type: mediaTypeDisplay[result.media_type as TMDBMediaType],
+    // Keep the raw TMDB media_type ('movie' | 'tv') for persistence,
+    // and provide a separate display value for UI rendering.
+    media_type: result.media_type,
+    media_type_display: mediaTypeDisplay[result.media_type as TMDBMediaType],
     name,
     release_date,
     release_year: release_date ? release_date.split('-')[0] : '',
