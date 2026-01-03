@@ -13,7 +13,7 @@ export enum TMDBMediaType {
 export interface TMDBSearchResultItem
   extends Omit<
     TMDBRawSearchResult,
-    'title' | 'first_air_date' | 'name' | 'release_date'
+    'genre_ids' | 'title' | 'first_air_date' | 'name' | 'release_date'
   > {
   genres: string[];
   name: string;

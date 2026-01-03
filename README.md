@@ -14,6 +14,16 @@ npm install
 
 ### Development
 
+Start a local Supabase instance:
+
+```bash
+npx supabase start
+```
+
+Create a `.env` file with the secrets output by this command.
+Use `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` instead of `VITE_SUPABASE_ANON_KEY`, but the value is the same.
+Make sure to include `VITE_TMDB_API_READ_TOKEN`, obtained from TMDB.
+
 Start the development server with HMR:
 
 ```bash
