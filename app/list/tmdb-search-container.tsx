@@ -15,6 +15,7 @@ export interface TMDBSearchResultItem
     TMDBRawSearchResult,
     'genre_ids' | 'title' | 'first_air_date' | 'name' | 'release_date'
   > {
+  genre_tags: { id: number; name: string }[];
   genres: string[];
   name: string;
   release_date: string;
@@ -31,25 +32,29 @@ function createSearchResultItem(
   result: TMDBRawSearchResult,
   genreData: { movieGenres: TMDBGenre[]; tvGenres: TMDBGenre[] }
 ): TMDBSearchResultItem {
-  let genres: string[] = [];
+  let genre_tags: { id: number; name: string }[] = [];
   if (result.media_type === TMDBMediaType.MOVIE) {
-    genres = result.genre_ids
+    genre_tags = result.genre_ids
       .map((genre_id: number) => {
-        return genreData.movieGenres.find((genre: TMDBGenre) => genre.id === genre_id)?.name;
+        const genre = genreData.movieGenres.find((g: TMDBGenre) => g.id === genre_id);
+        return genre ? { id: genre.id, name: genre.name } : null;
       })
-      .filter((name): name is string => typeof name === 'string');
+      .filter((tag): tag is { id: number; name: string } => !!tag);
   } else if (result.media_type === TMDBMediaType.TV) {
-    genres = result.genre_ids
+    genre_tags = result.genre_ids
       .map((genre_id: number) => {
-        return genreData.tvGenres.find((genre: TMDBGenre) => genre.id === genre_id)?.name;
+        const genre = genreData.tvGenres.find((g: TMDBGenre) => g.id === genre_id);
+        return genre ? { id: genre.id, name: genre.name } : null;
       })
-      .filter((name): name is string => typeof name === 'string');
+      .filter((tag): tag is { id: number; name: string } => !!tag);
   }
 
   const release_date = result.release_date || result.first_air_date || ''; // movie || tv
   const name = result.name || result.title || ''; // tv || movie
+  const genres = genre_tags.map((t) => t.name);
   return {
     ...result,
+    genre_tags,
     genres,
     // Keep the raw TMDB media_type ('movie' | 'tv') for persistence,
     // and provide a separate display value for UI rendering.

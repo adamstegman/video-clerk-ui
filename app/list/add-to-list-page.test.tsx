@@ -508,8 +508,9 @@ describe('AddToListPage', () => {
         p_tmdb_id: 1,
         p_media_type: 'movie',
         p_title: 'Test Movie',
-        p_genres: ['Action', 'Adventure'],
-        p_runtime_minutes: 142,
+        p_genre_ids: [28, 12],
+        p_genre_names: ['Action', 'Adventure'],
+        p_runtime: 142,
       }));
     });
 
@@ -566,8 +567,9 @@ describe('AddToListPage', () => {
         p_tmdb_id: 2,
         p_media_type: 'tv',
         p_title: 'Test TV Show',
-        p_genres: ['Animation', 'Comedy'],
-        p_runtime_minutes: 30,
+        p_genre_ids: [16, 35],
+        p_genre_names: ['Animation', 'Comedy'],
+        p_runtime: 30,
       }));
     });
   });

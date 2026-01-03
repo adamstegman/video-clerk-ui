@@ -1,7 +1,7 @@
 -- RPC: persist a TMDB result into entries/tmdb_details/tags/entry_tags for the current user.
 -- Notes:
 -- - tags created from TMDB genres are shared (user_id NULL, is_custom = false)
--- - runtime_minutes is fetched from TMDB details by the UI before calling this RPC
+-- - runtime is fetched from TMDB details by the UI before calling this RPC
 
 create or replace function public.save_tmdb_result_to_list(
   p_tmdb_id integer,
@@ -18,8 +18,9 @@ create or replace function public.save_tmdb_result_to_list(
   p_original_name text,
   p_release_date date,
   p_origin_country jsonb,
-  p_genres text[],
-  p_runtime_minutes integer
+  p_genre_ids integer[],
+  p_genre_names text[],
+  p_runtime integer
 )
 returns integer
 language plpgsql
@@ -30,7 +31,9 @@ declare
   v_user_id uuid;
   v_entry_id integer;
   v_tag_id integer;
-  v_genre text;
+  v_genre_id integer;
+  v_genre_name text;
+  v_i integer;
 begin
   v_user_id := auth.uid();
   if v_user_id is null then
@@ -52,7 +55,7 @@ begin
     original_name,
     release_date,
     origin_country,
-    runtime_minutes
+    runtime
   )
   values (
     p_tmdb_id,
@@ -69,10 +72,9 @@ begin
     p_original_name,
     p_release_date,
     p_origin_country,
-    p_runtime_minutes
+    p_runtime
   )
-  on conflict (tmdb_id) do update set
-    media_type = excluded.media_type,
+  on conflict (tmdb_id, media_type) do update set
     adult = excluded.adult,
     backdrop_path = excluded.backdrop_path,
     poster_path = excluded.poster_path,
@@ -85,23 +87,32 @@ begin
     original_name = excluded.original_name,
     release_date = excluded.release_date,
     origin_country = excluded.origin_country,
-    runtime_minutes = excluded.runtime_minutes;
+    runtime = excluded.runtime;
 
-  insert into public.entries (user_id, title, tmdb_id)
-  values (v_user_id, p_title, p_tmdb_id)
-  on conflict (user_id, tmdb_id) do update set
-    title = excluded.title
+  insert into public.entries (user_id, tmdb_id, media_type)
+  values (v_user_id, p_tmdb_id, p_media_type)
+  on conflict (user_id, tmdb_id, media_type) do update set
+    tmdb_id = excluded.tmdb_id
   returning id into v_entry_id;
 
-  if p_genres is not null then
-    foreach v_genre in array p_genres loop
-      if v_genre is null or btrim(v_genre) = '' then
+  if p_genre_ids is not null then
+    for v_i in 1..coalesce(array_length(p_genre_ids, 1), 0) loop
+      v_genre_id := p_genre_ids[v_i];
+      v_genre_name := null;
+      if p_genre_names is not null then
+        v_genre_name := p_genre_names[v_i];
+      end if;
+
+      if v_genre_id is null then
+        continue;
+      end if;
+      if v_genre_name is null or btrim(v_genre_name) = '' then
         continue;
       end if;
 
-      insert into public.tags (name, user_id, is_custom)
-      values (v_genre, null, false)
-      on conflict (name) where (is_custom = false) do update set
+      insert into public.tags (name, tmdb_id, user_id, is_custom)
+      values (v_genre_name, v_genre_id, null, false)
+      on conflict (tmdb_id) where (is_custom = false) do update set
         name = excluded.name
       returning id into v_tag_id;
 
@@ -130,6 +141,7 @@ grant execute on function public.save_tmdb_result_to_list(
   text,
   date,
   jsonb,
+  integer[],
   text[],
   integer
 ) to authenticated;

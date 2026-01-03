@@ -10,7 +10,7 @@ export function TMDBSearchResultContainer({ result }: { result: TMDBSearchResult
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const fetchRuntimeMinutes = async () => {
+  const fetchRuntime = async () => {
     // Runtime is required for saving, but don't block on a missing API context.
     if (!api) return null;
     if (result.media_type === 'movie') {
@@ -32,7 +32,7 @@ export function TMDBSearchResultContainer({ result }: { result: TMDBSearchResult
     setSaving(true);
     setSaveError(null);
     try {
-      const runtimeMinutes = await fetchRuntimeMinutes();
+      const runtime = await fetchRuntime();
       const supabase = createClient();
       const { error } = await supabase.rpc('save_tmdb_result_to_list', {
         p_tmdb_id: result.id,
@@ -49,8 +49,9 @@ export function TMDBSearchResultContainer({ result }: { result: TMDBSearchResult
         p_original_name: result.original_name ?? null,
         p_release_date: result.release_date || null,
         p_origin_country: result.origin_country ?? null,
-        p_genres: result.genres,
-        p_runtime_minutes: runtimeMinutes,
+        p_genre_ids: result.genre_tags.map((t) => t.id),
+        p_genre_names: result.genre_tags.map((t) => t.name),
+        p_runtime: runtime,
       });
       if (error) throw error;
       setSaved(true);
