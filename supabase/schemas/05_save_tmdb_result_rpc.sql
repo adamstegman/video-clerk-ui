@@ -1,9 +1,7 @@
--- Adds an RPC to persist a TMDB search result as an entry for the current user.
--- This function:
--- - upserts tmdb_details by tmdb_id
--- - inserts (or updates) entries for auth.uid()
--- - upserts TMDB-genre tags (is_custom = false) by name
--- - inserts entry_tags rows linking the entry to those tags
+-- RPC: persist a TMDB result into entries/tmdb_details/tags/entry_tags for the current user.
+-- Notes:
+-- - tags created from TMDB genres are shared (user_id NULL, is_custom = false)
+-- - runtime_minutes is fetched from TMDB details by the UI before calling this RPC
 
 create or replace function public.save_tmdb_result_to_list(
   p_tmdb_id integer,
@@ -20,7 +18,8 @@ create or replace function public.save_tmdb_result_to_list(
   p_original_name text,
   p_release_date date,
   p_origin_country jsonb,
-  p_genres text[]
+  p_genres text[],
+  p_runtime_minutes integer
 )
 returns integer
 language plpgsql
@@ -38,7 +37,6 @@ begin
     raise exception 'Not authenticated' using errcode = '28000';
   end if;
 
-  -- Upsert public TMDB details (shared across users).
   insert into public.tmdb_details (
     tmdb_id,
     media_type,
@@ -71,7 +69,7 @@ begin
     p_original_name,
     p_release_date,
     p_origin_country,
-    null
+    p_runtime_minutes
   )
   on conflict (tmdb_id) do update set
     media_type = excluded.media_type,
@@ -86,16 +84,15 @@ begin
     name = excluded.name,
     original_name = excluded.original_name,
     release_date = excluded.release_date,
-    origin_country = excluded.origin_country;
+    origin_country = excluded.origin_country,
+    runtime_minutes = excluded.runtime_minutes;
 
-  -- Insert (or update) the user's entry.
   insert into public.entries (user_id, title, tmdb_id)
   values (v_user_id, p_title, p_tmdb_id)
   on conflict (user_id, tmdb_id) do update set
     title = excluded.title
   returning id into v_entry_id;
 
-  -- Upsert tags from the provided genre names and connect them to the entry.
   if p_genres is not null then
     foreach v_genre in array p_genres loop
       if v_genre is null or btrim(v_genre) = '' then
@@ -133,6 +130,7 @@ grant execute on function public.save_tmdb_result_to_list(
   text,
   date,
   jsonb,
-  text[]
+  text[],
+  integer
 ) to authenticated;
 
