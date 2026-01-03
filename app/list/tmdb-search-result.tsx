@@ -46,7 +46,7 @@ export function TMDBSearchResult({
         className={cn(
           "flex-shrink-0 rounded px-3 py-2 text-sm font-medium transition",
           saved
-            ? "bg-emerald-600 text-white"
+            ? "bg-fuchsia-300 text-zinc-900"
             : "bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         )}
         aria-label={saved ? `Saved ${result.name}` : `Save ${result.name}`}
