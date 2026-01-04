@@ -1,11 +1,43 @@
 import { Plus } from "lucide-react";
 import { ActionLink } from "./action-link";
-import { pageTitleClasses } from "../lib/utils";
+import { pageTitleClasses, sectionSpacingClasses, secondaryTextClasses, cn } from "../lib/utils";
+import { SavedEntryRow, type SavedEntryRowData } from "./saved-entry-row";
 
-export function ListPage() {
+export function ListPage({
+  entries,
+  loading,
+  error,
+}: {
+  entries: SavedEntryRowData[];
+  loading: boolean;
+  error: string | null;
+}) {
   return (
     <>
-      <p className={pageTitleClasses}>List of saved items</p>
+      <div className={sectionSpacingClasses}>
+        <h2 className={pageTitleClasses}>List of Saved Items</h2>
+      </div>
+      <div className="flex-1 overflow-y-auto min-h-0 pb-4">
+        {loading && !error && entries.length === 0 && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-4">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-indigo-500"></div>
+              <p className={secondaryTextClasses}>Loading...</p>
+            </div>
+          </div>
+        )}
+        {error && <p className={cn("text-sm text-red-500", sectionSpacingClasses)}>{error}</p>}
+        {!loading && !error && entries.length === 0 && (
+          <p className={cn("text-sm", secondaryTextClasses)}>Your list is empty.</p>
+        )}
+        {!error && entries.length > 0 && (
+          <div className="space-y-4 md:space-y-6">
+            {entries.map((entry) => (
+              <SavedEntryRow key={entry.id} entry={entry} />
+            ))}
+          </div>
+        )}
+      </div>
       <ActionLink to="/app/list/add">
         <Plus />
       </ActionLink>

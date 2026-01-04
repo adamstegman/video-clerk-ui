@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Common Tailwind class constants for consistent styling
-export const pageTitleClasses = "text-2xl text-zinc-700 dark:text-zinc-200"
+export const pageTitleClasses = "text-2xl font-bold text-indigo-600 dark:text-indigo-400"
 export const sectionSpacingClasses = "flex-shrink-0 pb-2 pt-4"
 export const secondaryTextClasses = "text-zinc-600 dark:text-zinc-400"
 export const primaryHeadingClasses = "text-zinc-900 dark:text-zinc-100"
