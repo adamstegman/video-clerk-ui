@@ -1,9 +1,10 @@
-import { useContext, useState, useEffect, useCallback } from 'react';
+import { useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 import { TMDBSearch } from './tmdb-search';
 import { type TMDBGenre, type TMDBSearchResult as TMDBRawSearchResult } from '../tmdb-api/tmdb-api';
 import { TMDBAPIContext } from '../tmdb-api/tmdb-api-provider';
 import { TMDBGenresContext } from '../tmdb-api/tmdb-genres';
+import { createClient } from '../lib/supabase/client';
 
 export enum TMDBMediaType {
   MOVIE = 'movie',
@@ -67,11 +68,43 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
   const [results, setResults] = useState<TMDBSearchResultItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [savedEntryKeys, setSavedEntryKeys] = useState<Set<string>>(new Set());
+  const requestIdRef = useRef(0);
+
+  const entryKey = (tmdbId: number, mediaType: string) => `${mediaType}:${tmdbId}`;
+
+  const fetchSavedEntryKeys = async (results: TMDBSearchResultItem[]) => {
+    const ids = Array.from(new Set(results.map((r) => r.id)));
+    if (ids.length === 0) return new Set<string>();
+
+    const supabase = createClient();
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      console.error(userError);
+      return new Set<string>();
+    }
+    if (!userData.user) return new Set<string>();
+
+    const mediaTypes = Array.from(new Set(results.map((r) => r.media_type)));
+    const { data, error } = await supabase
+      .from('entries')
+      .select('tmdb_id, media_type')
+      .in('tmdb_id', ids)
+      .in('media_type', mediaTypes);
+
+    if (error) {
+      console.error(error);
+      return new Set<string>();
+    }
+
+    return new Set((data ?? []).map((row) => entryKey(row.tmdb_id as number, row.media_type as string)));
+  };
 
   const handleSearch = useCallback(async (term: string) => {
     setError(null);
     if (!term) {
       setResults([]);
+      setSavedEntryKeys(new Set());
       setLoading(false);
       return;
     }
@@ -82,7 +115,9 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
       return;
     }
 
+    const requestId = ++requestIdRef.current;
     setLoading(true);
+    setSavedEntryKeys(new Set());
     let results: TMDBSearchResultItem[] = [];
     try {
       const data = await api.multiSearch(term);
@@ -102,6 +137,17 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     }
     setResults(results);
     setLoading(false);
+
+    // Non-blocking: show results immediately, then hydrate "already saved" state.
+    fetchSavedEntryKeys(results)
+      .then((keys) => {
+        if (requestIdRef.current === requestId) {
+          setSavedEntryKeys(keys);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }, [api, genreData]);
 
   useEffect(() => {
@@ -110,5 +156,14 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     }
   }, [initialQuery, handleSearch]);
 
-  return <TMDBSearch onSearch={handleSearch} results={results} error={error} loading={loading} initialQuery={initialQuery} />;
+  return (
+    <TMDBSearch
+      onSearch={handleSearch}
+      results={results}
+      error={error}
+      loading={loading}
+      initialQuery={initialQuery}
+      savedEntryKeys={savedEntryKeys}
+    />
+  );
 }
