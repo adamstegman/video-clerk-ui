@@ -20,8 +20,8 @@ Start a local Supabase instance:
 npx supabase start
 ```
 
-Create a `.env` file with the secrets output by this command.
-Use `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` instead of `VITE_SUPABASE_ANON_KEY`, but the value is the same.
+Create a `.env` file with the "Authentication Keys" output by this command.
+Set `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` and `VITE_SUPABASE_SECRET_KEY`.
 Make sure to include `VITE_TMDB_API_READ_TOKEN`, obtained from TMDB.
 
 Start the development server with HMR:
@@ -41,6 +41,17 @@ npm run build
 ```
 
 ## Deployment
+
+### Supabase
+
+Generate migrations from any schema updates, and push them to production.
+
+```
+npx supabase stop
+npx supabase db diff -f <timestamp>_<update_description>
+npx supabase start
+npx supabase db push
+```
 
 ### GitHub Pages
 

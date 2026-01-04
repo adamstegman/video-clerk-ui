@@ -3,27 +3,27 @@ import { describe, expect, it } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'node:crypto';
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+const SUPABASE_SECRET_KEY = process.env.VITE_SUPABASE_SECRET_KEY;
 
 const hasSupabaseEnv =
   typeof SUPABASE_URL === 'string' &&
   SUPABASE_URL.length > 0 &&
-  typeof SUPABASE_ANON_KEY === 'string' &&
-  SUPABASE_ANON_KEY.length > 0 &&
-  typeof SUPABASE_SERVICE_ROLE_KEY === 'string' &&
-  SUPABASE_SERVICE_ROLE_KEY.length > 0;
+  typeof SUPABASE_PUBLISHABLE_KEY === 'string' &&
+  SUPABASE_PUBLISHABLE_KEY.length > 0 &&
+  typeof SUPABASE_SECRET_KEY === 'string' &&
+  SUPABASE_SECRET_KEY.length > 0;
 
 const describeIf = hasSupabaseEnv ? describe : describe.skip;
 
 describeIf('Application-level: save TMDB result to list (Supabase)', () => {
   it('creates entries, tmdb_details, tags (from genres), and entry_tags', async () => {
     const url = SUPABASE_URL!;
-    const anonKey = SUPABASE_ANON_KEY!;
-    const serviceRoleKey = SUPABASE_SERVICE_ROLE_KEY!;
+    const publishableKey = SUPABASE_PUBLISHABLE_KEY!;
+    const secretKey = SUPABASE_SECRET_KEY!;
 
-    const admin = createClient(url, serviceRoleKey);
+    const admin = createClient(url, secretKey);
 
     const email = `test-${crypto.randomUUID()}@example.com`;
     const password = `pw-${crypto.randomUUID()}`;
@@ -39,7 +39,7 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
     const userId = created.user!.id;
 
     try {
-      const authed = createClient(url, anonKey);
+      const authed = createClient(url, publishableKey);
 
       const { error: signInError } = await authed.auth.signInWithPassword({
         email,
@@ -91,10 +91,10 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
         .single();
 
       expect(detailsError).toBeNull();
-      expect(details.tmdb_id).toBe(550);
-      expect(details.media_type).toBe('movie');
-      expect(details.runtime).toBe(139);
-      expect(details.name).toBe('Fight Club');
+      expect(details!.tmdb_id).toBe(550);
+      expect(details!.media_type).toBe('movie');
+      expect(details!.runtime).toBe(139);
+      expect(details!.name).toBe('Fight Club');
 
       // tags created/upserted from genres (shared tags have user_id null, is_custom false)
       const { data: tags, error: tagsError } = await authed
@@ -136,4 +136,3 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
     }
   }, 30_000);
 });
-

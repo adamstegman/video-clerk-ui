@@ -89,7 +89,6 @@ This schema organizes the information into four related tables: `entries`, `tmdb
 | Column Name | Data Type | Constraint | Description |
 | :--- | :--- | :--- | :--- |
 | **id** | SERIAL | PRIMARY KEY | Unique identifier for the entry in your personal list. |
-| **title** | VARCHAR(255) | NOT NULL | The title of the movie or show. |
 | **tmdb\_id** | INTEGER | UNIQUE, NOT NULL | The unique ID from the TMDB API. Used for linking to `tmdb_details`. |
 | **added\_at** | TIMESTAMP | NOT NULL | Date/time the entry was added to the jar. |
 | **watched\_at** | TIMESTAMP | NULLABLE | Date/time the entry was watched, or `null` if not watched yet. |
@@ -112,14 +111,17 @@ This schema organizes the information into four related tables: `entries`, `tmdb
 | **original\_name** | VARCHAR(255) | NULLABLE | The original name (for TV shows). |
 | **release\_date** | DATE | NULLABLE | The release date or first air date (used for both movies and TV shows). |
 | **origin\_country** | JSONB | NULLABLE | Array of origin country codes (for TV shows, stored as JSON). |
-| **runtime\_minutes** | INTEGER | NULLABLE | Length of the content in minutes (may require separate API call for detailed info). |
+| **runtime** | INTEGER | NULLABLE | Length of the content in minutes (may require separate API call for detailed info). |
 | **updated\_at** | TIMESTAMP | NOT NULL | Date/time when the record was last updated from TMDB (for cache management - TMDB requests no caching longer than 6 months). |
+
+> **Note:** The `(tmdb_id, media_type)` pair forms the **Composite Primary Key** in the `tmdb_details` table.
 
 #### Table 3: `tags` (The Vibe Labels)
 
 | Column Name | Data Type | Constraint | Description |
 | :--- | :--- | :--- | :--- |
 | **id** | SERIAL | PRIMARY KEY | Unique identifier for the tag. |
+| **tmdb\_id** | INTEGER | UNIQUE, NOT NULL | The unique ID from the TMDB API. |
 | **name** | VARCHAR(50) | UNIQUE, NOT NULL | The tag name (e.g., 'light-hearted', 'comedy', 'complex'). |
 | **is\_custom** | BOOLEAN | NOT NULL | True for user-created tags, False for TMDB genres. |
 | **updated\_at** | TIMESTAMP | NOT NULL | Date/time when the tag was last updated. |
