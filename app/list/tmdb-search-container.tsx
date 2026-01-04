@@ -60,9 +60,10 @@ function createSearchResultItem(
 
 interface TMDBSearchContainerProps {
   initialQuery?: string;
+  userId?: string | null;
 }
 
-export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) {
+export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContainerProps) {
   const api = useContext(TMDBAPIContext);
   const genreData = useContext(TMDBGenresContext);
   const [results, setResults] = useState<TMDBSearchResultItem[]>([]);
@@ -74,21 +75,16 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
   const entryKey = (tmdbId: number, mediaType: string) => `${mediaType}:${tmdbId}`;
 
   const fetchSavedEntryKeys = async (results: TMDBSearchResultItem[]) => {
+    if (!userId) return new Set<string>();
     const ids = Array.from(new Set(results.map((r) => r.id)));
     if (ids.length === 0) return new Set<string>();
 
     const supabase = createClient();
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) {
-      console.error(userError);
-      return new Set<string>();
-    }
-    if (!userData.user) return new Set<string>();
-
     const mediaTypes = Array.from(new Set(results.map((r) => r.media_type)));
     const { data, error } = await supabase
       .from('entries')
       .select('tmdb_id, media_type')
+      .eq('user_id', userId)
       .in('tmdb_id', ids)
       .in('media_type', mediaTypes);
 
@@ -148,7 +144,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
       .catch((err) => {
         console.error(err);
       });
-  }, [api, genreData]);
+  }, [api, genreData, userId]);
 
   useEffect(() => {
     if (initialQuery) {
