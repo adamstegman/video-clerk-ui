@@ -175,7 +175,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
       onSearch={handleSearch}
       results={results}
       error={error}
-      savedStatusWarning={savedStatusWarning}
+      warning={savedStatusWarning}
       loading={loading}
       initialQuery={initialQuery}
       savedByMediaType={savedByMediaType}
