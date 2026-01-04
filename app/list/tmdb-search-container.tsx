@@ -69,15 +69,13 @@ export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContaine
   const [results, setResults] = useState<TMDBSearchResultItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [savedEntryKeys, setSavedEntryKeys] = useState<Set<string>>(new Set());
+  const [savedByMediaType, setSavedByMediaType] = useState<Map<string, Set<number>>>(new Map());
   const requestIdRef = useRef(0);
 
-  const entryKey = (tmdbId: number, mediaType: string) => `${mediaType}:${tmdbId}`;
-
-  const fetchSavedEntryKeys = async (results: TMDBSearchResultItem[]) => {
-    if (!userId) return new Set<string>();
+  const fetchSavedByMediaType = async (results: TMDBSearchResultItem[]) => {
+    if (!userId) return new Map<string, Set<number>>();
     const ids = Array.from(new Set(results.map((r) => r.id)));
-    if (ids.length === 0) return new Set<string>();
+    if (ids.length === 0) return new Map<string, Set<number>>();
 
     const supabase = createClient();
     const mediaTypes = Array.from(new Set(results.map((r) => r.media_type)));
@@ -90,17 +88,25 @@ export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContaine
 
     if (error) {
       console.error(error);
-      return new Set<string>();
+      return new Map<string, Set<number>>();
     }
 
-    return new Set((data ?? []).map((row) => entryKey(row.tmdb_id as number, row.media_type as string)));
+    const map = new Map<string, Set<number>>();
+    for (const row of data ?? []) {
+      const mediaType = row.media_type as string;
+      const tmdbId = row.tmdb_id as number;
+      const set = map.get(mediaType) ?? new Set<number>();
+      set.add(tmdbId);
+      map.set(mediaType, set);
+    }
+    return map;
   };
 
   const handleSearch = useCallback(async (term: string) => {
     setError(null);
     if (!term) {
       setResults([]);
-      setSavedEntryKeys(new Set());
+      setSavedByMediaType(new Map());
       setLoading(false);
       return;
     }
@@ -113,7 +119,7 @@ export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContaine
 
     const requestId = ++requestIdRef.current;
     setLoading(true);
-    setSavedEntryKeys(new Set());
+    setSavedByMediaType(new Map());
     let results: TMDBSearchResultItem[] = [];
     try {
       const data = await api.multiSearch(term);
@@ -135,10 +141,10 @@ export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContaine
     setLoading(false);
 
     // Non-blocking: show results immediately, then hydrate "already saved" state.
-    fetchSavedEntryKeys(results)
-      .then((keys) => {
+    fetchSavedByMediaType(results)
+      .then((map) => {
         if (requestIdRef.current === requestId) {
-          setSavedEntryKeys(keys);
+          setSavedByMediaType(map);
         }
       })
       .catch((err) => {
@@ -159,7 +165,7 @@ export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContaine
       error={error}
       loading={loading}
       initialQuery={initialQuery}
-      savedEntryKeys={savedEntryKeys}
+      savedByMediaType={savedByMediaType}
     />
   );
 }

@@ -9,14 +9,14 @@ import { pageTitleClasses, sectionSpacingClasses, secondaryTextClasses, cn } fro
 export function TMDBSearch({
   onSearch,
   results,
-  savedEntryKeys,
+  savedByMediaType,
   error,
   loading,
   initialQuery,
 }: {
   onSearch: (term: string) => void;
   results: TMDBSearchResultItem[];
-  savedEntryKeys?: Set<string>;
+  savedByMediaType?: Map<string, Set<number>>;
   error?: string | null;
   loading?: boolean;
   initialQuery?: string;
@@ -109,7 +109,7 @@ export function TMDBSearch({
               <TMDBSearchResultContainer
                 key={`${result.media_type}-${result.id}`}
                 result={result}
-                initiallySaved={savedEntryKeys?.has(`${result.media_type}:${result.id}`) ?? false}
+                initiallySaved={savedByMediaType?.get(result.media_type)?.has(result.id) ?? false}
               />
             ))}
             <div className="flex items-center gap-2 py-4">
