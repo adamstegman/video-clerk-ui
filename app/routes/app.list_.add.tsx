@@ -1,8 +1,8 @@
 import type { Route } from "./+types/app.list_.add";
-import { useMatches, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { Check } from "lucide-react";
 import { AddToListPage } from "../list/add-to-list-page";
-import type { AppClientLoaderData, RouteHandle } from "./app";
+import type { RouteHandle } from "./app";
 
 export const handle: RouteHandle = {
   rightHeaderAction: {
@@ -24,10 +24,5 @@ export function meta({ }: Route.MetaArgs) {
 export default function ListAdd() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const matches = useMatches();
-  const appData = matches
-    .map((m) => m.data)
-    .find((data): data is AppClientLoaderData => !!data && typeof data === "object" && "user" in data);
-
-  return <AddToListPage initialQuery={query} userId={appData?.user?.id ?? null} />;
+  return <AddToListPage initialQuery={query} />;
 }

@@ -4,6 +4,7 @@ import { TMDBSearch } from './tmdb-search';
 import { type TMDBGenre, type TMDBSearchResult as TMDBRawSearchResult } from '../tmdb-api/tmdb-api';
 import { TMDBAPIContext } from '../tmdb-api/tmdb-api-provider';
 import { TMDBGenresContext } from '../tmdb-api/tmdb-genres';
+import { AppDataContext } from '../app-data/app-data-provider';
 import { createClient } from '../lib/supabase/client';
 
 export enum TMDBMediaType {
@@ -60,12 +61,12 @@ function createSearchResultItem(
 
 interface TMDBSearchContainerProps {
   initialQuery?: string;
-  userId?: string | null;
 }
 
-export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContainerProps) {
+export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) {
   const api = useContext(TMDBAPIContext);
   const genreData = useContext(TMDBGenresContext);
+  const { user } = useContext(AppDataContext);
   const [results, setResults] = useState<TMDBSearchResultItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -73,7 +74,7 @@ export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContaine
   const requestIdRef = useRef(0);
 
   const fetchSavedByMediaType = async (results: TMDBSearchResultItem[]) => {
-    if (!userId) return new Map<string, Set<number>>();
+    if (!user) return new Map<string, Set<number>>();
     const ids = Array.from(new Set(results.map((r) => r.id)));
     if (ids.length === 0) return new Map<string, Set<number>>();
 
@@ -82,7 +83,6 @@ export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContaine
     const { data, error } = await supabase
       .from('entries')
       .select('tmdb_id, media_type')
-      .eq('user_id', userId)
       .in('tmdb_id', ids)
       .in('media_type', mediaTypes);
 
@@ -150,7 +150,7 @@ export function TMDBSearchContainer({ initialQuery, userId }: TMDBSearchContaine
       .catch((err) => {
         console.error(err);
       });
-  }, [api, genreData, userId]);
+  }, [api, genreData, user]);
 
   useEffect(() => {
     if (initialQuery) {

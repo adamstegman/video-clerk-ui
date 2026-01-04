@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { AddToListPage } from './add-to-list-page';
+import { AppDataProvider } from '../app-data/app-data-provider';
 import { TMDBAPI } from '../tmdb-api/tmdb-api';
 import { TMDBAPIContext } from '../tmdb-api/tmdb-api-provider';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
@@ -74,6 +75,15 @@ describe('AddToListPage', () => {
     } as unknown as TMDBAPI;
     mockRpc.mockReset();
     mockFrom.mockReset();
+
+    // Default entries lookup: return no saved items.
+    const in2 = vi.fn().mockResolvedValue({ data: [], error: null });
+    const in1 = vi.fn().mockReturnValue({ in: in2 });
+    const select = vi.fn().mockReturnValue({ in: in1 });
+    mockFrom.mockImplementation((table: string) => {
+      if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
+      return { select };
+    });
   });
 
   afterEach(() => {
@@ -86,13 +96,15 @@ describe('AddToListPage', () => {
         {
           path: '/',
           element: (
-            <TMDBAPIContext value={mockAPI}>
-              <TMDBConfigurationContext value={mockConfigurationState}>
-                <TMDBGenresContext value={mockGenresState}>
-                  <AddToListPage />
-                </TMDBGenresContext>
-              </TMDBConfigurationContext>
-            </TMDBAPIContext>
+            <AppDataProvider data={{ user: { id: 'user-1' } as any }}>
+              <TMDBAPIContext value={mockAPI}>
+                <TMDBConfigurationContext value={mockConfigurationState}>
+                  <TMDBGenresContext value={mockGenresState}>
+                    <AddToListPage />
+                  </TMDBGenresContext>
+                </TMDBConfigurationContext>
+              </TMDBAPIContext>
+            </AppDataProvider>
           ),
         },
       ],
@@ -209,43 +221,16 @@ describe('AddToListPage', () => {
 
     mockMultiSearch.mockResolvedValue(mockResults);
 
-    // Mock `from('entries').select(...).eq(...).in(...).in(...)` chain.
-    const in2 = vi.fn().mockResolvedValue({
-      data: [{ tmdb_id: 1, media_type: 'movie' }],
-      error: null,
-    });
+    // Override default entries lookup for this test: return a saved item.
+    const in2 = vi.fn().mockResolvedValue({ data: [{ tmdb_id: 1, media_type: 'movie' }], error: null });
     const in1 = vi.fn().mockReturnValue({ in: in2 });
-    const eq = vi.fn().mockReturnValue({ in: in1 });
-    const select = vi.fn().mockReturnValue({ eq });
+    const select = vi.fn().mockReturnValue({ in: in1 });
     mockFrom.mockImplementation((table: string) => {
       if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
       return { select };
     });
 
-    const router = createMemoryRouter(
-      [
-        {
-          path: '/',
-          element: (
-            <TMDBAPIContext value={mockAPI}>
-              <TMDBConfigurationContext value={mockConfigurationState}>
-                <TMDBGenresContext value={mockGenresState}>
-                  <AddToListPage userId="user-1" />
-                </TMDBGenresContext>
-              </TMDBConfigurationContext>
-            </TMDBAPIContext>
-          ),
-        },
-      ],
-      {
-        initialEntries: ['/'],
-        future: {
-          v7_startTransition: true,
-        },
-      }
-    );
-
-    render(<RouterProvider router={router} />);
+    renderWithProviders(['/']);
 
     const searchInput = screen.getByPlaceholderText('Type a title...');
     await user.type(searchInput, 'test');
