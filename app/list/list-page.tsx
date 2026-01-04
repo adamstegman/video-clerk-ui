@@ -115,7 +115,7 @@ export function ListPage() {
   return (
     <>
       <div className={sectionSpacingClasses}>
-        <p className={pageTitleClasses}>List of saved items</p>
+        <h2 className={pageTitleClasses}>List of saved items</h2>
       </div>
       <div className="flex-1 overflow-y-auto min-h-0 pb-4">
         {loading && !error && entries.length === 0 && (
