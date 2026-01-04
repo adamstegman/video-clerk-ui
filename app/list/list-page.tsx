@@ -26,6 +26,9 @@ type EntriesQueryRow = {
           | {
               name: string | null;
             }
+          | Array<{
+              name: string | null;
+            }>
           | null;
       }>
     | null;
@@ -42,6 +45,20 @@ function normalizeDetails(
 ): { poster_path: string | null; name: string | null; release_date: string | null } | null {
   if (!details) return null;
   return Array.isArray(details) ? details[0] ?? null : details;
+}
+
+function normalizeTagName(
+  tags:
+    | {
+        name: string | null;
+      }
+    | Array<{
+        name: string | null;
+      }>
+    | null
+) {
+  if (!tags) return null;
+  return Array.isArray(tags) ? tags[0]?.name ?? null : tags.name ?? null;
 }
 
 export function ListPage() {
@@ -80,11 +97,13 @@ export function ListPage() {
 
         if (error) throw error;
 
-        const normalized = ((data ?? []) as EntriesQueryRow[]).map((row) => {
+        const normalized = ((data ?? []) as unknown as EntriesQueryRow[]).map((row) => {
           const details = normalizeDetails(row.tmdb_details);
           const title = details?.name || "Untitled";
           const tags =
-            row.entry_tags?.map((et) => et.tags?.name).filter((n): n is string => !!n) ?? [];
+            row.entry_tags
+              ?.map((et) => normalizeTagName(et.tags))
+              .filter((n): n is string => !!n) ?? [];
 
           return {
             id: row.id,
