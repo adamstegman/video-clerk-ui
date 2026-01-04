@@ -79,22 +79,19 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
 
   const fetchSavedByMediaType = async (results: TMDBSearchResultItem[]) => {
     if (!user) return new Map<string, Set<number>>();
+    // Deduplicate the IDs and media types so the `in()` filter doesn't include redundant values.
     const ids = Array.from(new Set(results.map((r) => r.id)));
     if (ids.length === 0) return new Map<string, Set<number>>();
+    const mediaTypes = Array.from(new Set(results.map((r) => r.media_type)));
 
     const supabase = createClient();
-    // Deduplicate the media types so the `in('media_type', ...)` filter doesn't include redundant values.
-    const mediaTypes = Array.from(new Set(results.map((r) => r.media_type)));
     const { data, error } = await supabase
       .from('entries')
       .select('tmdb_id, media_type')
       .eq('user_id', user.id)
       .in('tmdb_id', ids)
       .in('media_type', mediaTypes);
-
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     const map = new Map<string, Set<number>>();
     for (const row of data ?? []) {
