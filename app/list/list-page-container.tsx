@@ -115,7 +115,16 @@ export function ListPageContainer() {
         if (!cancelled) setEntries(normalized);
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load list");
+          const message =
+            err instanceof Error
+              ? err.message
+              : typeof err === "object" &&
+                  err !== null &&
+                  "message" in err &&
+                  typeof (err as { message?: unknown }).message === "string"
+                ? String((err as { message: string }).message)
+                : "Failed to load list";
+          setError(message);
           setEntries([]);
         }
       } finally {
