@@ -112,7 +112,8 @@ begin
 
       insert into public.tags (name, tmdb_id, user_id, is_custom)
       values (v_genre_name, v_genre_id, null, false)
-      on conflict (tmdb_id) where (is_custom = false) do update set
+      -- Must match the partial unique index predicate on tags(tmdb_id)
+      on conflict (tmdb_id) where (is_custom = false and tmdb_id is not null) do update set
         name = excluded.name
       returning id into v_tag_id;
 
