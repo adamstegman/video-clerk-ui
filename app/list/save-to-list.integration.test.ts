@@ -71,11 +71,19 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
       expect(rpcError).toBeNull();
       expect(typeof rpcData).toBe('number');
 
-      // entries row for this user
+      const { data: membership, error: membershipError } = await authed
+        .from('group_memberships')
+        .select('group_id')
+        .single();
+      expect(membershipError).toBeNull();
+      expect(membership?.group_id).toBeTruthy();
+      const groupId = membership!.group_id;
+
+      // entries row for this group
       const { data: entries, error: entriesError } = await authed
         .from('entries')
-        .select('id, user_id, tmdb_id, media_type')
-        .eq('user_id', userId)
+        .select('id, group_id, tmdb_id, media_type')
+        .eq('group_id', groupId)
         .eq('tmdb_id', 550)
         .eq('media_type', 'movie');
 
@@ -100,7 +108,7 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
       // tags created/upserted from genres (shared tags have user_id null, is_custom false)
       const { data: tags, error: tagsError } = await authed
         .from('tags')
-        .select('id, name, tmdb_id, user_id, is_custom')
+        .select('id, name, tmdb_id, group_id, is_custom')
         .in('tmdb_id', [18, 53]);
 
       expect(tagsError).toBeNull();
@@ -114,7 +122,7 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
         expect(tag).toBeTruthy();
         expect(tag!.name).toBe(expected.name);
         expect(tag!.is_custom).toBe(false);
-        expect(tag!.user_id).toBeNull();
+        expect(tag!.group_id).toBeNull();
       }
 
       // entry_tags rows link the entry to those tag ids

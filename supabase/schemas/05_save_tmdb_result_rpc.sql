@@ -1,6 +1,6 @@
--- RPC: persist a TMDB result into entries/tmdb_details/tags/entry_tags for the current user.
+-- RPC: persist a TMDB result into entries/tmdb_details/tags/entry_tags for the current group.
 -- Notes:
--- - tags created from TMDB genres are shared (user_id NULL, is_custom = false)
+-- - tags created from TMDB genres are shared (group_id NULL, is_custom = false)
 -- - runtime is fetched from TMDB details by the UI before calling this RPC
 
 create or replace function public.save_tmdb_result_to_list(
@@ -29,6 +29,7 @@ set search_path = public
 as $$
 declare
   v_user_id uuid;
+  v_group_id uuid;
   v_entry_id integer;
   v_tag_id integer;
   v_genre_id integer;
@@ -38,6 +39,11 @@ begin
   v_user_id := auth.uid();
   if v_user_id is null then
     raise exception 'Not authenticated' using errcode = '28000';
+  end if;
+
+  v_group_id := public.current_user_group_id();
+  if v_group_id is null then
+    raise exception 'No group membership' using errcode = '28000';
   end if;
 
   insert into public.tmdb_details (
@@ -89,9 +95,9 @@ begin
     origin_country = excluded.origin_country,
     runtime = excluded.runtime;
 
-  insert into public.entries (user_id, tmdb_id, media_type)
-  values (v_user_id, p_tmdb_id, p_media_type)
-  on conflict (user_id, tmdb_id, media_type) do update set
+  insert into public.entries (group_id, tmdb_id, media_type)
+  values (v_group_id, p_tmdb_id, p_media_type)
+  on conflict (group_id, tmdb_id, media_type) do update set
     tmdb_id = excluded.tmdb_id
   returning id into v_entry_id;
 
@@ -110,7 +116,7 @@ begin
         continue;
       end if;
 
-      insert into public.tags (name, tmdb_id, user_id, is_custom)
+      insert into public.tags (name, tmdb_id, group_id, is_custom)
       values (v_genre_name, v_genre_id, null, false)
       -- Must match the partial unique index predicate on tags(tmdb_id)
       on conflict (tmdb_id) where (is_custom = false and tmdb_id is not null) do update set

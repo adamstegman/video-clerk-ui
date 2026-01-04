@@ -19,35 +19,38 @@ CREATE INDEX IF NOT EXISTS idx_entry_tags_tag_id ON entry_tags(tag_id);
 -- Enable Row Level Security
 ALTER TABLE entry_tags ENABLE ROW LEVEL SECURITY;
 
--- Policy: Users can only see entry_tags for their own entries
-CREATE POLICY "Users can view entry_tags for their own entries"
+-- Policy: Group members can only see entry_tags for their group entries
+DROP POLICY IF EXISTS "Users can view entry_tags for their own entries" ON entry_tags;
+CREATE POLICY "Group members can view entry_tags for group entries"
   ON entry_tags FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM entries
       WHERE entries.id = entry_tags.entry_id
-      AND entries.user_id = (select auth.uid())
+      AND entries.group_id = public.current_user_group_id()
     )
   );
 
--- Policy: Users can only insert entry_tags for their own entries
-CREATE POLICY "Users can insert entry_tags for their own entries"
+-- Policy: Group members can only insert entry_tags for their group entries
+DROP POLICY IF EXISTS "Users can insert entry_tags for their own entries" ON entry_tags;
+CREATE POLICY "Group members can insert entry_tags for group entries"
   ON entry_tags FOR INSERT
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM entries
       WHERE entries.id = entry_tags.entry_id
-      AND entries.user_id = (select auth.uid())
+      AND entries.group_id = public.current_user_group_id()
     )
   );
 
--- Policy: Users can only delete entry_tags for their own entries
-CREATE POLICY "Users can delete entry_tags for their own entries"
+-- Policy: Group members can only delete entry_tags for their group entries
+DROP POLICY IF EXISTS "Users can delete entry_tags for their own entries" ON entry_tags;
+CREATE POLICY "Group members can delete entry_tags for group entries"
   ON entry_tags FOR DELETE
   USING (
     EXISTS (
       SELECT 1 FROM entries
       WHERE entries.id = entry_tags.entry_id
-      AND entries.user_id = (select auth.uid())
+      AND entries.group_id = public.current_user_group_id()
     )
   );
