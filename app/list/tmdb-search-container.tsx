@@ -78,9 +78,9 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     "Couldn't verify whether search results are already saved. Some results may show “Save” even if already saved.";
 
   const fetchSavedByMediaType = async (results: TMDBSearchResultItem[]) => {
-    if (!user) return { map: new Map<string, Set<number>>(), warning: null as string | null };
+    if (!user) return new Map<string, Set<number>>();
     const ids = Array.from(new Set(results.map((r) => r.id)));
-    if (ids.length === 0) return { map: new Map<string, Set<number>>(), warning: null as string | null };
+    if (ids.length === 0) return new Map<string, Set<number>>();
 
     const supabase = createClient();
     // Deduplicate the media types so the `in('media_type', ...)` filter doesn't include redundant values.
@@ -93,8 +93,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
       .in('media_type', mediaTypes);
 
     if (error) {
-      console.error(error);
-      return { map: new Map<string, Set<number>>(), warning: savedStatusWarningMessage };
+      throw error;
     }
 
     const map = new Map<string, Set<number>>();
@@ -105,7 +104,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
       set.add(tmdbId);
       map.set(mediaType, set);
     }
-    return { map, warning: null as string | null };
+    return map;
   };
 
   const handleSearch = useCallback(async (term: string) => {
@@ -150,15 +149,16 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
 
     // Non-blocking: show results immediately, then hydrate "already saved" state.
     fetchSavedByMediaType(results)
-      .then(({ map, warning }) => {
+      .then((map) => {
         if (requestIdRef.current === requestId) {
           setSavedByMediaType(map);
-          setSavedStatusWarning(warning);
+          setSavedStatusWarning(null);
         }
       })
       .catch((err) => {
         console.error(err);
         if (requestIdRef.current === requestId) {
+          setSavedByMediaType(new Map());
           setSavedStatusWarning(savedStatusWarningMessage);
         }
       });
