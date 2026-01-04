@@ -2,7 +2,7 @@ import { useRef, useContext, useState, useEffect } from 'react';
 import { Form, useNavigate, useSearchParams } from 'react-router';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import type { TMDBSearchResultItem } from './tmdb-search-container';
-import { TMDBSearchResult } from './tmdb-search-result';
+import { TMDBSearchResultContainer } from './tmdb-search-result-container';
 import tmdbLogo from '../tmdb-api/tmdb-primary-long-blue.svg';
 import { pageTitleClasses, sectionSpacingClasses, secondaryTextClasses, cn } from '../lib/utils';
 
@@ -104,7 +104,7 @@ export function TMDBSearch({
         {results.length > 0 && !displayError && (
           <div className="space-y-4 md:space-y-6">
             {results.map((result) => (
-              <TMDBSearchResult key={result.id} result={result} />
+              <TMDBSearchResultContainer key={result.id} result={result} />
             ))}
             <div className="flex items-center gap-2 py-4">
               Results by <img src={tmdbLogo} alt="TMDB" className="h-4" />

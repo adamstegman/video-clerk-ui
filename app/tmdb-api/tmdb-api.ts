@@ -49,6 +49,14 @@ export interface TMDBGenreList {
   genres: TMDBGenre[];
 }
 
+export interface TMDBMovieDetails {
+  runtime: number | null;
+}
+
+export interface TMDBTVDetails {
+  episode_run_time: number[];
+}
+
 export class TMDBAPI {
   constructor(private apiToken: string) {}
 
@@ -85,6 +93,28 @@ export class TMDBAPI {
   async fetchTVGenres(): Promise<TMDBGenreList> {
     const response = await fetch(
       'https://api.themoviedb.org/3/genre/tv/list',
+      this.fetchOptions(),
+    );
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
+    }
+    return response.json();
+  }
+
+  async fetchMovieDetails(tmdbId: number): Promise<TMDBMovieDetails> {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${tmdbId}`,
+      this.fetchOptions(),
+    );
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
+    }
+    return response.json();
+  }
+
+  async fetchTVDetails(tmdbId: number): Promise<TMDBTVDetails> {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/tv/${tmdbId}`,
       this.fetchOptions(),
     );
     if (!response.ok) {

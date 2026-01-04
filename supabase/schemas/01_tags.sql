@@ -5,6 +5,7 @@
 CREATE TABLE IF NOT EXISTS tags (
   id SERIAL PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
+  tmdb_id INTEGER,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   is_custom BOOLEAN NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -22,6 +23,7 @@ CREATE INDEX IF NOT EXISTS idx_tags_is_custom ON tags(is_custom);
 -- Unique constraint: TMDB genres (is_custom = false) must have unique names globally
 -- Custom tags (is_custom = true) must have unique names per user
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tags_name_unique_tmdb ON tags(name) WHERE is_custom = false;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tags_tmdb_id_unique_tmdb ON tags(tmdb_id) WHERE is_custom = false AND tmdb_id IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tags_name_user_unique_custom ON tags(name, user_id) WHERE is_custom = true;
 
 -- Enable Row Level Security
