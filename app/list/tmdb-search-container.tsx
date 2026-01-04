@@ -83,6 +83,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     const { data, error } = await supabase
       .from('entries')
       .select('tmdb_id, media_type')
+      .eq('user_id', user.id)
       .in('tmdb_id', ids)
       .in('media_type', mediaTypes);
 
