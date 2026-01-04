@@ -34,6 +34,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      entries: {
+        Row: {
+          added_at: string
+          group_id: string
+          id: number
+          media_type: string
+          tmdb_id: number
+          watched_at: string | null
+        }
+        Insert: {
+          added_at?: string
+          group_id: string
+          id?: number
+          media_type: string
+          tmdb_id: number
+          watched_at?: string | null
+        }
+        Update: {
+          added_at?: string
+          group_id?: string
+          id?: number
+          media_type?: string
+          tmdb_id?: number
+          watched_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entries_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tmdb_details"
+            columns: ["tmdb_id", "media_type"]
+            isOneToOne: false
+            referencedRelation: "tmdb_details"
+            referencedColumns: ["tmdb_id", "media_type"]
+          },
+        ]
+      }
+      entry_tags: {
+        Row: {
+          entry_id: number
+          tag_id: number
+        }
+        Insert: {
+          entry_id: number
+          tag_id: number
+        }
+        Update: {
+          entry_id?: number
+          tag_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_entry"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tag"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_invites: {
         Row: {
           accepted_at: string | null
@@ -112,78 +184,6 @@ export type Database = {
           id?: string
         }
         Relationships: []
-      }
-      entries: {
-        Row: {
-          added_at: string
-          group_id: string
-          id: number
-          media_type: string
-          tmdb_id: number
-          watched_at: string | null
-        }
-        Insert: {
-          added_at?: string
-          group_id: string
-          id?: number
-          media_type: string
-          tmdb_id: number
-          watched_at?: string | null
-        }
-        Update: {
-          added_at?: string
-          group_id?: string
-          id?: number
-          media_type?: string
-          tmdb_id?: number
-          watched_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_tmdb_details"
-            columns: ["tmdb_id", "media_type"]
-            isOneToOne: false
-            referencedRelation: "tmdb_details"
-            referencedColumns: ["tmdb_id", "media_type"]
-          },
-          {
-            foreignKeyName: "entries_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "groups"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      entry_tags: {
-        Row: {
-          entry_id: number
-          tag_id: number
-        }
-        Insert: {
-          entry_id: number
-          tag_id: number
-        }
-        Update: {
-          entry_id?: number
-          tag_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_entry"
-            columns: ["entry_id"]
-            isOneToOne: false
-            referencedRelation: "entries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_tag"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       tags: {
         Row: {
@@ -282,22 +282,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      accept_group_invite: {
-        Args: {
-          p_invite_id: string
-        }
-        Returns: string
-      }
+      accept_group_invite: { Args: { p_invite_id: string }; Returns: string }
       create_group_invite: {
-        Args: {
-          p_invited_email: string
-        }
+        Args: { p_invited_email: string }
         Returns: string
       }
-      current_user_group_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      current_user_group_id: { Args: never; Returns: string }
       save_tmdb_result_to_list: {
         Args: {
           p_adult: boolean
