@@ -79,6 +79,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     if (ids.length === 0) return new Map<string, Set<number>>();
 
     const supabase = createClient();
+    // Deduplicate the media types so the `in('media_type', ...)` filter doesn't include redundant values.
     const mediaTypes = Array.from(new Set(results.map((r) => r.media_type)));
     const { data, error } = await supabase
       .from('entries')
