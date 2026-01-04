@@ -44,10 +44,10 @@ export function TMDBSearchResult({
         onClick={onSave}
         disabled={saving || saved || !onSave}
         className={cn(
-          "flex-shrink-0 rounded px-3 py-2 text-sm font-medium transition cursor-pointer disabled:cursor-not-allowed",
+          "flex-shrink-0 rounded px-3 py-2 text-sm font-medium transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70",
           saved
-            ? "bg-fuchsia-300 text-zinc-900"
-            : "bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+            ? "bg-indigo-300 text-zinc-900"
+            : "bg-indigo-600 text-white hover:bg-indigo-700"
         )}
         aria-label={saved ? `Saved ${result.name}` : `Save ${result.name}`}
       >
