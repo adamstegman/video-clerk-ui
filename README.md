@@ -48,7 +48,7 @@ Generate migrations from any schema updates, and push them to production.
 
 ```
 npx supabase stop
-npx supabase db diff -f <timestamp>_<update_description>
+npx supabase db diff -f <update_description>
 npx supabase start
 npx supabase db push
 ```
