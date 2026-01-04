@@ -69,14 +69,18 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
   const { user } = useContext(AppDataContext);
   const [results, setResults] = useState<TMDBSearchResultItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [savedStatusWarning, setSavedStatusWarning] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [savedByMediaType, setSavedByMediaType] = useState<Map<string, Set<number>>>(new Map());
   const requestIdRef = useRef(0);
 
+  const savedStatusWarningMessage =
+    "Couldn't verify whether search results are already saved. Some results may show “Save” even if already saved.";
+
   const fetchSavedByMediaType = async (results: TMDBSearchResultItem[]) => {
-    if (!user) return new Map<string, Set<number>>();
+    if (!user) return { map: new Map<string, Set<number>>(), warning: null as string | null };
     const ids = Array.from(new Set(results.map((r) => r.id)));
-    if (ids.length === 0) return new Map<string, Set<number>>();
+    if (ids.length === 0) return { map: new Map<string, Set<number>>(), warning: null as string | null };
 
     const supabase = createClient();
     // Deduplicate the media types so the `in('media_type', ...)` filter doesn't include redundant values.
@@ -90,7 +94,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
 
     if (error) {
       console.error(error);
-      return new Map<string, Set<number>>();
+      return { map: new Map<string, Set<number>>(), warning: savedStatusWarningMessage };
     }
 
     const map = new Map<string, Set<number>>();
@@ -101,7 +105,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
       set.add(tmdbId);
       map.set(mediaType, set);
     }
-    return map;
+    return { map, warning: null as string | null };
   };
 
   const handleSearch = useCallback(async (term: string) => {
@@ -109,6 +113,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     if (!term) {
       setResults([]);
       setSavedByMediaType(new Map());
+      setSavedStatusWarning(null);
       setLoading(false);
       return;
     }
@@ -122,6 +127,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     const requestId = ++requestIdRef.current;
     setLoading(true);
     setSavedByMediaType(new Map());
+    setSavedStatusWarning(null);
     let results: TMDBSearchResultItem[] = [];
     try {
       const data = await api.multiSearch(term);
@@ -144,13 +150,17 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
 
     // Non-blocking: show results immediately, then hydrate "already saved" state.
     fetchSavedByMediaType(results)
-      .then((map) => {
+      .then(({ map, warning }) => {
         if (requestIdRef.current === requestId) {
           setSavedByMediaType(map);
+          setSavedStatusWarning(warning);
         }
       })
       .catch((err) => {
         console.error(err);
+        if (requestIdRef.current === requestId) {
+          setSavedStatusWarning(savedStatusWarningMessage);
+        }
       });
   }, [api, genreData, user]);
 
@@ -165,6 +175,7 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
       onSearch={handleSearch}
       results={results}
       error={error}
+      savedStatusWarning={savedStatusWarning}
       loading={loading}
       initialQuery={initialQuery}
       savedByMediaType={savedByMediaType}

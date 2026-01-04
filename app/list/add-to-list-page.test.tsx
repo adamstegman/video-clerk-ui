@@ -246,6 +246,60 @@ describe('AddToListPage', () => {
     expect(savedButton).toBeDisabled();
   });
 
+  it('shows a warning if saved-status lookup fails', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const user = userEvent.setup();
+    const mockResults: TMDBSearchResults = {
+      page: 1,
+      results: [
+        {
+          adult: false,
+          backdrop_path: '/backdrop.jpg',
+          genre_ids: [28, 12],
+          id: 1,
+          media_type: 'movie',
+          original_language: 'en',
+          overview: 'A great movie',
+          popularity: 100.5,
+          poster_path: '/poster.jpg',
+          release_date: '2023-01-01',
+          title: 'Test Movie',
+          vote_average: 8.5,
+          vote_count: 1000,
+        },
+      ],
+      total_pages: 1,
+      total_results: 1,
+    };
+
+    mockMultiSearch.mockResolvedValue(mockResults);
+
+    // Make the entries lookup fail.
+    const in2 = vi.fn().mockResolvedValue({ data: null, error: { message: 'db down' } });
+    const in1 = vi.fn().mockReturnValue({ in: in2 });
+    const eq = vi.fn().mockReturnValue({ in: in1 });
+    const select = vi.fn().mockReturnValue({ eq });
+    mockFrom.mockImplementation((table: string) => {
+      if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
+      return { select };
+    });
+
+    renderWithProviders();
+
+    const searchInput = screen.getByPlaceholderText('Type a title...');
+    await user.type(searchInput, 'test');
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Movie')).toBeInTheDocument();
+    });
+
+    expect(
+      await screen.findByText(/Couldn't verify whether search results are already saved/i)
+    ).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
+  });
+
   it('filters out results with unsupported media types', async () => {
     const user = userEvent.setup();
     const mockResults: TMDBSearchResults = {

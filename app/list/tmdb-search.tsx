@@ -11,6 +11,7 @@ export function TMDBSearch({
   results,
   savedByMediaType,
   error,
+  savedStatusWarning,
   loading,
   initialQuery,
 }: {
@@ -18,6 +19,7 @@ export function TMDBSearch({
   results: TMDBSearchResultItem[];
   savedByMediaType?: Map<string, Set<number>>;
   error?: string | null;
+  savedStatusWarning?: string | null;
   loading?: boolean;
   initialQuery?: string;
 }) {
@@ -92,6 +94,9 @@ export function TMDBSearch({
         </Form>
         {displayError && (
           <div className="mt-2 text-red-500">{displayError}</div>
+        )}
+        {!displayError && savedStatusWarning && (
+          <div className="mt-2 text-sm text-amber-700 dark:text-amber-400">{savedStatusWarning}</div>
         )}
       </div>
       <div className="flex-1 overflow-y-auto min-h-0 pb-4">
