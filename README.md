@@ -44,12 +44,13 @@ npm run build
 
 ### Supabase
 
-Generate migrations from any schema updates, and push them to production.
+Generate migrations and types from any schema updates, and push them to production.
 
 ```
 npx supabase stop
 npx supabase db diff -f <update_description>
 npx supabase start
+npx supabase gen types typescript --local > app/lib/supabase/database.generated.types.ts
 npx supabase db push
 ```
 

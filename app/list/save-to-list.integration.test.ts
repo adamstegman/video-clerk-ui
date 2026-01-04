@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'node:crypto';
+import type { Database } from '~/lib/supabase/database.types';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
@@ -23,7 +24,7 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
     const publishableKey = SUPABASE_PUBLISHABLE_KEY!;
     const secretKey = SUPABASE_SECRET_KEY!;
 
-    const admin = createClient(url, secretKey);
+    const admin = createClient<Database>(url, secretKey);
 
     const email = `test-${crypto.randomUUID()}@example.com`;
     const password = `pw-${crypto.randomUUID()}`;
@@ -39,7 +40,7 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
     const userId = created.user!.id;
 
     try {
-      const authed = createClient(url, publishableKey);
+      const authed = createClient<Database>(url, publishableKey);
 
       const { error: signInError } = await authed.auth.signInWithPassword({
         email,
