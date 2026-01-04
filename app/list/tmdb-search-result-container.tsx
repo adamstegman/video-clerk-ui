@@ -4,11 +4,18 @@ import { TMDBSearchResult } from './tmdb-search-result';
 import { createClient } from '../lib/supabase/client';
 import { TMDBAPIContext } from '../tmdb-api/tmdb-api-provider';
 
-export function TMDBSearchResultContainer({ result }: { result: TMDBSearchResultItem }) {
+export function TMDBSearchResultContainer({
+  result,
+  initiallySaved = false,
+}: {
+  result: TMDBSearchResultItem;
+  initiallySaved?: boolean;
+}) {
   const api = useContext(TMDBAPIContext);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const isSaved = saved || initiallySaved;
 
   const fetchRuntime = async () => {
     // Runtime is required for saving, but don't block on a missing API context.
@@ -28,7 +35,7 @@ export function TMDBSearchResultContainer({ result }: { result: TMDBSearchResult
   };
 
   const handleSave = async () => {
-    if (saving || saved) return;
+    if (saving || isSaved) return;
     setSaving(true);
     setSaveError(null);
     try {
@@ -68,7 +75,7 @@ export function TMDBSearchResultContainer({ result }: { result: TMDBSearchResult
       result={result}
       onSave={handleSave}
       saving={saving}
-      saved={saved}
+      saved={isSaved}
       saveError={saveError}
     />
   );

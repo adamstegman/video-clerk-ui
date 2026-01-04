@@ -9,13 +9,17 @@ import { pageTitleClasses, sectionSpacingClasses, secondaryTextClasses, cn } fro
 export function TMDBSearch({
   onSearch,
   results,
+  savedByMediaType,
   error,
+  warning,
   loading,
   initialQuery,
 }: {
   onSearch: (term: string) => void;
   results: TMDBSearchResultItem[];
+  savedByMediaType?: Map<string, Set<number>>;
   error?: string | null;
+  warning?: string | null;
   loading?: boolean;
   initialQuery?: string;
 }) {
@@ -91,6 +95,9 @@ export function TMDBSearch({
         {displayError && (
           <div className="mt-2 text-red-500">{displayError}</div>
         )}
+        {!displayError && warning && (
+          <div className="mt-2 text-sm text-amber-700 dark:text-amber-400">{warning}</div>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto min-h-0 pb-4">
         {loading && !displayError && results.length === 0 && (
@@ -104,7 +111,11 @@ export function TMDBSearch({
         {results.length > 0 && !displayError && (
           <div className="space-y-4 md:space-y-6">
             {results.map((result) => (
-              <TMDBSearchResultContainer key={result.id} result={result} />
+              <TMDBSearchResultContainer
+                key={`${result.media_type}-${result.id}`}
+                result={result}
+                initiallySaved={savedByMediaType?.get(result.media_type)?.has(result.id) ?? false}
+              />
             ))}
             <div className="flex items-center gap-2 py-4">
               Results by <img src={tmdbLogo} alt="TMDB" className="h-4" />

@@ -1,9 +1,11 @@
-import { useContext, useState, useEffect, useCallback } from 'react';
+import { useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 import { TMDBSearch } from './tmdb-search';
 import { type TMDBGenre, type TMDBSearchResult as TMDBRawSearchResult } from '../tmdb-api/tmdb-api';
 import { TMDBAPIContext } from '../tmdb-api/tmdb-api-provider';
 import { TMDBGenresContext } from '../tmdb-api/tmdb-genres';
+import { AppDataContext } from '../app-data/app-data-provider';
+import { createClient } from '../lib/supabase/client';
 
 export enum TMDBMediaType {
   MOVIE = 'movie',
@@ -64,14 +66,50 @@ interface TMDBSearchContainerProps {
 export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) {
   const api = useContext(TMDBAPIContext);
   const genreData = useContext(TMDBGenresContext);
+  const { user } = useContext(AppDataContext);
   const [results, setResults] = useState<TMDBSearchResultItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [savedStatusWarning, setSavedStatusWarning] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [savedByMediaType, setSavedByMediaType] = useState<Map<string, Set<number>>>(new Map());
+  const requestIdRef = useRef(0);
+
+  const savedStatusWarningMessage =
+    "Couldn't verify whether search results are already saved. Some results may show “Save” even if already saved.";
+
+  const fetchSavedByMediaType = async (results: TMDBSearchResultItem[]) => {
+    if (!user) return new Map<string, Set<number>>();
+    // Deduplicate the IDs and media types so the `in()` filter doesn't include redundant values.
+    const ids = Array.from(new Set(results.map((r) => r.id)));
+    if (ids.length === 0) return new Map<string, Set<number>>();
+    const mediaTypes = Array.from(new Set(results.map((r) => r.media_type)));
+
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('entries')
+      .select('tmdb_id, media_type')
+      .eq('user_id', user.id)
+      .in('tmdb_id', ids)
+      .in('media_type', mediaTypes);
+    if (error) throw error;
+
+    const map = new Map<string, Set<number>>();
+    for (const row of data ?? []) {
+      const mediaType = row.media_type as string;
+      const tmdbId = row.tmdb_id as number;
+      const set = map.get(mediaType) ?? new Set<number>();
+      set.add(tmdbId);
+      map.set(mediaType, set);
+    }
+    return map;
+  };
 
   const handleSearch = useCallback(async (term: string) => {
     setError(null);
     if (!term) {
       setResults([]);
+      setSavedByMediaType(new Map());
+      setSavedStatusWarning(null);
       setLoading(false);
       return;
     }
@@ -82,7 +120,10 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
       return;
     }
 
+    const requestId = ++requestIdRef.current;
     setLoading(true);
+    setSavedByMediaType(new Map());
+    setSavedStatusWarning(null);
     let results: TMDBSearchResultItem[] = [];
     try {
       const data = await api.multiSearch(term);
@@ -102,7 +143,23 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     }
     setResults(results);
     setLoading(false);
-  }, [api, genreData]);
+
+    // Non-blocking: show results immediately, then hydrate "already saved" state.
+    fetchSavedByMediaType(results)
+      .then((map) => {
+        if (requestIdRef.current === requestId) {
+          setSavedByMediaType(map);
+          setSavedStatusWarning(null);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (requestIdRef.current === requestId) {
+          setSavedByMediaType(new Map());
+          setSavedStatusWarning(savedStatusWarningMessage);
+        }
+      });
+  }, [api, genreData, user]);
 
   useEffect(() => {
     if (initialQuery) {
@@ -110,5 +167,15 @@ export function TMDBSearchContainer({ initialQuery }: TMDBSearchContainerProps) 
     }
   }, [initialQuery, handleSearch]);
 
-  return <TMDBSearch onSearch={handleSearch} results={results} error={error} loading={loading} initialQuery={initialQuery} />;
+  return (
+    <TMDBSearch
+      onSearch={handleSearch}
+      results={results}
+      error={error}
+      warning={savedStatusWarning}
+      loading={loading}
+      initialQuery={initialQuery}
+      savedByMediaType={savedByMediaType}
+    />
+  );
 }

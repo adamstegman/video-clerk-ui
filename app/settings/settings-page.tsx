@@ -1,22 +1,10 @@
-import { Link, useMatches } from 'react-router'
+import { useContext } from "react";
+import { Link } from 'react-router'
 import { sectionSpacingClasses, secondaryTextClasses, cn } from "~/lib/utils";
-import type { User } from '@supabase/supabase-js'
-import type { AppClientLoaderData } from '~/routes/app';
-
-function useUser(): User | null | undefined {
-  const matches = useMatches()
-  const appMatch = matches.find(match =>
-    match.loaderData &&
-    typeof match.loaderData === 'object' &&
-    'user' in match.loaderData &&
-    match.loaderData.user !== null
-  )
-  const userData = appMatch?.loaderData as AppClientLoaderData | undefined
-  return userData?.user
-}
+import { AppDataContext } from "../app-data/app-data-provider";
 
 export function SettingsPage() {
-  const user = useUser()
+  const { user } = useContext(AppDataContext);
 
   return (
     <>

@@ -35,7 +35,7 @@
     "jsdom": "^24.1.1",
     "supabase": "^2.70.5",
     "tailwindcss": "^4.1.13",
-    "type-fest": "^4.0.0",
+    "type-fest": "^4.41.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",
     "vite-tsconfig-paths": "^5.1.4",

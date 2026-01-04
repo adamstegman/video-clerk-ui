@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { AddToListPage } from './add-to-list-page';
+import { AppDataProvider } from '../app-data/app-data-provider';
 import { TMDBAPI } from '../tmdb-api/tmdb-api';
 import { TMDBAPIContext } from '../tmdb-api/tmdb-api-provider';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
@@ -15,9 +16,11 @@ vi.mock('../tmdb-api/tmdb-primary-long-blue.svg', () => ({
 }));
 
 const mockRpc = vi.hoisted(() => vi.fn());
+const mockFrom = vi.hoisted(() => vi.fn());
 vi.mock('../lib/supabase/client', () => ({
   createClient: () => ({
     rpc: mockRpc,
+    from: mockFrom,
   }),
 }));
 
@@ -71,6 +74,17 @@ describe('AddToListPage', () => {
       fetchTVDetails,
     } as unknown as TMDBAPI;
     mockRpc.mockReset();
+    mockFrom.mockReset();
+
+    // Default entries lookup: return no saved items.
+    const in2 = vi.fn().mockResolvedValue({ data: [], error: null });
+    const in1 = vi.fn().mockReturnValue({ in: in2 });
+    const eq = vi.fn().mockReturnValue({ in: in1 });
+    const select = vi.fn().mockReturnValue({ eq });
+    mockFrom.mockImplementation((table: string) => {
+      if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
+      return { select };
+    });
   });
 
   afterEach(() => {
@@ -83,13 +97,15 @@ describe('AddToListPage', () => {
         {
           path: '/',
           element: (
-            <TMDBAPIContext value={mockAPI}>
-              <TMDBConfigurationContext value={mockConfigurationState}>
-                <TMDBGenresContext value={mockGenresState}>
-                  <AddToListPage />
-                </TMDBGenresContext>
-              </TMDBConfigurationContext>
-            </TMDBAPIContext>
+            <AppDataProvider data={{ user: { id: 'user-1' } as any }}>
+              <TMDBAPIContext value={mockAPI}>
+                <TMDBConfigurationContext value={mockConfigurationState}>
+                  <TMDBGenresContext value={mockGenresState}>
+                    <AddToListPage />
+                  </TMDBGenresContext>
+                </TMDBConfigurationContext>
+              </TMDBAPIContext>
+            </AppDataProvider>
           ),
         },
       ],
@@ -177,6 +193,111 @@ describe('AddToListPage', () => {
     // Check that TMDB attribution section is displayed with logo
     expect(screen.getByText('Results by')).toBeInTheDocument();
     expect(screen.getByAltText('TMDB')).toBeInTheDocument();
+  });
+
+  it('shows Save button disabled as Saved when result is already in entries for user', async () => {
+    const user = userEvent.setup();
+    const mockResults: TMDBSearchResults = {
+      page: 1,
+      results: [
+        {
+          adult: false,
+          backdrop_path: '/backdrop.jpg',
+          genre_ids: [28, 12],
+          id: 1,
+          media_type: 'movie',
+          original_language: 'en',
+          overview: 'A great movie',
+          popularity: 100.5,
+          poster_path: '/poster.jpg',
+          release_date: '2023-01-01',
+          title: 'Test Movie',
+          vote_average: 8.5,
+          vote_count: 1000,
+        },
+      ],
+      total_pages: 1,
+      total_results: 1,
+    };
+
+    mockMultiSearch.mockResolvedValue(mockResults);
+
+    // Override default entries lookup for this test: return a saved item.
+    const in2 = vi.fn().mockResolvedValue({ data: [{ tmdb_id: 1, media_type: 'movie' }], error: null });
+    const in1 = vi.fn().mockReturnValue({ in: in2 });
+    const eq = vi.fn().mockReturnValue({ in: in1 });
+    const select = vi.fn().mockReturnValue({ eq });
+    mockFrom.mockImplementation((table: string) => {
+      if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
+      return { select };
+    });
+
+    renderWithProviders(['/']);
+
+    const searchInput = screen.getByPlaceholderText('Type a title...');
+    await user.type(searchInput, 'test');
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Movie')).toBeInTheDocument();
+    });
+
+    // Hydration of saved-state is async after results render.
+    const savedButton = await screen.findByRole('button', { name: 'Saved Test Movie' });
+    expect(savedButton).toBeDisabled();
+  });
+
+  it('shows a warning if saved-status lookup fails', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const user = userEvent.setup();
+    const mockResults: TMDBSearchResults = {
+      page: 1,
+      results: [
+        {
+          adult: false,
+          backdrop_path: '/backdrop.jpg',
+          genre_ids: [28, 12],
+          id: 1,
+          media_type: 'movie',
+          original_language: 'en',
+          overview: 'A great movie',
+          popularity: 100.5,
+          poster_path: '/poster.jpg',
+          release_date: '2023-01-01',
+          title: 'Test Movie',
+          vote_average: 8.5,
+          vote_count: 1000,
+        },
+      ],
+      total_pages: 1,
+      total_results: 1,
+    };
+
+    mockMultiSearch.mockResolvedValue(mockResults);
+
+    // Make the entries lookup fail.
+    const in2 = vi.fn().mockResolvedValue({ data: null, error: { message: 'db down' } });
+    const in1 = vi.fn().mockReturnValue({ in: in2 });
+    const eq = vi.fn().mockReturnValue({ in: in1 });
+    const select = vi.fn().mockReturnValue({ eq });
+    mockFrom.mockImplementation((table: string) => {
+      if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
+      return { select };
+    });
+
+    renderWithProviders();
+
+    const searchInput = screen.getByPlaceholderText('Type a title...');
+    await user.type(searchInput, 'test');
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Movie')).toBeInTheDocument();
+    });
+
+    expect(
+      await screen.findByText(/Couldn't verify whether search results are already saved/i)
+    ).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('filters out results with unsupported media types', async () => {
