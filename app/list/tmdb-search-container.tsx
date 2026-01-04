@@ -15,10 +15,11 @@ export interface TMDBSearchResultItem
     TMDBRawSearchResult,
     'genre_ids' | 'title' | 'first_air_date' | 'name' | 'release_date'
   > {
-  genres: string[];
+  genres: TMDBGenre[];
   name: string;
   release_date: string;
   release_year: string;
+  media_type_display: string;
 }
 
 const mediaTypeDisplay = {
@@ -30,19 +31,15 @@ function createSearchResultItem(
   result: TMDBRawSearchResult,
   genreData: { movieGenres: TMDBGenre[]; tvGenres: TMDBGenre[] }
 ): TMDBSearchResultItem {
-  let genres: string[] = [];
+  let genres: TMDBGenre[] = [];
   if (result.media_type === TMDBMediaType.MOVIE) {
     genres = result.genre_ids
-      .map((genre_id: number) => {
-        return genreData.movieGenres.find((genre: TMDBGenre) => genre.id === genre_id)?.name;
-      })
-      .filter((name): name is string => typeof name === 'string');
+      .map((genre_id: number) => genreData.movieGenres.find((g: TMDBGenre) => g.id === genre_id))
+      .filter((genre: TMDBGenre | undefined) => !!genre);
   } else if (result.media_type === TMDBMediaType.TV) {
     genres = result.genre_ids
-      .map((genre_id: number) => {
-        return genreData.tvGenres.find((genre: TMDBGenre) => genre.id === genre_id)?.name;
-      })
-      .filter((name): name is string => typeof name === 'string');
+      .map((genre_id: number) => genreData.tvGenres.find((g: TMDBGenre) => g.id === genre_id))
+      .filter((genre: TMDBGenre | undefined) => !!genre);
   }
 
   const release_date = result.release_date || result.first_air_date || ''; // movie || tv
@@ -50,7 +47,10 @@ function createSearchResultItem(
   return {
     ...result,
     genres,
-    media_type: mediaTypeDisplay[result.media_type as TMDBMediaType],
+    // Keep the raw TMDB media_type ('movie' | 'tv') for persistence,
+    // and provide a separate display value for UI rendering.
+    media_type: result.media_type,
+    media_type_display: mediaTypeDisplay[result.media_type as TMDBMediaType],
     name,
     release_date,
     release_year: release_date ? release_date.split('-')[0] : '',

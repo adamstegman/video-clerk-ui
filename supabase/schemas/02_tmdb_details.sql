@@ -3,7 +3,7 @@
 -- (TMDB requests no caching longer than 6 months)
 
 CREATE TABLE IF NOT EXISTS tmdb_details (
-  tmdb_id INTEGER UNIQUE NOT NULL PRIMARY KEY,
+  tmdb_id INTEGER NOT NULL,
   media_type VARCHAR(20) NOT NULL,
   adult BOOLEAN NOT NULL,
   backdrop_path VARCHAR(255),
@@ -17,8 +17,9 @@ CREATE TABLE IF NOT EXISTS tmdb_details (
   original_name VARCHAR(255),
   release_date DATE,
   origin_country JSONB,
-  runtime_minutes INTEGER,
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  runtime INTEGER,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (tmdb_id, media_type)
 );
 
 -- Index for filtering by media type
@@ -28,7 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_tmdb_details_media_type ON tmdb_details(media_typ
 CREATE INDEX IF NOT EXISTS idx_tmdb_details_release_date ON tmdb_details(release_date);
 
 -- Index for filtering by runtime
-CREATE INDEX IF NOT EXISTS idx_tmdb_details_runtime ON tmdb_details(runtime_minutes);
+CREATE INDEX IF NOT EXISTS idx_tmdb_details_runtime ON tmdb_details(runtime);
 
 -- Enable Row Level Security
 ALTER TABLE tmdb_details ENABLE ROW LEVEL SECURITY;

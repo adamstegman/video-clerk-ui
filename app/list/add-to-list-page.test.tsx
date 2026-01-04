@@ -14,6 +14,13 @@ vi.mock('../tmdb-api/tmdb-primary-long-blue.svg', () => ({
   default: 'tmdb-logo.svg',
 }));
 
+const mockRpc = vi.hoisted(() => vi.fn());
+vi.mock('../lib/supabase/client', () => ({
+  createClient: () => ({
+    rpc: mockRpc,
+  }),
+}));
+
 describe('AddToListPage', () => {
   let mockAPI: TMDBAPI;
   let mockMultiSearch: ReturnType<typeof vi.fn>;
@@ -56,9 +63,14 @@ describe('AddToListPage', () => {
 
   beforeEach(() => {
     mockMultiSearch = vi.fn();
+    const fetchMovieDetails = vi.fn();
+    const fetchTVDetails = vi.fn();
     mockAPI = {
       multiSearch: mockMultiSearch,
+      fetchMovieDetails,
+      fetchTVDetails,
     } as unknown as TMDBAPI;
+    mockRpc.mockReset();
   });
 
   afterEach(() => {
@@ -448,5 +460,117 @@ describe('AddToListPage', () => {
 
     // Verify that no results are shown while loading
     expect(screen.queryByText(/Results by/)).not.toBeInTheDocument();
+  });
+
+  it('allows saving a search result to the database', async () => {
+    const user = userEvent.setup();
+    const mockResults: TMDBSearchResults = {
+      page: 1,
+      results: [
+        {
+          adult: false,
+          backdrop_path: '/backdrop.jpg',
+          genre_ids: [28, 12],
+          id: 1,
+          media_type: 'movie',
+          original_language: 'en',
+          overview: 'A great movie',
+          popularity: 100.5,
+          poster_path: '/poster.jpg',
+          release_date: '2023-01-01',
+          title: 'Test Movie',
+          vote_average: 8.5,
+          vote_count: 1000,
+        },
+      ],
+      total_pages: 1,
+      total_results: 1,
+    };
+
+    mockMultiSearch.mockResolvedValue(mockResults);
+    (mockAPI as any).fetchMovieDetails.mockResolvedValue({ runtime: 142 });
+    mockRpc.mockResolvedValue({ data: 123, error: null });
+
+    renderWithProviders();
+
+    const searchInput = screen.getByPlaceholderText('Type a title...');
+    await user.type(searchInput, 'test');
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Movie')).toBeInTheDocument();
+    });
+
+    const saveButton = screen.getByRole('button', { name: 'Save Test Movie' });
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockRpc).toHaveBeenCalledWith('save_tmdb_result_to_list', expect.objectContaining({
+        p_tmdb_id: 1,
+        p_media_type: 'movie',
+        p_title: 'Test Movie',
+        p_genre_ids: [28, 12],
+        p_genre_names: ['Action', 'Adventure'],
+        p_runtime: 142,
+      }));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Saved Test Movie' })).toBeInTheDocument();
+    });
+  });
+
+  it('averages tv episode runtimes before saving', async () => {
+    const user = userEvent.setup();
+    const mockResults: TMDBSearchResults = {
+      page: 1,
+      results: [
+        {
+          adult: false,
+          backdrop_path: '/backdrop2.jpg',
+          genre_ids: [16, 35],
+          id: 2,
+          media_type: 'tv',
+          original_language: 'en',
+          original_name: 'Test TV Show',
+          origin_country: ['US'],
+          overview: 'A great TV show',
+          popularity: 85.2,
+          poster_path: '/poster2.jpg',
+          first_air_date: '2022-01-01',
+          name: 'Test TV Show',
+          vote_average: 7.8,
+          vote_count: 500,
+        },
+      ],
+      total_pages: 1,
+      total_results: 1,
+    };
+
+    mockMultiSearch.mockResolvedValue(mockResults);
+    (mockAPI as any).fetchTVDetails.mockResolvedValue({ episode_run_time: [25, 35] }); // average => 30
+    mockRpc.mockResolvedValue({ data: 456, error: null });
+
+    renderWithProviders();
+
+    const searchInput = screen.getByPlaceholderText('Type a title...');
+    await user.type(searchInput, 'tv');
+
+    await waitFor(() => {
+      expect(screen.getByText('Test TV Show')).toBeInTheDocument();
+    });
+
+    const saveButton = screen.getByRole('button', { name: 'Save Test TV Show' });
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockRpc).toHaveBeenCalledWith('save_tmdb_result_to_list', expect.objectContaining({
+        p_tmdb_id: 2,
+        p_media_type: 'tv',
+        p_title: 'Test TV Show',
+        p_genre_ids: [16, 35],
+        p_genre_names: ['Animation', 'Comedy'],
+        p_runtime: 30,
+      }));
+    });
   });
 });
