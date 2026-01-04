@@ -40,6 +40,12 @@ Create a production build:
 npm run build
 ```
 
+## Tests
+
+Unit tests run without external dependencies.
+
+Integration tests run against a local Supabase instance (Docker) in CI; no GitHub secrets are required for them.
+
 ## Deployment
 
 ### Supabase
@@ -68,7 +74,6 @@ This project is configured for automatic deployment to GitHub Pages using GitHub
    - Add the following **Secrets** (under the "Secrets" tab):
      - `VITE_SUPABASE_URL` - Your Supabase project URL
      - `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` - Your Supabase anon/public key
-     - `VITE_SUPABASE_SECRET_KEY` - Your Supabase service role key (required for CI integration tests)
      - `VITE_TMDB_API_READ_TOKEN` - Your TMDB API read token
 
 2. **Enable GitHub Pages:**

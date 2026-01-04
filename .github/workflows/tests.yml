@@ -35,12 +35,7 @@ jobs:
     name: Integration tests (Supabase)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Secrets are not available to workflows triggered by pull requests from forks.
-    if: >
-      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-      && secrets.VITE_SUPABASE_URL != ''
-      && secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY != ''
-      && secrets.VITE_SUPABASE_SECRET_KEY != ''
+    needs: unit
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,10 +49,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Start Supabase (local Docker)
+        run: >
+          npx supabase start --yes
+          -x studio,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor,realtime,postgres-meta
+
+      - name: Reset local database (apply migrations)
+        run: npx supabase db reset --yes --no-seed
+
+      - name: Write Supabase env to .env
+        run: >
+          npx supabase status -o env
+          --override-name api.url=VITE_SUPABASE_URL
+          --override-name anon.key=VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+          --override-name service_role.key=VITE_SUPABASE_SECRET_KEY
+          > .env
+
       - name: Run integration tests
-        run: npm test -- --run app/list/save-to-list.integration.test.ts
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
-          # Service role key (used by tests to create/delete users)
-          VITE_SUPABASE_SECRET_KEY: ${{ secrets.VITE_SUPABASE_SECRET_KEY }}
+        run: npx dotenvx run -- npm test -- --run app/list/save-to-list.integration.test.ts
+
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop
