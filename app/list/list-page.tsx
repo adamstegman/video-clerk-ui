@@ -1,136 +1,17 @@
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
 import { ActionLink } from "./action-link";
-import { createClient } from "../lib/supabase/client";
 import { pageTitleClasses, sectionSpacingClasses, secondaryTextClasses, cn } from "../lib/utils";
 import { SavedEntryRow, type SavedEntryRowData } from "./saved-entry-row";
 
-type EntriesQueryRow = {
-  id: number;
-  added_at: string;
-  tmdb_details:
-    | {
-        poster_path: string | null;
-        name: string | null;
-        release_date: string | null;
-      }
-    | Array<{
-        poster_path: string | null;
-        name: string | null;
-        release_date: string | null;
-      }>
-    | null;
-  entry_tags:
-    | Array<{
-        tags:
-          | {
-              name: string | null;
-            }
-          | Array<{
-              name: string | null;
-            }>
-          | null;
-      }>
-    | null;
-};
-
-function getReleaseYear(releaseDate: string | null | undefined) {
-  if (!releaseDate) return "";
-  const year = releaseDate.split("-")[0];
-  return year || "";
-}
-
-function normalizeDetails(
-  details: EntriesQueryRow["tmdb_details"]
-): { poster_path: string | null; name: string | null; release_date: string | null } | null {
-  if (!details) return null;
-  return Array.isArray(details) ? details[0] ?? null : details;
-}
-
-function normalizeTagName(
-  tags:
-    | {
-        name: string | null;
-      }
-    | Array<{
-        name: string | null;
-      }>
-    | null
-) {
-  if (!tags) return null;
-  return Array.isArray(tags) ? tags[0]?.name ?? null : tags.name ?? null;
-}
-
-export function ListPage() {
-  const [entries, setEntries] = useState<SavedEntryRowData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("entries")
-          .select(
-            `
-              id,
-              added_at,
-              tmdb_details (
-                poster_path,
-                name,
-                release_date
-              ),
-              entry_tags (
-                tags (
-                  name
-                )
-              )
-            `
-          )
-          .order("added_at", { ascending: false });
-
-        if (error) throw error;
-
-        const normalized = ((data ?? []) as unknown as EntriesQueryRow[]).map((row) => {
-          const details = normalizeDetails(row.tmdb_details);
-          const title = details?.name || "Untitled";
-          const tags =
-            row.entry_tags
-              ?.map((et) => normalizeTagName(et.tags))
-              .filter((n): n is string => !!n) ?? [];
-
-          return {
-            id: row.id,
-            title,
-            releaseYear: getReleaseYear(details?.release_date ?? null),
-            posterPath: details?.poster_path ?? null,
-            tags,
-          } satisfies SavedEntryRowData;
-        });
-
-        if (!cancelled) setEntries(normalized);
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load list");
-          setEntries([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+export function ListPage({
+  entries,
+  loading,
+  error,
+}: {
+  entries: SavedEntryRowData[];
+  loading: boolean;
+  error: string | null;
+}) {
   return (
     <>
       <div className={sectionSpacingClasses}>

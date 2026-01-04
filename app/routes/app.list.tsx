@@ -1,5 +1,5 @@
 import type { Route } from "./+types/app.list";
-import { ListPage } from "../list/list-page";
+import { ListPageContainer } from "../list/list-page-container";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -12,6 +12,6 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function List() {
-  return <ListPage />;
+  return <ListPageContainer />;
 }
 
