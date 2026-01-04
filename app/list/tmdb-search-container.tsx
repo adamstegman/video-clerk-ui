@@ -15,8 +15,7 @@ export interface TMDBSearchResultItem
     TMDBRawSearchResult,
     'genre_ids' | 'title' | 'first_air_date' | 'name' | 'release_date'
   > {
-  genre_tags: { id: number; name: string }[];
-  genres: string[];
+  genres: TMDBGenre[];
   name: string;
   release_date: string;
   release_year: string;
@@ -32,29 +31,21 @@ function createSearchResultItem(
   result: TMDBRawSearchResult,
   genreData: { movieGenres: TMDBGenre[]; tvGenres: TMDBGenre[] }
 ): TMDBSearchResultItem {
-  let genre_tags: { id: number; name: string }[] = [];
+  let genres: TMDBGenre[] = [];
   if (result.media_type === TMDBMediaType.MOVIE) {
-    genre_tags = result.genre_ids
-      .map((genre_id: number) => {
-        const genre = genreData.movieGenres.find((g: TMDBGenre) => g.id === genre_id);
-        return genre ? { id: genre.id, name: genre.name } : null;
-      })
-      .filter((tag): tag is { id: number; name: string } => !!tag);
+    genres = result.genre_ids
+      .map((genre_id: number) => genreData.movieGenres.find((g: TMDBGenre) => g.id === genre_id))
+      .filter((genre: TMDBGenre | undefined) => !!genre);
   } else if (result.media_type === TMDBMediaType.TV) {
-    genre_tags = result.genre_ids
-      .map((genre_id: number) => {
-        const genre = genreData.tvGenres.find((g: TMDBGenre) => g.id === genre_id);
-        return genre ? { id: genre.id, name: genre.name } : null;
-      })
-      .filter((tag): tag is { id: number; name: string } => !!tag);
+    genres = result.genre_ids
+      .map((genre_id: number) => genreData.tvGenres.find((g: TMDBGenre) => g.id === genre_id))
+      .filter((genre: TMDBGenre | undefined) => !!genre);
   }
 
   const release_date = result.release_date || result.first_air_date || ''; // movie || tv
   const name = result.name || result.title || ''; // tv || movie
-  const genres = genre_tags.map((t) => t.name);
   return {
     ...result,
-    genre_tags,
     genres,
     // Keep the raw TMDB media_type ('movie' | 'tv') for persistence,
     // and provide a separate display value for UI rendering.

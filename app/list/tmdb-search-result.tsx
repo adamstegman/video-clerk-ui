@@ -34,7 +34,7 @@ export function TMDBSearchResult({
       <div className="flex-1 min-w-0">
         <h3 className={cn("font-bold text-base md:text-lg", primaryHeadingClasses)}>{result.name}</h3>
         <p className={cn("text-sm md:text-base", secondaryTextClasses)}>{result.release_year} - {result.media_type_display}</p>
-        <p className={cn("text-sm md:text-base", secondaryTextClasses)}>{result.genres.join(', ')}</p>
+        <p className={cn("text-sm md:text-base", secondaryTextClasses)}>{result.genres.map((genre) => genre.name).join(', ')}</p>
         {saveError && (
           <p className="mt-2 text-sm text-red-500">{saveError}</p>
         )}

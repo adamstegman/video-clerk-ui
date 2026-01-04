@@ -49,8 +49,8 @@ export function TMDBSearchResultContainer({ result }: { result: TMDBSearchResult
         p_original_name: result.original_name ?? null,
         p_release_date: result.release_date || null,
         p_origin_country: result.origin_country ?? null,
-        p_genre_ids: result.genre_tags.map((t) => t.id),
-        p_genre_names: result.genre_tags.map((t) => t.name),
+        p_genre_ids: result.genres.map((genre) => genre.id),
+        p_genre_names: result.genres.map((genre) => genre.name),
         p_runtime: runtime,
       });
       if (error) throw error;
@@ -73,4 +73,3 @@ export function TMDBSearchResultContainer({ result }: { result: TMDBSearchResult
     />
   );
 }
-
