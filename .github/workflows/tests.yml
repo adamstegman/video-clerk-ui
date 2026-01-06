@@ -1,0 +1,75 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests (exclude integration)
+        run: npm test -- --run --exclude "**/*.integration.test.*"
+
+  integration:
+    name: Integration tests (Supabase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: unit
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start Supabase (local Docker)
+        run: >
+          npx supabase start --yes
+          -x studio,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor,realtime,postgres-meta
+
+      - name: Reset local database (apply migrations)
+        run: npx supabase db reset --yes --no-seed
+
+      - name: Write Supabase env to .env
+        run: >
+          npx supabase status -o env
+          --override-name api.url=VITE_SUPABASE_URL
+          --override-name auth.publishable_key=VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+          --override-name auth.secret_key=VITE_SUPABASE_SECRET_KEY
+          > .env
+
+      - name: Run integration tests
+        run: npx dotenvx run -- npm test -- --run integration.test
+
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop
