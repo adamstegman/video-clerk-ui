@@ -61,8 +61,8 @@ jobs:
         run: >
           npx supabase status -o env
           --override-name api.url=VITE_SUPABASE_URL
-          --override-name anon.key=VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
-          --override-name service_role.key=VITE_SUPABASE_SECRET_KEY
+          --override-name auth.publishable_key=VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+          --override-name auth.secret_key=VITE_SUPABASE_SECRET_KEY
           > .env
 
       - name: Run integration tests

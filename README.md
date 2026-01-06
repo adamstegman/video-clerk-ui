@@ -42,9 +42,11 @@ npm run build
 
 ## Tests
 
+```bash
+npm test
 Unit tests run without external dependencies.
 
-Integration tests run against a local Supabase instance (Docker) in CI; no GitHub secrets are required for them.
+Integration tests run against a local Supabase instance (Docker). Locally, this uses the `.env` file you created above. In CI, no GitHub secrets are required for them.
 
 ## Deployment
 
