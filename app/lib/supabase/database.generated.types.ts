@@ -288,6 +288,22 @@ export type Database = {
         Returns: string
       }
       current_user_group_id: { Args: never; Returns: string }
+      get_group_members: {
+        Args: never
+        Returns: {
+          email: string
+          joined_at: string
+          user_id: string
+        }[]
+      }
+      get_pending_group_invites: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          invited_email: string
+        }[]
+      }
       save_tmdb_result_to_list: {
         Args: {
           p_adult: boolean

@@ -217,6 +217,12 @@ BEGIN
     RAISE EXCEPTION 'Cannot invite yourself' USING errcode = '22023';
   END IF;
 
+  -- Delete any existing pending invitations for the same email in this group
+  DELETE FROM public.group_invites
+  WHERE group_id = v_group_id
+    AND lower(invited_email) = v_email
+    AND accepted_at IS NULL;
+
   INSERT INTO public.group_invites(group_id, invited_email, invited_by)
   VALUES (v_group_id, v_email, v_user_id)
   RETURNING id INTO v_invite_id;
@@ -235,6 +241,72 @@ AS $function$
   select gm.group_id
   from public.group_memberships gm
   where gm.user_id = auth.uid()
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.get_group_members()
+ RETURNS TABLE(user_id uuid, email text, joined_at timestamp without time zone)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_group_id uuid;
+  v_user_id uuid;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated' USING errcode = '28000';
+  END IF;
+
+  v_group_id := public.current_user_group_id();
+  IF v_group_id IS NULL THEN
+    RAISE EXCEPTION 'No group membership' USING errcode = '28000';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    gm.user_id,
+    coalesce(au.email::text, '') as email,
+    gm.joined_at
+  FROM public.group_memberships gm
+  JOIN auth.users au ON au.id = gm.user_id
+  WHERE gm.group_id = v_group_id
+  ORDER BY gm.joined_at ASC;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.get_pending_group_invites()
+ RETURNS TABLE(id uuid, invited_email text, created_at timestamp without time zone)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_group_id uuid;
+  v_user_id uuid;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated' USING errcode = '28000';
+  END IF;
+
+  v_group_id := public.current_user_group_id();
+  IF v_group_id IS NULL THEN
+    RAISE EXCEPTION 'No group membership' USING errcode = '28000';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    gi.id,
+    gi.invited_email,
+    gi.created_at
+  FROM public.group_invites gi
+  WHERE gi.group_id = v_group_id
+    AND gi.accepted_at IS NULL
+  ORDER BY gi.created_at ASC;
+END;
 $function$
 ;
 

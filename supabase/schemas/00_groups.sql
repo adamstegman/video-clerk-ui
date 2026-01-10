@@ -85,3 +85,81 @@ CREATE TRIGGER on_auth_user_created_create_group
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user_create_group();
+
+-- Function to get all members of the current user's group with their emails
+CREATE OR REPLACE FUNCTION public.get_group_members()
+RETURNS TABLE (
+  user_id uuid,
+  email text,
+  joined_at timestamp
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_group_id uuid;
+  v_user_id uuid;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated' USING errcode = '28000';
+  END IF;
+
+  v_group_id := public.current_user_group_id();
+  IF v_group_id IS NULL THEN
+    RAISE EXCEPTION 'No group membership' USING errcode = '28000';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    gm.user_id,
+    coalesce(au.email::text, '') as email,
+    gm.joined_at
+  FROM public.group_memberships gm
+  JOIN auth.users au ON au.id = gm.user_id
+  WHERE gm.group_id = v_group_id
+  ORDER BY gm.joined_at ASC;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_group_members() TO authenticated;
+
+-- Function to get all pending invitations (not accepted) for the current user's group
+CREATE OR REPLACE FUNCTION public.get_pending_group_invites()
+RETURNS TABLE (
+  id uuid,
+  invited_email text,
+  created_at timestamp
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_group_id uuid;
+  v_user_id uuid;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated' USING errcode = '28000';
+  END IF;
+
+  v_group_id := public.current_user_group_id();
+  IF v_group_id IS NULL THEN
+    RAISE EXCEPTION 'No group membership' USING errcode = '28000';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    gi.id,
+    gi.invited_email,
+    gi.created_at
+  FROM public.group_invites gi
+  WHERE gi.group_id = v_group_id
+    AND gi.accepted_at IS NULL
+  ORDER BY gi.created_at ASC;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_pending_group_invites() TO authenticated;

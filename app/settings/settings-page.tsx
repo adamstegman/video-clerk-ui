@@ -1,9 +1,16 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from 'react-router'
-import { sectionSpacingClasses, secondaryTextClasses, cn } from "~/lib/utils";
+import { sectionSpacingClasses, secondaryTextClasses, errorTextClasses, successTextClasses, cn } from "~/lib/utils";
 import { AppDataContext } from "../app-data/app-data-provider";
 import { createClient } from "../lib/supabase/client";
 import { ActionButton } from "../components/action-button";
+import { SettingsSection } from "../components/settings-section";
+import { TableView, TableViewRow, TableViewActionButton } from "../components/table-view";
+import { SettingsSubsection } from "../components/settings-subsection";
+import type { Database } from "../lib/supabase/database.types";
+
+type GroupMember = Database['public']['Functions']['get_group_members']['Returns'][number];
+type PendingInvite = Database['public']['Functions']['get_pending_group_invites']['Returns'][number];
 
 export function SettingsPage() {
   const { user } = useContext(AppDataContext);
@@ -21,6 +28,42 @@ export function SettingsPage() {
   const [inviteAcceptError, setInviteAcceptError] = useState<string | null>(null);
 
   const [copySuccess, setCopySuccess] = useState(false);
+  const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+      const fetchGroupMembers = async () => {
+        setMembersLoading(true);
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase.rpc('get_group_members');
+          if (error) throw error;
+          setGroupMembers(data || []);
+      } catch (err) {
+        console.error('Failed to fetch group members:', err);
+      } finally {
+        setMembersLoading(false);
+      }
+    };
+    fetchGroupMembers();
+  }, [user, inviteAccepted]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchPendingInvites = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.rpc('get_pending_group_invites');
+        if (error) throw error;
+        setPendingInvites(data || []);
+      } catch (err) {
+        console.error('Failed to fetch pending invites:', err);
+      }
+    };
+    fetchPendingInvites();
+  }, [user, inviteCreating, inviteAccepted]);
 
   const inviteLink = useMemo(() => {
     const id = inviteId ?? inviteParam;
@@ -87,62 +130,79 @@ export function SettingsPage() {
   return (
     <>
       {user && (
-        <p>
-          Hello <span className="text-primary font-semibold">{user.email}</span>
-        </p>
+        <SettingsSection title="Account">
+          <TableView>
+            <TableViewRow label="Email" value={user.email || ''} />
+          </TableView>
+        </SettingsSection>
       )}
       {user && (
-        <div className={sectionSpacingClasses}>
-          <h2 className="text-base font-semibold">Group</h2>
-
+        <SettingsSection title="Group">
           {inviteParam && (
-            <div className="mt-3 rounded-md border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
-              <p className="text-sm">
-                You have a pending group invite. Accepting it will move you into the inviter&apos;s group and
-                leave your previous group orphaned.
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <ActionButton
-                  onClick={handleAcceptInvite}
-                  loading={inviteAccepting}
-                  loadingText="Accepting…"
-                >
-                  Accept invite
-                </ActionButton>
-                {inviteAcceptError && <p className="text-sm text-red-600">{inviteAcceptError}</p>}
-                {inviteAccepted && <p className="text-sm text-green-600">Invite accepted.</p>}
-              </div>
-            </div>
-          )}
-
-          <div className="mt-3 rounded-md border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
-            <p className="text-sm">Invite someone to join your group (they must accept while signed in).</p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <input
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => {
-                  const newEmail = e.target.value;
-                  setInviteEmail(newEmail);
-                  // Clear invite link if email changes
-                  if (inviteId && inviteEmailForCreatedInvite && newEmail.trim() !== inviteEmailForCreatedInvite) {
-                    setInviteId(null);
-                    setInviteEmailForCreatedInvite(null);
-                  }
-                }}
-                placeholder="friend@example.com"
-                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-              />
-              <ActionButton
-                onClick={handleCreateInvite}
-                disabled={inviteEmail.trim().length === 0 || (inviteId !== null && inviteEmail.trim() === inviteEmailForCreatedInvite)}
-                loading={inviteCreating}
-                loadingText="Creating…"
+            <SettingsSubsection
+              description="You have a pending group invite. Accepting it will move you into the inviter's group and you will lose access to any existing saved items."
+              error={inviteAcceptError}
+              success={inviteAccepted ? "Invite accepted." : null}
+              showBottomBorder
+            >
+              <TableViewActionButton
+                onClick={handleAcceptInvite}
+                loading={inviteAccepting}
+                loadingText="Accepting…"
               >
-                Create invite
-              </ActionButton>
-            </div>
-            {inviteError && <p className="mt-2 text-sm text-red-600">{inviteError}</p>}
+                Accept invite
+              </TableViewActionButton>
+            </SettingsSubsection>
+          )}
+          {(groupMembers.length > 0 || pendingInvites.length > 0) && (
+            <TableView showBottomBorder>
+              {groupMembers.map((member, index) => (
+                <TableViewRow
+                  key={member.user_id}
+                  label={index === 0 ? 'Members' : ''}
+                  value={member.email}
+                />
+              ))}
+              {pendingInvites.length > 0 && (
+                <>
+                  {pendingInvites.map((invite, index) => (
+                    <TableViewRow
+                      key={invite.id}
+                      label={index === 0 ? 'Pending Members' : ''}
+                      value={invite.invited_email}
+                    />
+                  ))}
+                </>
+              )}
+            </TableView>
+          )}
+          <SettingsSubsection
+            description="Invite someone to join your group (they must accept while signed in)."
+            error={inviteError}
+          >
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => {
+                const newEmail = e.target.value;
+                setInviteEmail(newEmail);
+                // Clear invite link if email changes
+                if (inviteId && inviteEmailForCreatedInvite && newEmail.trim() !== inviteEmailForCreatedInvite) {
+                  setInviteId(null);
+                  setInviteEmailForCreatedInvite(null);
+                }
+              }}
+              placeholder="friend@example.com"
+              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            />
+            <TableViewActionButton
+              onClick={handleCreateInvite}
+              disabled={inviteEmail.trim().length === 0 || (inviteId !== null && inviteEmail.trim() === inviteEmailForCreatedInvite)}
+              loading={inviteCreating}
+              loadingText="Creating…"
+            >
+              Create invite
+            </TableViewActionButton>
             {inviteLink && (
               <div className="mt-2">
                 <p className="text-sm mb-1">Invite link:</p>
@@ -160,8 +220,8 @@ export function SettingsPage() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </SettingsSubsection>
+        </SettingsSection>
       )}
       <div className={sectionSpacingClasses}>
         <Link

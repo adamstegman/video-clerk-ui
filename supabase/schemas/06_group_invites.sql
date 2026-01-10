@@ -54,6 +54,12 @@ BEGIN
     RAISE EXCEPTION 'Cannot invite yourself' USING errcode = '22023';
   END IF;
 
+  -- Delete any existing pending invitations for the same email in this group
+  DELETE FROM public.group_invites
+  WHERE group_id = v_group_id
+    AND lower(invited_email) = v_email
+    AND accepted_at IS NULL;
+
   INSERT INTO public.group_invites(group_id, invited_email, invited_by)
   VALUES (v_group_id, v_email, v_user_id)
   RETURNING id INTO v_invite_id;
