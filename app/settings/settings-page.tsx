@@ -14,10 +14,13 @@ export function SettingsPage() {
   const [inviteCreating, setInviteCreating] = useState(false);
   const [inviteId, setInviteId] = useState<string | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteEmailForCreatedInvite, setInviteEmailForCreatedInvite] = useState<string | null>(null);
 
   const [inviteAccepting, setInviteAccepting] = useState(false);
   const [inviteAccepted, setInviteAccepted] = useState(false);
   const [inviteAcceptError, setInviteAcceptError] = useState<string | null>(null);
+
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const inviteLink = useMemo(() => {
     const id = inviteId ?? inviteParam;
@@ -38,6 +41,7 @@ export function SettingsPage() {
       });
       if (error) throw error;
       setInviteId(String(data));
+      setInviteEmailForCreatedInvite(inviteEmail.trim());
     } catch (err) {
       setInviteError(err instanceof Error ? err.message : 'Failed to create invite');
     } finally {
@@ -65,6 +69,18 @@ export function SettingsPage() {
       setInviteAcceptError(err instanceof Error ? err.message : 'Failed to accept invite');
     } finally {
       setInviteAccepting(false);
+    }
+  };
+
+  const handleCopyInviteLink = async () => {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      console.error('Failed to copy to clipboard:', err);
     }
   };
 
@@ -105,13 +121,21 @@ export function SettingsPage() {
               <input
                 type="email"
                 value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
+                onChange={(e) => {
+                  const newEmail = e.target.value;
+                  setInviteEmail(newEmail);
+                  // Clear invite link if email changes
+                  if (inviteId && inviteEmailForCreatedInvite && newEmail.trim() !== inviteEmailForCreatedInvite) {
+                    setInviteId(null);
+                    setInviteEmailForCreatedInvite(null);
+                  }
+                }}
                 placeholder="friend@example.com"
                 className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
               />
               <ActionButton
                 onClick={handleCreateInvite}
-                disabled={inviteEmail.trim().length === 0}
+                disabled={inviteEmail.trim().length === 0 || (inviteId !== null && inviteEmail.trim() === inviteEmailForCreatedInvite)}
                 loading={inviteCreating}
                 loadingText="Creating…"
               >
@@ -120,12 +144,21 @@ export function SettingsPage() {
             </div>
             {inviteError && <p className="mt-2 text-sm text-red-600">{inviteError}</p>}
             {inviteLink && (
-              <p className="mt-2 text-sm">
-                Invite link:{' '}
-                <a className="underline" href={inviteLink}>
-                  {inviteLink}
-                </a>
-              </p>
+              <div className="mt-2">
+                <p className="text-sm mb-1">Invite link:</p>
+                <div className="flex items-center gap-2">
+                  <pre className="flex-1 overflow-x-auto overflow-y-hidden text-sm text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-md px-3 py-2 whitespace-nowrap">
+                    {inviteLink}
+                  </pre>
+                  <ActionButton
+                    onClick={handleCopyInviteLink}
+                    completed={copySuccess}
+                    completedText="Copied!"
+                  >
+                    Copy
+                  </ActionButton>
+                </div>
+              </div>
             )}
           </div>
         </div>
