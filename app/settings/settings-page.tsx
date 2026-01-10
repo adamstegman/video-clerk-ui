@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router'
 import { sectionSpacingClasses, secondaryTextClasses, cn } from "~/lib/utils";
 import { AppDataContext } from "../app-data/app-data-provider";
 import { createClient } from "../lib/supabase/client";
+import { ActionButton } from "../components/action-button";
 
 export function SettingsPage() {
   const { user } = useContext(AppDataContext);
@@ -85,14 +86,13 @@ export function SettingsPage() {
                 leave your previous group orphaned.
               </p>
               <div className="mt-3 flex items-center gap-2">
-                <button
-                  type="button"
+                <ActionButton
                   onClick={handleAcceptInvite}
-                  disabled={inviteAccepting}
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-50"
+                  loading={inviteAccepting}
+                  loadingText="Accepting…"
                 >
-                  {inviteAccepting ? 'Accepting…' : 'Accept invite'}
-                </button>
+                  Accept invite
+                </ActionButton>
                 {inviteAcceptError && <p className="text-sm text-red-600">{inviteAcceptError}</p>}
                 {inviteAccepted && <p className="text-sm text-green-600">Invite accepted.</p>}
               </div>
@@ -109,14 +109,14 @@ export function SettingsPage() {
                 placeholder="friend@example.com"
                 className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
               />
-              <button
-                type="button"
+              <ActionButton
                 onClick={handleCreateInvite}
-                disabled={inviteCreating || inviteEmail.trim().length === 0}
-                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-50"
+                disabled={inviteEmail.trim().length === 0}
+                loading={inviteCreating}
+                loadingText="Creating…"
               >
-                {inviteCreating ? 'Creating…' : 'Create invite'}
-              </button>
+                Create invite
+              </ActionButton>
             </div>
             {inviteError && <p className="mt-2 text-sm text-red-600">{inviteError}</p>}
             {inviteLink && (
