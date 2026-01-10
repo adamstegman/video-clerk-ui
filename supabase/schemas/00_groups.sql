@@ -23,7 +23,7 @@ CREATE POLICY "Group members can view their group"
     id IN (
       SELECT group_id
       FROM public.group_memberships
-      WHERE user_id = auth.uid()
+      WHERE user_id = (select auth.uid())
     )
   );
 

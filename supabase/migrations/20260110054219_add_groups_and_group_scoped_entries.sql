@@ -590,7 +590,7 @@ using ((( SELECT auth.uid() AS uid) = user_id));
   to public
 using ((id IN ( SELECT group_memberships.group_id
    FROM public.group_memberships
-  WHERE (group_memberships.user_id = auth.uid()))));
+  WHERE (group_memberships.user_id = ( SELECT auth.uid() AS uid)))));
 
 
 
