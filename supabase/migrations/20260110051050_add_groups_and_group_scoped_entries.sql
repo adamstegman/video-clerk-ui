@@ -65,6 +65,8 @@ alter table "public"."group_memberships" enable row level security;
       );
 
 
+alter table "public"."groups" enable row level security;
+
 alter table "public"."entries" drop column "user_id";
 
 alter table "public"."entries" add column "group_id" uuid not null;
@@ -578,6 +580,45 @@ with check (false);
   for select
   to public
 using ((( SELECT auth.uid() AS uid) = user_id));
+
+
+
+  create policy "Group members can view their group"
+  on "public"."groups"
+  as permissive
+  for select
+  to public
+using ((id IN ( SELECT group_memberships.group_id
+   FROM public.group_memberships
+  WHERE (group_memberships.user_id = auth.uid()))));
+
+
+
+  create policy "Groups cannot be deleted"
+  on "public"."groups"
+  as permissive
+  for delete
+  to public
+using (false);
+
+
+
+  create policy "Groups cannot be directly inserted"
+  on "public"."groups"
+  as permissive
+  for insert
+  to public
+with check (false);
+
+
+
+  create policy "Groups cannot be updated"
+  on "public"."groups"
+  as permissive
+  for update
+  to public
+using (false)
+with check (false);
 
 
 
