@@ -51,7 +51,6 @@ CREATE POLICY "Authenticated users can update tmdb_details"
   WITH CHECK ((select auth.role()) = 'authenticated');
 
 -- Trigger to automatically update updated_at timestamp
-DROP TRIGGER IF EXISTS update_tmdb_details_updated_at ON tmdb_details;
 CREATE TRIGGER update_tmdb_details_updated_at
   BEFORE UPDATE ON tmdb_details
   FOR EACH ROW

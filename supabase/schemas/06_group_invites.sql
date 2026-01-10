@@ -16,7 +16,6 @@ CREATE INDEX IF NOT EXISTS idx_group_invites_invited_email ON group_invites(invi
 ALTER TABLE group_invites ENABLE ROW LEVEL SECURITY;
 
 -- Keep invite rows private; use the RPCs below for creation/acceptance.
-DROP POLICY IF EXISTS "No direct access to group invites" ON group_invites;
 CREATE POLICY "No direct access to group invites"
   ON group_invites
   AS RESTRICTIVE
@@ -120,4 +119,3 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.accept_group_invite(uuid) TO authenticated;
-

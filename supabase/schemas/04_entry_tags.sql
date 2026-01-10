@@ -20,7 +20,6 @@ CREATE INDEX IF NOT EXISTS idx_entry_tags_tag_id ON entry_tags(tag_id);
 ALTER TABLE entry_tags ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Group members can only see entry_tags for their group entries
-DROP POLICY IF EXISTS "Users can view entry_tags for their own entries" ON entry_tags;
 CREATE POLICY "Group members can view entry_tags for group entries"
   ON entry_tags FOR SELECT
   USING (
@@ -32,7 +31,6 @@ CREATE POLICY "Group members can view entry_tags for group entries"
   );
 
 -- Policy: Group members can only insert entry_tags for their group entries
-DROP POLICY IF EXISTS "Users can insert entry_tags for their own entries" ON entry_tags;
 CREATE POLICY "Group members can insert entry_tags for group entries"
   ON entry_tags FOR INSERT
   WITH CHECK (
@@ -44,7 +42,6 @@ CREATE POLICY "Group members can insert entry_tags for group entries"
   );
 
 -- Policy: Group members can only delete entry_tags for their group entries
-DROP POLICY IF EXISTS "Users can delete entry_tags for their own entries" ON entry_tags;
 CREATE POLICY "Group members can delete entry_tags for group entries"
   ON entry_tags FOR DELETE
   USING (

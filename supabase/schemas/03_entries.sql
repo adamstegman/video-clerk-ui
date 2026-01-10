@@ -31,26 +31,22 @@ CREATE INDEX IF NOT EXISTS idx_entries_watched_at ON entries(watched_at);
 ALTER TABLE entries ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Group members can only see their group's entries
-DROP POLICY IF EXISTS "Users can view their own entries" ON entries;
 CREATE POLICY "Group members can view group entries"
   ON entries FOR SELECT
   USING (group_id = public.current_user_group_id());
 
 -- Policy: Group members can only insert into their group
-DROP POLICY IF EXISTS "Users can insert their own entries" ON entries;
 CREATE POLICY "Group members can insert group entries"
   ON entries FOR INSERT
   WITH CHECK (group_id = public.current_user_group_id());
 
 -- Policy: Group members can update their group's entries
-DROP POLICY IF EXISTS "Users can update their own entries" ON entries;
 CREATE POLICY "Group members can update group entries"
   ON entries FOR UPDATE
   USING (group_id = public.current_user_group_id())
   WITH CHECK (group_id = public.current_user_group_id());
 
 -- Policy: Group members can delete their group's entries
-DROP POLICY IF EXISTS "Users can delete their own entries" ON entries;
 CREATE POLICY "Group members can delete group entries"
   ON entries FOR DELETE
   USING (group_id = public.current_user_group_id());

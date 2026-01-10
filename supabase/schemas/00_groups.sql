@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS group_memberships (
 ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Group members can view their own group
-DROP POLICY IF EXISTS "Group members can view their group" ON groups;
 CREATE POLICY "Group members can view their group"
   ON groups FOR SELECT
   USING (
@@ -30,20 +29,17 @@ CREATE POLICY "Group members can view their group"
 
 -- Block direct INSERT (groups are created through SECURITY DEFINER trigger function)
 -- Note: SECURITY DEFINER functions bypass RLS, so the trigger will still work
-DROP POLICY IF EXISTS "Groups cannot be directly inserted" ON groups;
 CREATE POLICY "Groups cannot be directly inserted"
   ON groups FOR INSERT
   WITH CHECK (false);
 
 -- Block direct UPDATE (groups should not be modified)
-DROP POLICY IF EXISTS "Groups cannot be updated" ON groups;
 CREATE POLICY "Groups cannot be updated"
   ON groups FOR UPDATE
   USING (false)
   WITH CHECK (false);
 
 -- Block direct DELETE (groups are deleted through CASCADE when memberships are deleted)
-DROP POLICY IF EXISTS "Groups cannot be deleted" ON groups;
 CREATE POLICY "Groups cannot be deleted"
   ON groups FOR DELETE
   USING (false);
@@ -51,7 +47,6 @@ CREATE POLICY "Groups cannot be deleted"
 -- Enable Row Level Security on group_memberships
 ALTER TABLE group_memberships ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can view their own group membership" ON group_memberships;
 CREATE POLICY "Users can view their own group membership"
   ON group_memberships FOR SELECT
   USING ((select auth.uid()) = user_id);
@@ -86,7 +81,6 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS on_auth_user_created_create_group ON auth.users;
 CREATE TRIGGER on_auth_user_created_create_group
   AFTER INSERT ON auth.users
   FOR EACH ROW

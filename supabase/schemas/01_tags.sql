@@ -30,7 +30,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_tags_name_group_unique_custom ON tags(name
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Everyone can read TMDB tags; group members can read their group's custom tags
-DROP POLICY IF EXISTS "Everyone can view tags" ON tags;
 CREATE POLICY "Users can view TMDB tags and their group's custom tags"
   ON tags FOR SELECT
   USING (
@@ -39,7 +38,6 @@ CREATE POLICY "Users can view TMDB tags and their group's custom tags"
   );
 
 -- Policy: Authenticated users can create custom tags (is_custom must be true)
-DROP POLICY IF EXISTS "Authenticated users can create custom tags" ON tags;
 CREATE POLICY "Group members can create custom tags"
   ON tags FOR INSERT
   WITH CHECK (
@@ -49,14 +47,12 @@ CREATE POLICY "Group members can create custom tags"
   );
 
 -- Policy: Users can only update their own custom tags
-DROP POLICY IF EXISTS "Users can update their own custom tags" ON tags;
 CREATE POLICY "Group members can update group custom tags"
   ON tags FOR UPDATE
   USING (group_id = public.current_user_group_id() AND is_custom = true)
   WITH CHECK (group_id = public.current_user_group_id() AND is_custom = true);
 
 -- Policy: Users can only delete their own custom tags
-DROP POLICY IF EXISTS "Users can delete their own custom tags" ON tags;
 CREATE POLICY "Group members can delete group custom tags"
   ON tags FOR DELETE
   USING (group_id = public.current_user_group_id() AND is_custom = true);
@@ -74,7 +70,6 @@ END;
 $$;
 
 -- Trigger to automatically update updated_at timestamp
-DROP TRIGGER IF EXISTS update_tags_updated_at ON tags;
 CREATE TRIGGER update_tags_updated_at
   BEFORE UPDATE ON tags
   FOR EACH ROW
