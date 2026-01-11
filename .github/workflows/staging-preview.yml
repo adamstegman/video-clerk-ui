@@ -39,6 +39,11 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
           VITE_TMDB_API_READ_TOKEN: ${{ secrets.VITE_TMDB_API_READ_TOKEN }}
 
+      # GitHub Pages (branch deploy) runs Jekyll unless disabled.
+      # Our asset filenames can start with "_" (e.g. "_index-...js"), which Jekyll will exclude.
+      - name: Add .nojekyll (allow _* assets)
+        run: touch build/client/.nojekyll
+
       - name: Deploy to staging folder on gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
