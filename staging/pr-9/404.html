@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting…</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <script>
+      (function () {
+        var path = window.location.pathname || "/";
+        var stagingMatch = path.match(/^\/staging\/pr-\d+(?=\/)/);
+        var base = stagingMatch ? stagingMatch[0] + "/" : "/";
+
+        try {
+          window.sessionStorage.setItem(
+            "__video_clerk_redirect__",
+            window.location.pathname + window.location.search + window.location.hash
+          );
+        } catch (e) {
+          // ignore
+        }
+
+        window.location.replace(base);
+      })();
+    </script>
+  </body>
+</html>
+
