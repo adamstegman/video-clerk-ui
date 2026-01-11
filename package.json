@@ -6,7 +6,7 @@
     "build": "dotenvx run -- react-router build",
     "dev": "dotenvx run -- react-router dev",
     "start": "dotenvx run -- react-router-serve ./build/server/index.js",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 import type { Route } from "./+types/app.watch";
-import { WatchPage } from "../watch/watch-page";
+import { WatchPageContainer } from "../watch/watch-page-container";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -12,6 +12,6 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function Watch() {
-  return <WatchPage />;
+  return <WatchPageContainer />;
 }
 
