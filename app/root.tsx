@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { useEffect } from "react";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -85,6 +86,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  // Support GitHub Pages SPA routing for both production (/) and staging previews (/staging/pr-<n>/).
+  // The root `public/404.html` stores the original URL and redirects to the base path.
+  // On app load, we restore the intended URL if it belongs to this build's base.
+  // This enables refresh/deep-links inside staging previews.
+  useEffect(() => {
+    const key = "__video_clerk_redirect__";
+    try {
+      const stored = window.sessionStorage.getItem(key);
+      if (!stored) return;
+
+      const base = import.meta.env.BASE_URL || "/";
+      const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+      const normalizedStored = stored.startsWith("/") ? stored : `/${stored}`;
+
+      const isStagingPreviewPath = /^\/staging\/pr-\d+(?=\/|$)/.test(normalizedStored);
+      const matchesThisBuild =
+        normalizedBase === ""
+          ? !isStagingPreviewPath
+          : normalizedStored === normalizedBase || normalizedStored.startsWith(`${normalizedBase}/`);
+
+      if (!matchesThisBuild) return;
+
+      window.sessionStorage.removeItem(key);
+      window.history.replaceState(null, "", normalizedStored);
+    } catch {
+      // ignore
+    }
+  }, []);
   return <Outlet />;
 }
 

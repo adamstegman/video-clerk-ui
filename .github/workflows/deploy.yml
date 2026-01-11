@@ -7,16 +7,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -41,27 +39,19 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
           VITE_TMDB_API_READ_TOKEN: ${{ secrets.VITE_TMDB_API_READ_TOKEN }}
 
-      - name: Create 404.html for SPA routing
-        run: cp build/client/index.html build/client/404.html
+      - name: Create 404.html for SPA routing (supports staging previews)
+        run: cp public/404.html build/client/404.html
 
       - name: Create CNAME file
         run: echo "${{ vars.PAGES_DOMAIN }}" > build/client/CNAME
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      # Deploy GitHub Pages from the `gh-pages` branch, while preserving `staging/`
+      # so PR preview folders aren’t deleted by production deployments.
+      - name: Deploy to GitHub Pages (gh-pages branch)
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: './build/client'
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          branch: gh-pages
+          folder: build/client
+          clean: true
+          clean-exclude: staging/
+          force: false
