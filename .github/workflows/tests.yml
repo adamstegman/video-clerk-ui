@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Run unit tests (exclude integration)
-        run: npm test -- --run --exclude "**/*.integration.test.*"
+        run: npm test -- --exclude "**/*.integration.test.*"
 
   integration:
     name: Integration tests (Supabase)
@@ -68,7 +68,7 @@ jobs:
           > .env
 
       - name: Run integration tests
-        run: npx dotenvx run -- npm test -- --run integration.test
+        run: npx dotenvx run -- npm test -- integration.test
 
       - name: Stop Supabase
         if: always()

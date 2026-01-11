@@ -10,31 +10,38 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 
+function withBasePath(path: string) {
+  const base = import.meta.env.BASE_URL || "/";
+  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+  const normalizedPath = path.replace(/^\/+/, "");
+  return `${normalizedBase}${normalizedPath}`;
+}
+
 export const links: Route.LinksFunction = () => [
-  { rel: "manifest", href: "/manifest.webmanifest" },
-  { rel: "apple-touch-icon", href: "/tv-minimal-play.light.png" },
+  { rel: "manifest", href: withBasePath("manifest.webmanifest") },
+  { rel: "apple-touch-icon", href: withBasePath("tv-minimal-play.light.png") },
   {
     rel: "icon",
     type: "image/svg+xml",
-    href: "/tv-minimal-play.light.svg",
+    href: withBasePath("tv-minimal-play.light.svg"),
     media: "(prefers-color-scheme: light)",
   },
   {
     rel: "icon",
     type: "image/svg+xml",
-    href: "/tv-minimal-play.dark.svg",
+    href: withBasePath("tv-minimal-play.dark.svg"),
     media: "(prefers-color-scheme: dark)",
   },
   {
     rel: "icon",
     type: "image/png",
-    href: "/tv-minimal-play.light.png",
+    href: withBasePath("tv-minimal-play.light.png"),
     media: "(prefers-color-scheme: light)",
   },
   {
     rel: "icon",
     type: "image/png",
-    href: "/tv-minimal-play.dark.png",
+    href: withBasePath("tv-minimal-play.dark.png"),
     media: "(prefers-color-scheme: dark)",
   },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
