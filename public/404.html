@@ -10,7 +10,8 @@
     <script>
       (function () {
         var path = window.location.pathname || "/";
-        var stagingMatch = path.match(/^\/staging\/pr-\d+(?=\/)/);
+        // Match both `/staging/pr-9` and `/staging/pr-9/...`
+        var stagingMatch = path.match(/^\/staging\/pr-\d+(?=\/|$)/);
         var base = stagingMatch ? stagingMatch[0] + "/" : "/";
 
         try {
