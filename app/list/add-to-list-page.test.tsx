@@ -79,8 +79,7 @@ describe('AddToListPage', () => {
     // Default entries lookup: return no saved items.
     const in2 = vi.fn().mockResolvedValue({ data: [], error: null });
     const in1 = vi.fn().mockReturnValue({ in: in2 });
-    const eq = vi.fn().mockReturnValue({ in: in1 });
-    const select = vi.fn().mockReturnValue({ eq });
+    const select = vi.fn().mockReturnValue({ in: in1 });
     mockFrom.mockImplementation((table: string) => {
       if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
       return { select };
@@ -225,8 +224,7 @@ describe('AddToListPage', () => {
     // Override default entries lookup for this test: return a saved item.
     const in2 = vi.fn().mockResolvedValue({ data: [{ tmdb_id: 1, media_type: 'movie' }], error: null });
     const in1 = vi.fn().mockReturnValue({ in: in2 });
-    const eq = vi.fn().mockReturnValue({ in: in1 });
-    const select = vi.fn().mockReturnValue({ eq });
+    const select = vi.fn().mockReturnValue({ in: in1 });
     mockFrom.mockImplementation((table: string) => {
       if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
       return { select };
@@ -277,8 +275,7 @@ describe('AddToListPage', () => {
     // Make the entries lookup fail.
     const in2 = vi.fn().mockResolvedValue({ data: null, error: { message: 'db down' } });
     const in1 = vi.fn().mockReturnValue({ in: in2 });
-    const eq = vi.fn().mockReturnValue({ in: in1 });
-    const select = vi.fn().mockReturnValue({ eq });
+    const select = vi.fn().mockReturnValue({ in: in1 });
     mockFrom.mockImplementation((table: string) => {
       if (table !== 'entries') throw new Error(`Unexpected table: ${table}`);
       return { select };

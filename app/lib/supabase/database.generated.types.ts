@@ -37,29 +37,36 @@ export type Database = {
       entries: {
         Row: {
           added_at: string
+          group_id: string
           id: number
           media_type: string
           tmdb_id: number
-          user_id: string
           watched_at: string | null
         }
         Insert: {
           added_at?: string
+          group_id: string
           id?: number
           media_type: string
           tmdb_id: number
-          user_id: string
           watched_at?: string | null
         }
         Update: {
           added_at?: string
+          group_id?: string
           id?: number
           media_type?: string
           tmdb_id?: number
-          user_id?: string
           watched_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "entries_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_tmdb_details"
             columns: ["tmdb_id", "media_type"]
@@ -99,32 +106,119 @@ export type Database = {
           },
         ]
       }
+      group_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          group_id: string
+          id: string
+          invited_by: string
+          invited_email: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          group_id: string
+          id?: string
+          invited_by: string
+          invited_email: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          group_id?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_invites_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_memberships: {
+        Row: {
+          group_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_memberships_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          created_at: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       tags: {
         Row: {
+          group_id: string | null
           id: number
           is_custom: boolean
           name: string
           tmdb_id: number | null
           updated_at: string
-          user_id: string | null
         }
         Insert: {
+          group_id?: string | null
           id?: number
           is_custom: boolean
           name: string
           tmdb_id?: number | null
           updated_at?: string
-          user_id?: string | null
         }
         Update: {
+          group_id?: string | null
           id?: number
           is_custom?: boolean
           name?: string
           tmdb_id?: number | null
           updated_at?: string
-          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tags_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tmdb_details: {
         Row: {
@@ -188,6 +282,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_group_invite: { Args: { p_invite_id: string }; Returns: string }
+      create_group_invite: {
+        Args: { p_invited_email: string }
+        Returns: string
+      }
+      current_user_group_id: { Args: never; Returns: string }
+      get_group_members: {
+        Args: never
+        Returns: {
+          email: string
+          joined_at: string
+          user_id: string
+        }[]
+      }
+      get_pending_group_invites: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          invited_email: string
+        }[]
+      }
       save_tmdb_result_to_list: {
         Args: {
           p_adult: boolean

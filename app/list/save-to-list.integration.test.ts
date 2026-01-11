@@ -1,53 +1,22 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { createClient } from '@supabase/supabase-js';
-import crypto from 'node:crypto';
-import type { Database } from '~/lib/supabase/database.types';
-
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
-const SUPABASE_SECRET_KEY = process.env.VITE_SUPABASE_SECRET_KEY;
-
-const hasSupabaseEnv =
-  typeof SUPABASE_URL === 'string' &&
-  SUPABASE_URL.length > 0 &&
-  typeof SUPABASE_PUBLISHABLE_KEY === 'string' &&
-  SUPABASE_PUBLISHABLE_KEY.length > 0 &&
-  typeof SUPABASE_SECRET_KEY === 'string' &&
-  SUPABASE_SECRET_KEY.length > 0;
+import {
+  createAdminClient,
+  createTestUser,
+  cleanupTestUser,
+  getGroupId,
+  hasSupabaseEnv,
+} from '~/test-utils/supabase';
 
 const describeIf = hasSupabaseEnv ? describe : describe.skip;
 
 describeIf('Application-level: save TMDB result to list (Supabase)', () => {
   it('creates entries, tmdb_details, tags (from genres), and entry_tags', async () => {
-    const url = SUPABASE_URL!;
-    const publishableKey = SUPABASE_PUBLISHABLE_KEY!;
-    const secretKey = SUPABASE_SECRET_KEY!;
-
-    const admin = createClient<Database>(url, secretKey);
-
-    const email = `test-${crypto.randomUUID()}@example.com`;
-    const password = `pw-${crypto.randomUUID()}`;
-
-    const { data: created, error: createUserError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-    expect(createUserError).toBeNull();
-    expect(created.user).toBeTruthy();
-
-    const userId = created.user!.id;
+    const admin = createAdminClient();
+    const testUser = await createTestUser(admin);
+    const { client: authed, userId } = testUser;
 
     try {
-      const authed = createClient<Database>(url, publishableKey);
-
-      const { error: signInError } = await authed.auth.signInWithPassword({
-        email,
-        password,
-      });
-      expect(signInError).toBeNull();
-
       const { data: rpcData, error: rpcError } = await authed.rpc('save_tmdb_result_to_list', {
         p_tmdb_id: 550,
         p_media_type: 'movie',
@@ -71,11 +40,13 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
       expect(rpcError).toBeNull();
       expect(typeof rpcData).toBe('number');
 
-      // entries row for this user
+      const groupId = await getGroupId(authed);
+
+      // entries row for this group
       const { data: entries, error: entriesError } = await authed
         .from('entries')
-        .select('id, user_id, tmdb_id, media_type')
-        .eq('user_id', userId)
+        .select('id, group_id, tmdb_id, media_type')
+        .eq('group_id', groupId)
         .eq('tmdb_id', 550)
         .eq('media_type', 'movie');
 
@@ -100,7 +71,7 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
       // tags created/upserted from genres (shared tags have user_id null, is_custom false)
       const { data: tags, error: tagsError } = await authed
         .from('tags')
-        .select('id, name, tmdb_id, user_id, is_custom')
+        .select('id, name, tmdb_id, group_id, is_custom')
         .in('tmdb_id', [18, 53]);
 
       expect(tagsError).toBeNull();
@@ -114,7 +85,7 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
         expect(tag).toBeTruthy();
         expect(tag!.name).toBe(expected.name);
         expect(tag!.is_custom).toBe(false);
-        expect(tag!.user_id).toBeNull();
+        expect(tag!.group_id).toBeNull();
       }
 
       // entry_tags rows link the entry to those tag ids
@@ -133,7 +104,7 @@ describeIf('Application-level: save TMDB result to list (Supabase)', () => {
       }
     } finally {
       // Cleanup: remove the user and their dependent rows (entries cascade).
-      await admin.auth.admin.deleteUser(userId);
+      await cleanupTestUser(admin, userId);
     }
   }, 30_000);
 });

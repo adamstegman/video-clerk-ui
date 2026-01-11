@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import type { TMDBSearchResultItem } from './tmdb-search-container';
 import { primaryHeadingClasses, secondaryTextClasses, cn } from '../lib/utils';
+import { ActionButton } from '../components/action-button';
 
 export function TMDBSearchResult({
   result,
@@ -39,20 +40,18 @@ export function TMDBSearchResult({
           <p className="mt-2 text-sm text-red-500">{saveError}</p>
         )}
       </div>
-      <button
-        type="button"
+      <ActionButton
         onClick={onSave}
-        disabled={saving || saved || !onSave}
-        className={cn(
-          "flex-shrink-0 rounded px-3 py-2 text-sm font-medium transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-70",
-          saved
-            ? "bg-indigo-300 text-zinc-900"
-            : "bg-indigo-600 text-white hover:bg-indigo-700"
-        )}
-        aria-label={saved ? `Saved ${result.name}` : `Save ${result.name}`}
+        disabled={!onSave}
+        loading={saving}
+        completed={saved}
+        loadingText="Saving…"
+        completedText="Saved"
+        className="flex-shrink-0"
+        ariaLabel={saved ? `Saved ${result.name}` : `Save ${result.name}`}
       >
-        {saved ? 'Saved' : saving ? 'Saving…' : 'Save'}
-      </button>
+        Save
+      </ActionButton>
     </div>
   );
 }

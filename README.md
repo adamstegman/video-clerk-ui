@@ -60,6 +60,7 @@ Generate migrations and types from any schema updates, and push them to producti
 npx supabase stop
 npx supabase db diff -f <update_description>
 npx supabase start
+npx supabase db reset
 npx supabase gen types typescript --local > app/lib/supabase/database.generated.types.ts
 npx supabase db push
 ```
