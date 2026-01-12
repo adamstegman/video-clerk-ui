@@ -75,48 +75,50 @@ function WatchCard({
       role={isTop ? "group" : undefined}
       aria-label={isTop ? `Swipe card for ${entry.title}` : undefined}
     >
-      <div className="relative h-full w-full">
-        {imageUrl ? (
-          <>
-            <img
-              src={imageUrl}
-              alt={entry.title}
-              className="absolute inset-0 h-full w-full object-cover"
-              draggable={false}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />
-          </>
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-800 to-zinc-700" />
-        )}
+      <div className="flex h-full w-full flex-col">
+        {/* Media area: backdrop/poster only (keeps text readable below) */}
+        <div className="relative h-[62%] w-full flex-none">
+          {imageUrl ? (
+            <>
+              <img
+                src={imageUrl}
+                alt={entry.title}
+                className="absolute inset-0 h-full w-full object-cover"
+                draggable={false}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-black/0" />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-800 to-zinc-700" />
+          )}
 
-        {/* Like / Nope stamps */}
-        <div
-          className="absolute left-4 top-4 rounded-lg border-2 border-emerald-300 bg-emerald-500/10 px-3 py-1 text-lg font-extrabold tracking-widest text-emerald-200"
-          style={{ opacity: likeOpacity }}
-        >
-          LIKE
-        </div>
-        <div
-          className="absolute right-4 top-4 rounded-lg border-2 border-rose-300 bg-rose-500/10 px-3 py-1 text-lg font-extrabold tracking-widest text-rose-200"
-          style={{ opacity: nopeOpacity }}
-        >
-          NOPE
+          {/* Like / Nope stamps */}
+          <div
+            className="absolute left-4 top-4 rounded-lg border-2 border-emerald-300 bg-emerald-500/10 px-3 py-1 text-lg font-extrabold tracking-widest text-emerald-100"
+            style={{ opacity: likeOpacity }}
+          >
+            LIKE
+          </div>
+          <div
+            className="absolute right-4 top-4 rounded-lg border-2 border-rose-300 bg-rose-500/10 px-3 py-1 text-lg font-extrabold tracking-widest text-rose-100"
+            style={{ opacity: nopeOpacity }}
+          >
+            NOPE
+          </div>
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 p-5">
+        {/* Text area: solid background for readability */}
+        <div className="flex-1 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-5">
           <div className="flex items-baseline gap-2">
-            <h3 className={cn("text-xl font-bold text-white", primaryHeadingClasses)}>{entry.title}</h3>
+            <h3 className={cn("text-xl font-bold", primaryHeadingClasses)}>{entry.title}</h3>
             {entry.releaseYear && (
-              <span className="text-sm text-zinc-200/90">{entry.releaseYear}</span>
+              <span className={cn("text-sm", secondaryTextClasses)}>{entry.releaseYear}</span>
             )}
           </div>
           {entry.overview && (
-            <p className={cn("mt-2 line-clamp-4 text-sm text-zinc-200/90", secondaryTextClasses)}>
-              {entry.overview}
-            </p>
+            <p className={cn("mt-2 line-clamp-4 text-sm", secondaryTextClasses)}>{entry.overview}</p>
           )}
-          <p className="mt-3 text-xs text-zinc-200/80">
+          <p className={cn("mt-3 text-xs", secondaryTextClasses)}>
             {entry.mediaType === "movie" ? "Movie" : entry.mediaType === "tv" ? "TV" : entry.mediaType}
           </p>
         </div>
