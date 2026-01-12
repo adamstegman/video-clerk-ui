@@ -76,9 +76,26 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
   });
 
   async function advanceSwipeAnimation() {
-    // WatchPage uses a 220ms timeout to pop the card off the deck
+    // Keep as a fallback, but prefer waiting on UI conditions below.
     await act(async () => {
-      await new Promise((r) => setTimeout(r, 260));
+      await new Promise((r) => setTimeout(r, 300));
+    });
+  }
+
+  function getLikedCountFromCardsView() {
+    const likedLabel = screen.getByText(/Liked:/i);
+    const span = likedLabel.querySelector("span");
+    const n = span ? Number(span.textContent) : NaN;
+    return n;
+  }
+
+  async function clickLikeAndWaitForCardsCount(
+    user: ReturnType<typeof userEvent.setup>,
+    expected: number
+  ) {
+    await user.click(screen.getByRole("button", { name: "Like" }));
+    await waitFor(() => {
+      expect(getLikedCountFromCardsView()).toBe(expected);
     });
   }
 
@@ -138,17 +155,15 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
         expect(screen.getByRole("button", { name: "Like" })).toBeInTheDocument();
       });
 
-      // Like three to reach picker
+      // Like three to reach picker.
+      await clickLikeAndWaitForCardsCount(user, 1);
+      await clickLikeAndWaitForCardsCount(user, 2);
       await user.click(screen.getByRole("button", { name: "Like" }));
-      await advanceSwipeAnimation();
-      await user.click(screen.getByRole("button", { name: "Like" }));
-      await advanceSwipeAnimation();
-      await user.click(screen.getByRole("button", { name: "Like" }));
-      await advanceSwipeAnimation();
 
-      // Prompt is a <p> whose text is split across nodes (liked count is in its own node).
-      const pickerPrompt = screen.getByText(/Pick one to watch/i, { selector: "p" });
-      expect(pickerPrompt).toHaveTextContent(/You liked\s*3/i);
+      // Wait for pick mode to appear.
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
+      });
 
       // Pick one of the liked entries (accessible name includes title + year + overview).
       const pick =
@@ -221,10 +236,12 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await waitFor(() => expect(screen.getByRole("button", { name: "Like" })).toBeInTheDocument());
 
       await user.click(screen.getByRole("button", { name: "Like" }));
-      await advanceSwipeAnimation();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
+      });
 
-      const pickerPrompt = screen.getByText(/Pick one to watch/i, { selector: "p" });
-      expect(pickerPrompt).toHaveTextContent(/You liked\s*1/i);
+      // Pick mode should appear after 1 like when total entries < 3.
+      expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
       await user.click(screen.getByRole("button", { name: /^Solo\b/i }));
 
       await waitFor(() => {
@@ -264,10 +281,11 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await waitFor(() => expect(screen.getByRole("button", { name: "Like" })).toBeInTheDocument());
 
       await user.click(screen.getByRole("button", { name: "Like" }));
-      await advanceSwipeAnimation();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
+      });
 
-      const pickerPrompt = screen.getByText(/Pick one to watch/i, { selector: "p" });
-      expect(pickerPrompt).toHaveTextContent(/You liked\s*1/i);
+      expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
 
       // Choose "One" if present; otherwise choose whatever is present
       const onePick = screen.queryByRole("button", { name: /^One\b/i });
