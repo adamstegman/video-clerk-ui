@@ -146,19 +146,23 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await user.click(screen.getByRole("button", { name: "Like" }));
       await advanceSwipeAnimation();
 
-      expect(screen.getByText("You liked 3. Pick one to watch:")).toBeInTheDocument();
+      // "You liked 3. Pick one to watch:" is split across text nodes, so match by full textContent.
+      expect(
+        screen.getByText((_, node) => (node?.textContent ?? "").includes("You liked 3") && (node?.textContent ?? "").includes("Pick one to watch"))
+      ).toBeInTheDocument();
 
-      // Pick A (if it was among liked)
-      const aPick = screen.queryByRole("button", { name: /^A$/i });
-      if (aPick) {
-        await user.click(aPick);
-      } else {
-        // fall back: select first button in picker
-        const buttons = screen.getAllByRole("button");
-        const candidate = buttons.find((b) => b.textContent?.trim() === "B" || b.textContent?.trim() === "C");
-        expect(candidate).toBeTruthy();
-        await user.click(candidate!);
-      }
+      // Pick one of the liked entries (accessible name includes title + year + overview).
+      const pick =
+        screen.queryByRole("button", { name: /^A\b/i }) ??
+        screen.queryByRole("button", { name: /^B\b/i }) ??
+        screen.queryByRole("button", { name: /^C\b/i });
+      expect(pick).toBeTruthy();
+      await user.click(pick!);
+
+      // Ensure choose button enables after selection
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Choose winner" })).not.toBeDisabled();
+      });
 
       await user.click(screen.getByRole("button", { name: "Choose winner" }));
 
@@ -220,8 +224,14 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await user.click(screen.getByRole("button", { name: "Like" }));
       await advanceSwipeAnimation();
 
-      expect(screen.getByText("You liked 1. Pick one to watch:")).toBeInTheDocument();
-      await user.click(screen.getByRole("button", { name: /^Solo$/i }));
+      expect(
+        screen.getByText((_, node) => (node?.textContent ?? "").includes("You liked 1") && (node?.textContent ?? "").includes("Pick one to watch"))
+      ).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: /^Solo\b/i }));
+
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Choose winner" })).not.toBeDisabled();
+      });
       await user.click(screen.getByRole("button", { name: "Choose winner" }));
 
       await waitFor(() => expect(router.state.location.pathname).toBe(`/app/watch/${entryId}`));
@@ -258,12 +268,18 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await user.click(screen.getByRole("button", { name: "Like" }));
       await advanceSwipeAnimation();
 
-      expect(screen.getByText("You liked 1. Pick one to watch:")).toBeInTheDocument();
+      expect(
+        screen.getByText((_, node) => (node?.textContent ?? "").includes("You liked 1") && (node?.textContent ?? "").includes("Pick one to watch"))
+      ).toBeInTheDocument();
 
       // Choose "One" if present; otherwise choose whatever is present
-      const onePick = screen.queryByRole("button", { name: /^One$/i });
+      const onePick = screen.queryByRole("button", { name: /^One\b/i });
       if (onePick) await user.click(onePick);
-      else await user.click(screen.getAllByRole("button").find((b) => b.textContent?.trim() === "Two")!);
+      else await user.click(screen.getByRole("button", { name: /^Two\b/i }));
+
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Choose winner" })).not.toBeDisabled();
+      });
 
       await user.click(screen.getByRole("button", { name: "Choose winner" }));
 
