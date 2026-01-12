@@ -273,7 +273,7 @@ export function WatchPage({
         </p>
       </div>
 
-      <div className="flex-1 min-h-0 pb-4">
+      <div className="flex-1 min-h-0 pb-4 overflow-y-auto">
         {loading && !error && deck.length === 0 && (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-4">
@@ -352,96 +352,100 @@ export function WatchPage({
           </div>
         ) : (
           <>
-            <div className="relative mx-auto w-full max-w-md h-[520px] md:h-[560px]">
-              {top && (
-                <WatchCard
-                  entry={top}
-                  isTop={true}
-                  likeOpacity={likeOpacity}
-                  nopeOpacity={nopeOpacity}
-                  style={{
-                    zIndex: 50,
-                    transform: `translate3d(${drag.dx}px, ${drag.dy}px, 0) rotate(${drag.dx / 14}deg)`,
-                    transition: drag.isDragging ? "none" : "transform 220ms ease",
-                  }}
-                  onPointerDown={(e) => {
+            <div className="mx-auto flex h-full w-full max-w-md flex-col">
+              <div className="relative flex-1 min-h-[440px] md:min-h-[520px]">
+                {top && (
+                  <WatchCard
+                    entry={top}
+                    isTop={true}
+                    likeOpacity={likeOpacity}
+                    nopeOpacity={nopeOpacity}
+                    style={{
+                      zIndex: 50,
+                      transform: `translate3d(${drag.dx}px, ${drag.dy}px, 0) rotate(${drag.dx / 14}deg)`,
+                      transition: drag.isDragging ? "none" : "transform 220ms ease",
+                    }}
+                    onPointerDown={(e) => {
+                      if (!top) return;
+                      if (drag.animatingOut) return;
+                      if (liked.length >= 3) return;
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                      const { x, y } = getPointerXY(e);
+                      setDrag((d) => ({
+                        ...d,
+                        activeId: top.id,
+                        startX: x,
+                        startY: y,
+                        dx: 0,
+                        dy: 0,
+                        isDragging: true,
+                        animatingOut: false,
+                        decision: null,
+                      }));
+                    }}
+                  />
+                )}
+
+                {next.map((e, idx) => (
+                  <WatchCard
+                    key={e.id}
+                    entry={e}
+                    isTop={false}
+                    likeOpacity={0}
+                    nopeOpacity={0}
+                    style={{
+                      zIndex: 40 - idx,
+                      transform: `translate3d(0, ${10 + idx * 10}px, 0) scale(${1 - (idx + 1) * 0.03})`,
+                      transition: "transform 220ms ease",
+                    }}
+                  />
+                ))}
+
+                {/* Pointer move/up are easiest on a wrapper so we keep tracking even if image steals events */}
+                <div
+                  className="absolute inset-0"
+                  onPointerMove={(e) => {
                     if (!top) return;
-                    if (drag.animatingOut) return;
-                    if (liked.length >= 3) return;
-                    e.currentTarget.setPointerCapture(e.pointerId);
+                    if (!drag.isDragging) return;
+                    if (drag.activeId !== top.id) return;
                     const { x, y } = getPointerXY(e);
-                    setDrag((d) => ({
-                      ...d,
-                      activeId: top.id,
-                      startX: x,
-                      startY: y,
-                      dx: 0,
-                      dy: 0,
-                      isDragging: true,
-                      animatingOut: false,
-                      decision: null,
-                    }));
+                    setDrag((d) => ({ ...d, dx: x - d.startX, dy: y - d.startY }));
+                  }}
+                  onPointerUp={() => {
+                    if (!top) return;
+                    if (!drag.isDragging) return;
+                    if (drag.activeId !== top.id) return;
+                    if (drag.dx > swipeThreshold) return animateOut("like");
+                    if (drag.dx < -swipeThreshold) return animateOut("nope");
+                    setDrag((d) => ({ ...d, isDragging: false, dx: 0, dy: 0 }));
+                  }}
+                  onPointerCancel={() => {
+                    setDrag((d) => ({ ...d, isDragging: false, dx: 0, dy: 0 }));
                   }}
                 />
-              )}
-
-              {next.map((e, idx) => (
-                <WatchCard
-                  key={e.id}
-                  entry={e}
-                  isTop={false}
-                  likeOpacity={0}
-                  nopeOpacity={0}
-                  style={{
-                    zIndex: 40 - idx,
-                    transform: `translate3d(0, ${10 + idx * 10}px, 0) scale(${1 - (idx + 1) * 0.03})`,
-                    transition: "transform 220ms ease",
-                  }}
-                />
-              ))}
-
-              {/* Pointer move/up are easiest on a wrapper so we keep tracking even if image steals events */}
-              <div
-                className="absolute inset-0"
-                onPointerMove={(e) => {
-                  if (!top) return;
-                  if (!drag.isDragging) return;
-                  if (drag.activeId !== top.id) return;
-                  const { x, y } = getPointerXY(e);
-                  setDrag((d) => ({ ...d, dx: x - d.startX, dy: y - d.startY }));
-                }}
-                onPointerUp={() => {
-                  if (!top) return;
-                  if (!drag.isDragging) return;
-                  if (drag.activeId !== top.id) return;
-                  if (drag.dx > swipeThreshold) return animateOut("like");
-                  if (drag.dx < -swipeThreshold) return animateOut("nope");
-                  setDrag((d) => ({ ...d, isDragging: false, dx: 0, dy: 0 }));
-                }}
-                onPointerCancel={() => {
-                  setDrag((d) => ({ ...d, isDragging: false, dx: 0, dy: 0 }));
-                }}
-              />
-            </div>
-
-            <div className="mx-auto mt-4 flex w-full max-w-md items-center justify-between gap-3">
-              <button
-                className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-60"
-                onClick={() => animateOut("nope")}
-                disabled={!top || drag.animatingOut || liked.length >= 3}
-              >
-                Nope
-              </button>
-              <div className={cn("text-sm", secondaryTextClasses)}>
-                Liked: <span className="font-semibold">{liked.length}</span>/3
               </div>
-              <button
-                className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
-                onClick={() => animateOut("like")}
-                disabled={!top || drag.animatingOut || liked.length >= 3}
-              >
-                Like
-              </button>
+
+              <div className="mt-4 flex-shrink-0 pb-2">
+                <div className="flex w-full items-center justify-between gap-3">
+                  <button
+                    className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-60"
+                    onClick={() => animateOut("nope")}
+                    disabled={!top || drag.animatingOut || liked.length >= 3}
+                  >
+                    Nope
+                  </button>
+                  <div className={cn("text-sm", secondaryTextClasses)}>
+                    Liked: <span className="font-semibold">{liked.length}</span>/3
+                  </div>
+                  <button
+                    className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+                    onClick={() => animateOut("like")}
+                    disabled={!top || drag.animatingOut || liked.length >= 3}
+                  >
+                    Like
+                  </button>
+                </div>
+              </div>
             </div>
           </>
         )}
