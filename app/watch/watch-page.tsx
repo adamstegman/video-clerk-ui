@@ -273,8 +273,7 @@ export function WatchPage({
         </p>
       </div>
 
-      {/* Extra bottom padding keeps controls clear of the bottom nav on small screens */}
-      <div className="flex-1 min-h-0 overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+5.5rem)]">
+      <div className="flex-1 min-h-0 pb-4 overflow-y-auto">
         {loading && !error && deck.length === 0 && (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-4">
