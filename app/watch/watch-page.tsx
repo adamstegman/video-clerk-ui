@@ -197,7 +197,9 @@ export function WatchPage({
   const next = deck.slice(1, 4); // just for stacked look
 
   const swipeThreshold = 110;
-  const isInPickMode = liked.length >= 3 && !markSuccess;
+  const likeGoal =
+    initialEntries.length === 0 ? 0 : initialEntries.length < 3 ? 1 : 3;
+  const isInPickMode = likeGoal > 0 && liked.length >= likeGoal && !markSuccess;
 
   const likeOpacity = top ? clamp(Math.max(0, drag.dx) / swipeThreshold, 0, 1) : 0;
   const nopeOpacity = top ? clamp(Math.max(0, -drag.dx) / swipeThreshold, 0, 1) : 0;
@@ -219,7 +221,7 @@ export function WatchPage({
     swipeTimeoutRef.current = window.setTimeout(() => {
       setDeck((prev) => prev.slice(1));
       if (decision === "like") {
-        setLiked((prev) => (prev.length >= 3 ? prev : [...prev, top]));
+        setLiked((prev) => (prev.length >= likeGoal ? prev : [...prev, top]));
       }
       setDrag({
         activeId: null,
@@ -300,10 +302,10 @@ export function WatchPage({
         {isInPickMode ? (
           <div className="space-y-3">
             <p className={cn("text-sm", secondaryTextClasses)}>
-              You liked 3. Pick one to watch:
+              You liked {liked.length}. Pick one to watch:
             </p>
             <div className="grid gap-3 md:grid-cols-3">
-              {liked.slice(0, 3).map((e) => (
+              {(likeGoal === 1 ? liked : liked.slice(0, 3)).map((e) => (
                 <button
                   key={e.id}
                   className={cn(
@@ -368,7 +370,7 @@ export function WatchPage({
                     onPointerDown={(e) => {
                       if (!top) return;
                       if (drag.animatingOut) return;
-                      if (liked.length >= 3) return;
+                    if (liked.length >= likeGoal) return;
                       e.currentTarget.setPointerCapture(e.pointerId);
                       const { x, y } = getPointerXY(e);
                       setDrag((d) => ({
@@ -430,17 +432,17 @@ export function WatchPage({
                   <button
                     className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-60"
                     onClick={() => animateOut("nope")}
-                    disabled={!top || drag.animatingOut || liked.length >= 3}
+                    disabled={!top || drag.animatingOut || liked.length >= likeGoal}
                   >
                     Nope
                   </button>
                   <div className={cn("text-sm", secondaryTextClasses)}>
-                    Liked: <span className="font-semibold">{liked.length}</span>/3
+                    Liked: <span className="font-semibold">{liked.length}</span>/{likeGoal || 3}
                   </div>
                   <button
                     className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
                     onClick={() => animateOut("like")}
-                    disabled={!top || drag.animatingOut || liked.length >= 3}
+                    disabled={!top || drag.animatingOut || liked.length >= likeGoal}
                   >
                     Like
                   </button>
