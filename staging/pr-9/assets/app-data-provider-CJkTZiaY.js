@@ -1,1 +1,0 @@
-import{j as a}from"./jsx-runtime-u17CrQMm.js";import{a as o}from"./chunk-JMJ3UQ3L-DtOYCHaw.js";const e=o.createContext({user:null});function n({data:t,children:r}){return a.jsx(e,{value:t,children:r})}export{n as A,e as a};
