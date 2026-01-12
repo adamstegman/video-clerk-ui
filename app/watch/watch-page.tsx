@@ -77,7 +77,7 @@ function WatchCard({
     >
       <div className="flex h-full w-full flex-col">
         {/* Media area: backdrop/poster only (keeps text readable below) */}
-        <div className="relative h-[62%] w-full flex-none">
+        <div className="relative w-full flex-none shrink-0 basis-[62%]">
           {imageUrl ? (
             <>
               <img
@@ -108,7 +108,7 @@ function WatchCard({
         </div>
 
         {/* Text area: solid background for readability */}
-        <div className="flex-1 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-5">
+        <div className="flex-1 min-h-0 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-5 pt-5 pb-6">
           <div className="flex items-baseline gap-2">
             <h3 className={cn("text-xl font-bold", primaryHeadingClasses)}>{entry.title}</h3>
             {entry.releaseYear && (
