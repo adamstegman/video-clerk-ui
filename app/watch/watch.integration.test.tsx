@@ -146,10 +146,9 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await user.click(screen.getByRole("button", { name: "Like" }));
       await advanceSwipeAnimation();
 
-      // "You liked 3. Pick one to watch:" is split across text nodes, so match by full textContent.
-      expect(
-        screen.getByText((_, node) => (node?.textContent ?? "").includes("You liked 3") && (node?.textContent ?? "").includes("Pick one to watch"))
-      ).toBeInTheDocument();
+      // Prompt is a <p> whose text is split across nodes (liked count is in its own node).
+      const pickerPrompt = screen.getByText(/Pick one to watch/i, { selector: "p" });
+      expect(pickerPrompt).toHaveTextContent(/You liked\s*3/i);
 
       // Pick one of the liked entries (accessible name includes title + year + overview).
       const pick =
@@ -224,9 +223,8 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await user.click(screen.getByRole("button", { name: "Like" }));
       await advanceSwipeAnimation();
 
-      expect(
-        screen.getByText((_, node) => (node?.textContent ?? "").includes("You liked 1") && (node?.textContent ?? "").includes("Pick one to watch"))
-      ).toBeInTheDocument();
+      const pickerPrompt = screen.getByText(/Pick one to watch/i, { selector: "p" });
+      expect(pickerPrompt).toHaveTextContent(/You liked\s*1/i);
       await user.click(screen.getByRole("button", { name: /^Solo\b/i }));
 
       await waitFor(() => {
@@ -268,9 +266,8 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await user.click(screen.getByRole("button", { name: "Like" }));
       await advanceSwipeAnimation();
 
-      expect(
-        screen.getByText((_, node) => (node?.textContent ?? "").includes("You liked 1") && (node?.textContent ?? "").includes("Pick one to watch"))
-      ).toBeInTheDocument();
+      const pickerPrompt = screen.getByText(/Pick one to watch/i, { selector: "p" });
+      expect(pickerPrompt).toHaveTextContent(/You liked\s*1/i);
 
       // Choose "One" if present; otherwise choose whatever is present
       const onePick = screen.queryByRole("button", { name: /^One\b/i });
