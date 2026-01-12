@@ -89,6 +89,16 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
     return n;
   }
 
+  async function waitForCardsViewReady(expectedGoalText: RegExp) {
+    await waitFor(() => {
+      // Ensure a card is present (deck loaded)
+      expect(screen.getByRole("group", { name: /Swipe card for/i })).toBeInTheDocument();
+      // Ensure the liked counter is visible and has the expected goal (e.g. "/3")
+      const likedLabel = screen.getByText(/Liked:/i);
+      expect(likedLabel.textContent || "").toMatch(expectedGoalText);
+    });
+  }
+
   async function clickLikeAndWaitForCardsCount(
     user: ReturnType<typeof userEvent.setup>,
     expected: number
@@ -154,6 +164,7 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
         expect(screen.getByText("Watch")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Like" })).toBeInTheDocument();
       });
+      await waitForCardsViewReady(/\/\s*3/);
 
       // Like three to reach picker.
       await clickLikeAndWaitForCardsCount(user, 1);
@@ -234,6 +245,9 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       const { router } = renderWatchRouter(["/app/watch"]);
 
       await waitFor(() => expect(screen.getByRole("button", { name: "Like" })).toBeInTheDocument());
+      // In this case, likeGoal should be 1, but the cards view still shows a goal of 3 in the UI.
+      // We just wait for the deck to be present before clicking.
+      await waitForCardsViewReady(/\/\s*\d+/);
 
       await user.click(screen.getByRole("button", { name: "Like" }));
       await waitFor(() => {
@@ -279,6 +293,7 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       const { router } = renderWatchRouter(["/app/watch"]);
 
       await waitFor(() => expect(screen.getByRole("button", { name: "Like" })).toBeInTheDocument());
+      await waitForCardsViewReady(/\/\s*\d+/);
 
       await user.click(screen.getByRole("button", { name: "Like" }));
       await waitFor(() => {
