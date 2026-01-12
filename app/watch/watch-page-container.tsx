@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 import { createClient } from "../lib/supabase/client";
 import { WatchPage, type WatchCardEntry } from "./watch-page";
 
@@ -45,9 +46,23 @@ function normalizeDetails(
 }
 
 export function WatchPageContainer() {
+  const params = useParams();
+  const navigate = useNavigate();
+
+  const winnerEntryId = useMemo(() => {
+    const raw = params.entryId;
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? Math.trunc(n) : null;
+  }, [params.entryId]);
+
   const [entries, setEntries] = useState<WatchCardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [winnerEntry, setWinnerEntry] = useState<WatchCardEntry | null>(null);
+  const [winnerLoading, setWinnerLoading] = useState(false);
+  const [winnerError, setWinnerError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -111,17 +126,129 @@ export function WatchPageContainer() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
     const run = async () => {
       await load();
     };
     run();
     return () => {
-      cancelled = true;
-      void cancelled;
+      // no-op
     };
   }, [load]);
 
-  return <WatchPage initialEntries={entries} loading={loading} error={error} onReload={load} />;
+  const loadWinner = useCallback(
+    async (id: number) => {
+      setWinnerLoading(true);
+      setWinnerError(null);
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("entries")
+          .select(
+            `
+              id,
+              added_at,
+              media_type,
+              watched_at,
+              tmdb_details (
+                poster_path,
+                backdrop_path,
+                overview,
+                name,
+                release_date
+              )
+            `
+          )
+          .eq("id", id)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!data) {
+          setWinnerEntry(null);
+          setWinnerError("Could not find that entry.");
+          return;
+        }
+
+        const row = data as unknown as EntriesQueryRow;
+        const details = normalizeDetails(row.tmdb_details);
+        const title = details?.name || "Untitled";
+        setWinnerEntry({
+          id: row.id,
+          title,
+          overview: details?.overview ?? null,
+          releaseYear: getReleaseYear(details?.release_date ?? null),
+          posterPath: details?.poster_path ?? null,
+          backdropPath: details?.backdrop_path ?? null,
+          mediaType: row.media_type,
+        });
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : typeof err === "object" &&
+                err !== null &&
+                "message" in err &&
+                typeof (err as { message?: unknown }).message === "string"
+              ? String((err as { message: string }).message)
+              : "Failed to load selected entry";
+        setWinnerEntry(null);
+        setWinnerError(message);
+      } finally {
+        setWinnerLoading(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!winnerEntryId) {
+      setWinnerEntry(null);
+      setWinnerError(null);
+      setWinnerLoading(false);
+      return;
+    }
+
+    // If we already have it (e.g. from immediate navigation), don't refetch.
+    if (winnerEntry?.id === winnerEntryId) return;
+    void loadWinner(winnerEntryId);
+  }, [loadWinner, winnerEntry?.id, winnerEntryId]);
+
+  const goToWinner = useCallback(
+    (entry: WatchCardEntry) => {
+      setWinnerEntry(entry);
+      navigate(`/app/watch/${entry.id}`);
+    },
+    [navigate]
+  );
+
+  const markWatched = useCallback(
+    async (entryId: number) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("entries")
+        .update({ watched_at: new Date().toISOString() })
+        .eq("id", entryId);
+      if (error) throw error;
+
+      navigate("/app/watch");
+      await load();
+    },
+    [load, navigate]
+  );
+
+  return (
+    <WatchPage
+      initialEntries={entries}
+      loading={loading}
+      error={error}
+      onReload={load}
+      winnerEntryId={winnerEntryId}
+      winnerEntry={winnerEntry}
+      winnerLoading={winnerLoading}
+      winnerError={winnerError}
+      onGoToWinner={goToWinner}
+      onMarkWatched={markWatched}
+      onBackToCards={() => navigate("/app/watch")}
+    />
+  );
 }
 

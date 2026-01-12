@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { createClient } from "../lib/supabase/client";
 import { TMDBConfigurationContext } from "../tmdb-api/tmdb-configuration";
 import { cn, pageTitleClasses, primaryHeadingClasses, secondaryTextClasses } from "../lib/utils";
 
@@ -132,18 +131,31 @@ export function WatchPage({
   loading,
   error,
   onReload,
+  winnerEntryId,
+  winnerEntry,
+  winnerLoading,
+  winnerError,
+  onGoToWinner,
+  onMarkWatched,
+  onBackToCards,
 }: {
   initialEntries: WatchCardEntry[];
   loading: boolean;
   error: string | null;
   onReload: () => Promise<void>;
+  winnerEntryId: number | null;
+  winnerEntry: WatchCardEntry | null;
+  winnerLoading: boolean;
+  winnerError: string | null;
+  onGoToWinner: (entry: WatchCardEntry) => void;
+  onMarkWatched: (entryId: number) => Promise<void>;
+  onBackToCards: () => void;
 }) {
   const [deck, setDeck] = useState<WatchCardEntry[]>([]);
   const [liked, setLiked] = useState<WatchCardEntry[]>([]);
   const [chosenId, setChosenId] = useState<number | null>(null);
   const [markingWatched, setMarkingWatched] = useState(false);
   const [markError, setMarkError] = useState<string | null>(null);
-  const [markSuccess, setMarkSuccess] = useState(false);
 
   const [drag, setDrag] = useState<{
     activeId: number | null;
@@ -174,7 +186,6 @@ export function WatchPage({
     setChosenId(null);
     setMarkingWatched(false);
     setMarkError(null);
-    setMarkSuccess(false);
     setDrag({
       activeId: null,
       startX: 0,
@@ -199,7 +210,7 @@ export function WatchPage({
   const swipeThreshold = 110;
   const likeGoal =
     initialEntries.length === 0 ? 0 : initialEntries.length < 3 ? 1 : 3;
-  const isInPickMode = likeGoal > 0 && liked.length >= likeGoal && !markSuccess;
+  const isInPickMode = likeGoal > 0 && liked.length >= likeGoal;
 
   const likeOpacity = top ? clamp(Math.max(0, drag.dx) / swipeThreshold, 0, 1) : 0;
   const nopeOpacity = top ? clamp(Math.max(0, -drag.dx) / swipeThreshold, 0, 1) : 0;
@@ -239,17 +250,8 @@ export function WatchPage({
   async function markWatched(entryId: number) {
     setMarkingWatched(true);
     setMarkError(null);
-    setMarkSuccess(false);
     try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("entries")
-        .update({ watched_at: new Date().toISOString() })
-        .eq("id", entryId);
-      if (error) throw error;
-
-      setMarkSuccess(true);
-      await onReload();
+      await onMarkWatched(entryId);
     } catch (err) {
       const message =
         err instanceof Error
@@ -266,189 +268,243 @@ export function WatchPage({
     }
   }
 
+  const isWinnerMode = winnerEntryId !== null;
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex-shrink-0 pb-2 pt-4">
         <h2 className={pageTitleClasses}>Watch</h2>
         <p className={cn("mt-1 text-sm", secondaryTextClasses)}>
-          Swipe right to like, left to skip. Pick 1 once you have 3 likes.
+          Swipe right to like, left to skip. Pick 1 once you have enough likes.
         </p>
       </div>
 
       <div className="flex-1 min-h-0 pb-4 overflow-y-auto">
-        {loading && !error && deck.length === 0 && (
-          <div className="flex items-center justify-center py-12">
-            <div className="flex flex-col items-center gap-4">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-indigo-500"></div>
-              <p className={secondaryTextClasses}>Loading...</p>
-            </div>
-          </div>
-        )}
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        {!loading && !error && deck.length === 0 && liked.length < 3 && (
-          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-            <p className={cn("text-sm", secondaryTextClasses)}>No unwatched items to swipe on.</p>
-            <button
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
-              onClick={() => void onReload()}
-            >
-              Reload
-            </button>
-          </div>
-        )}
-
-        {isInPickMode ? (
-          <div className="space-y-3">
-            <p className={cn("text-sm", secondaryTextClasses)}>
-              You liked {liked.length}. Pick one to watch:
-            </p>
-            <div className="grid gap-3 md:grid-cols-3">
-              {(likeGoal === 1 ? liked : liked.slice(0, 3)).map((e) => (
-                <button
-                  key={e.id}
-                  className={cn(
-                    "rounded-xl border p-4 text-left transition",
-                    "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 hover:border-indigo-400",
-                    chosenId === e.id ? "ring-2 ring-indigo-500" : ""
-                  )}
-                  onClick={() => setChosenId(e.id)}
-                >
-                  <div className={cn("font-semibold", primaryHeadingClasses)}>{e.title}</div>
-                  {e.releaseYear && <div className={cn("text-sm", secondaryTextClasses)}>{e.releaseYear}</div>}
-                  {e.overview && (
-                    <div className={cn("mt-2 text-sm line-clamp-3", secondaryTextClasses)}>{e.overview}</div>
-                  )}
-                </button>
-              ))}
-            </div>
-            {markError && <p className="text-sm text-red-500">{markError}</p>}
-            {markSuccess && (
-              <p className={cn("text-sm text-indigo-600 dark:text-indigo-400")}>Marked watched.</p>
+        {isWinnerMode ? (
+          <div className="mx-auto w-full max-w-md">
+            {winnerLoading && (
+              <p className={cn("text-sm", secondaryTextClasses)}>Loading selection…</p>
             )}
-            <div className="flex gap-2">
-              <button
-                className="rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
-                onClick={() => {
-                  setLiked([]);
-                  setChosenId(null);
-                  setMarkError(null);
-                  setMarkSuccess(false);
-                }}
-                disabled={markingWatched}
-              >
-                Start over
-              </button>
-              <button
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
-                onClick={() => {
-                  if (!chosenId) return;
-                  void markWatched(chosenId);
-                }}
-                disabled={!chosenId || markingWatched}
-              >
-                {markingWatched ? "Marking..." : "Watch this"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="mx-auto flex h-full w-full max-w-md flex-col">
-              <div className="relative flex-1 min-h-[440px] md:min-h-[520px]">
-                {top && (
+            {winnerError && <p className="text-sm text-red-500">{winnerError}</p>}
+            {!winnerLoading && !winnerError && winnerEntry && (
+              <>
+                <p className={cn("mb-3 text-sm", secondaryTextClasses)}>
+                  Selected to watch:
+                </p>
+                <div className="relative h-[520px] md:h-[560px]">
                   <WatchCard
-                    entry={top}
-                    isTop={true}
-                    likeOpacity={likeOpacity}
-                    nopeOpacity={nopeOpacity}
-                    style={{
-                      zIndex: 50,
-                      transform: `translate3d(${drag.dx}px, ${drag.dy}px, 0) rotate(${drag.dx / 14}deg)`,
-                      transition: drag.isDragging ? "none" : "transform 220ms ease",
-                    }}
-                    onPointerDown={(e) => {
-                      if (!top) return;
-                      if (drag.animatingOut) return;
-                    if (liked.length >= likeGoal) return;
-                      e.currentTarget.setPointerCapture(e.pointerId);
-                      const { x, y } = getPointerXY(e);
-                      setDrag((d) => ({
-                        ...d,
-                        activeId: top.id,
-                        startX: x,
-                        startY: y,
-                        dx: 0,
-                        dy: 0,
-                        isDragging: true,
-                        animatingOut: false,
-                        decision: null,
-                      }));
-                    }}
-                  />
-                )}
-
-                {next.map((e, idx) => (
-                  <WatchCard
-                    key={e.id}
-                    entry={e}
+                    entry={winnerEntry}
                     isTop={false}
                     likeOpacity={0}
                     nopeOpacity={0}
                     style={{
-                      zIndex: 40 - idx,
-                      transform: `translate3d(0, ${10 + idx * 10}px, 0) scale(${1 - (idx + 1) * 0.03})`,
-                      transition: "transform 220ms ease",
+                      zIndex: 1,
+                      transform: "none",
+                      transition: "none",
                     }}
                   />
-                ))}
+                </div>
 
-                {/* Pointer move/up are easiest on a wrapper so we keep tracking even if image steals events */}
-                <div
-                  className="absolute inset-0"
-                  onPointerMove={(e) => {
-                    if (!top) return;
-                    if (!drag.isDragging) return;
-                    if (drag.activeId !== top.id) return;
-                    const { x, y } = getPointerXY(e);
-                    setDrag((d) => ({ ...d, dx: x - d.startX, dy: y - d.startY }));
-                  }}
-                  onPointerUp={() => {
-                    if (!top) return;
-                    if (!drag.isDragging) return;
-                    if (drag.activeId !== top.id) return;
-                    if (drag.dx > swipeThreshold) return animateOut("like");
-                    if (drag.dx < -swipeThreshold) return animateOut("nope");
-                    setDrag((d) => ({ ...d, isDragging: false, dx: 0, dy: 0 }));
-                  }}
-                  onPointerCancel={() => {
-                    setDrag((d) => ({ ...d, isDragging: false, dx: 0, dy: 0 }));
-                  }}
-                />
-              </div>
+                {markError && <p className="mt-3 text-sm text-red-500">{markError}</p>}
 
-              <div className="mt-4 flex-shrink-0 pb-2">
-                <div className="flex w-full items-center justify-between gap-3">
+                <div className="mt-4 flex gap-2">
                   <button
-                    className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-60"
-                    onClick={() => animateOut("nope")}
-                    disabled={!top || drag.animatingOut || liked.length >= likeGoal}
+                    className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                    onClick={onBackToCards}
+                    disabled={markingWatched}
                   >
-                    Nope
+                    Back to cards
                   </button>
-                  <div className={cn("text-sm", secondaryTextClasses)}>
-                    Liked: <span className="font-semibold">{liked.length}</span>/{likeGoal || 3}
-                  </div>
                   <button
                     className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
-                    onClick={() => animateOut("like")}
-                    disabled={!top || drag.animatingOut || liked.length >= likeGoal}
+                    onClick={() => void markWatched(winnerEntry.id)}
+                    disabled={markingWatched}
                   >
-                    Like
+                    {markingWatched ? "Marking..." : "Mark as Watched"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <>
+            {loading && !error && deck.length === 0 && (
+              <div className="flex items-center justify-center py-12">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-indigo-500"></div>
+                  <p className={secondaryTextClasses}>Loading...</p>
+                </div>
+              </div>
+            )}
+
+            {error && <p className="text-sm text-red-500">{error}</p>}
+
+            {!loading && !error && deck.length === 0 && liked.length < likeGoal && (
+              <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                <p className={cn("text-sm", secondaryTextClasses)}>No unwatched items to swipe on.</p>
+                <button
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                  onClick={() => void onReload()}
+                >
+                  Reload
+                </button>
+              </div>
+            )}
+
+            {isInPickMode ? (
+              <div className="space-y-3">
+                <p className={cn("text-sm", secondaryTextClasses)}>
+                  You liked {liked.length}. Pick one to watch:
+                </p>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {(likeGoal === 1 ? liked : liked.slice(0, 3)).map((e) => (
+                    <button
+                      key={e.id}
+                      className={cn(
+                        "rounded-xl border p-4 text-left transition",
+                        "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 hover:border-indigo-400",
+                        chosenId === e.id ? "ring-2 ring-indigo-500" : ""
+                      )}
+                      onClick={() => setChosenId(e.id)}
+                    >
+                      <div className={cn("font-semibold", primaryHeadingClasses)}>{e.title}</div>
+                      {e.releaseYear && (
+                        <div className={cn("text-sm", secondaryTextClasses)}>{e.releaseYear}</div>
+                      )}
+                      {e.overview && (
+                        <div className={cn("mt-2 text-sm line-clamp-3", secondaryTextClasses)}>
+                          {e.overview}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className="rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                    onClick={() => {
+                      setLiked([]);
+                      setChosenId(null);
+                      setMarkError(null);
+                    }}
+                    disabled={markingWatched}
+                  >
+                    Start over
+                  </button>
+                  <button
+                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+                    onClick={() => {
+                      if (!chosenId) return;
+                      const entry = liked.find((e) => e.id === chosenId);
+                      if (!entry) return;
+                      setMarkError(null);
+                      onGoToWinner(entry);
+                    }}
+                    disabled={!chosenId}
+                  >
+                    Choose winner
                   </button>
                 </div>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="mx-auto flex h-full w-full max-w-md flex-col">
+                  <div className="relative flex-1 min-h-[440px] md:min-h-[520px]">
+                    {top && (
+                      <WatchCard
+                        entry={top}
+                        isTop={true}
+                        likeOpacity={likeOpacity}
+                        nopeOpacity={nopeOpacity}
+                        style={{
+                          zIndex: 50,
+                          transform: `translate3d(${drag.dx}px, ${drag.dy}px, 0) rotate(${drag.dx / 14}deg)`,
+                          transition: drag.isDragging ? "none" : "transform 220ms ease",
+                        }}
+                        onPointerDown={(e) => {
+                          if (!top) return;
+                          if (drag.animatingOut) return;
+                          if (liked.length >= likeGoal) return;
+                          e.currentTarget.setPointerCapture(e.pointerId);
+                          const { x, y } = getPointerXY(e);
+                          setDrag((d) => ({
+                            ...d,
+                            activeId: top.id,
+                            startX: x,
+                            startY: y,
+                            dx: 0,
+                            dy: 0,
+                            isDragging: true,
+                            animatingOut: false,
+                            decision: null,
+                          }));
+                        }}
+                      />
+                    )}
+
+                    {next.map((e, idx) => (
+                      <WatchCard
+                        key={e.id}
+                        entry={e}
+                        isTop={false}
+                        likeOpacity={0}
+                        nopeOpacity={0}
+                        style={{
+                          zIndex: 40 - idx,
+                          transform: `translate3d(0, ${10 + idx * 10}px, 0) scale(${1 - (idx + 1) * 0.03})`,
+                          transition: "transform 220ms ease",
+                        }}
+                      />
+                    ))}
+
+                    {/* Pointer move/up are easiest on a wrapper so we keep tracking even if image steals events */}
+                    <div
+                      className="absolute inset-0"
+                      onPointerMove={(e) => {
+                        if (!top) return;
+                        if (!drag.isDragging) return;
+                        if (drag.activeId !== top.id) return;
+                        const { x, y } = getPointerXY(e);
+                        setDrag((d) => ({ ...d, dx: x - d.startX, dy: y - d.startY }));
+                      }}
+                      onPointerUp={() => {
+                        if (!top) return;
+                        if (!drag.isDragging) return;
+                        if (drag.activeId !== top.id) return;
+                        if (drag.dx > swipeThreshold) return animateOut("like");
+                        if (drag.dx < -swipeThreshold) return animateOut("nope");
+                        setDrag((d) => ({ ...d, isDragging: false, dx: 0, dy: 0 }));
+                      }}
+                      onPointerCancel={() => {
+                        setDrag((d) => ({ ...d, isDragging: false, dx: 0, dy: 0 }));
+                      }}
+                    />
+                  </div>
+
+                  <div className="mt-4 flex-shrink-0 pb-2">
+                    <div className="flex w-full items-center justify-between gap-3">
+                      <button
+                        className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-60"
+                        onClick={() => animateOut("nope")}
+                        disabled={!top || drag.animatingOut || liked.length >= likeGoal}
+                      >
+                        Nope
+                      </button>
+                      <div className={cn("text-sm", secondaryTextClasses)}>
+                        Liked: <span className="font-semibold">{liked.length}</span>/{likeGoal || 3}
+                      </div>
+                      <button
+                        className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+                        onClick={() => animateOut("like")}
+                        disabled={!top || drag.animatingOut || liked.length >= likeGoal}
+                      >
+                        Like
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
