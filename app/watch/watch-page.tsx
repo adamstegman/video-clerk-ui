@@ -179,13 +179,12 @@ export function WatchPage({
 
   const swipeTimeoutRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    // Reset local flow when data reloads.
+  const resetLocalFlow = () => {
     setDeck(initialEntries);
     setLiked([]);
     setChosenId(null);
-    setMarkingWatched(false);
     setMarkError(null);
+    setMarkingWatched(false);
     setDrag({
       activeId: null,
       startX: 0,
@@ -196,6 +195,11 @@ export function WatchPage({
       animatingOut: false,
       decision: null,
     });
+  };
+
+  useEffect(() => {
+    // Reset local flow when data reloads.
+    resetLocalFlow();
   }, [initialEntries]);
 
   useEffect(() => {
@@ -383,9 +387,7 @@ export function WatchPage({
                   <button
                     className="rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
                     onClick={() => {
-                      setLiked([]);
-                      setChosenId(null);
-                      setMarkError(null);
+                      resetLocalFlow();
                     }}
                     disabled={markingWatched}
                   >
