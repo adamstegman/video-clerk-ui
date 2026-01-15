@@ -179,7 +179,15 @@ export function WatchPage({
 
   const swipeTimeoutRef = useRef<number | null>(null);
 
+  const clearSwipeTimeout = () => {
+    if (swipeTimeoutRef.current) {
+      window.clearTimeout(swipeTimeoutRef.current);
+      swipeTimeoutRef.current = null;
+    }
+  };
+
   const resetLocalFlow = () => {
+    clearSwipeTimeout();
     setDeck(initialEntries);
     setLiked([]);
     setChosenId(null);
@@ -204,7 +212,7 @@ export function WatchPage({
 
   useEffect(() => {
     return () => {
-      if (swipeTimeoutRef.current) window.clearTimeout(swipeTimeoutRef.current);
+      clearSwipeTimeout();
     };
   }, []);
 
@@ -214,13 +222,15 @@ export function WatchPage({
   const swipeThreshold = 110;
   const likeGoal =
     initialEntries.length === 0 ? 0 : initialEntries.length < 3 ? 1 : 3;
-  const isInPickMode = likeGoal > 0 && liked.length >= likeGoal;
+  // Avoid switching into pick mode mid-swipe animation (keeps UI stable and tests deterministic).
+  const isInPickMode = likeGoal > 0 && liked.length >= likeGoal && !drag.animatingOut;
 
   const likeOpacity = top ? clamp(Math.max(0, drag.dx) / swipeThreshold, 0, 1) : 0;
   const nopeOpacity = top ? clamp(Math.max(0, -drag.dx) / swipeThreshold, 0, 1) : 0;
 
   function animateOut(decision: SwipeDecision) {
     if (!top) return;
+    const swipedEntry = top;
     const outX = decision === "like" ? 420 : -420;
     setDrag((d) => ({
       ...d,
@@ -229,15 +239,19 @@ export function WatchPage({
       dx: outX,
       dy: d.dy,
       isDragging: false,
-      activeId: top.id,
+      activeId: swipedEntry.id,
     }));
 
-    if (swipeTimeoutRef.current) window.clearTimeout(swipeTimeoutRef.current);
+    // Update liked immediately so the counter reflects user intent without depending on timers.
+    if (decision === "like") {
+      setLiked((prev) => (prev.length >= likeGoal ? prev : [...prev, swipedEntry]));
+    }
+
+    clearSwipeTimeout();
     swipeTimeoutRef.current = window.setTimeout(() => {
-      setDeck((prev) => prev.slice(1));
-      if (decision === "like") {
-        setLiked((prev) => (prev.length >= likeGoal ? prev : [...prev, top]));
-      }
+      // Remove the swiped card after the animation. Prefer id-match to be resilient to any
+      // concurrent deck changes (e.g. reload) while a swipe is in-flight.
+      setDeck((prev) => (prev[0]?.id === swipedEntry.id ? prev.slice(1) : prev.filter((e) => e.id !== swipedEntry.id)));
       setDrag({
         activeId: null,
         startX: 0,
@@ -248,6 +262,7 @@ export function WatchPage({
         animatingOut: false,
         decision: null,
       });
+      swipeTimeoutRef.current = null;
     }, 220);
   }
 
