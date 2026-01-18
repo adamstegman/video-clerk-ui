@@ -24,6 +24,18 @@ type EntriesQueryRow = {
         release_date: string | null;
       }>
     | null;
+  entry_tags:
+    | Array<{
+        tags:
+          | {
+              name: string | null;
+            }
+          | Array<{
+              name: string | null;
+            }>
+          | null;
+      }>
+    | null;
 };
 
 function getReleaseYear(releaseDate: string | null | undefined) {
@@ -43,6 +55,20 @@ function normalizeDetails(
 } | null {
   if (!details) return null;
   return Array.isArray(details) ? details[0] ?? null : details;
+}
+
+function normalizeTagName(
+  tags:
+    | {
+        name: string | null;
+      }
+    | Array<{
+        name: string | null;
+      }>
+    | null
+) {
+  if (!tags) return null;
+  return Array.isArray(tags) ? tags[0]?.name ?? null : tags.name ?? null;
 }
 
 export function WatchPageContainer() {
@@ -84,6 +110,11 @@ export function WatchPageContainer() {
               overview,
               name,
               release_date
+            ),
+            entry_tags (
+              tags (
+                name
+              )
             )
           `
         )
@@ -96,6 +127,10 @@ export function WatchPageContainer() {
       const normalized = ((data ?? []) as unknown as EntriesQueryRow[]).map((row) => {
         const details = normalizeDetails(row.tmdb_details);
         const title = details?.name || "Untitled";
+        const tags =
+          row.entry_tags
+            ?.map((et) => normalizeTagName(et.tags))
+            .filter((n): n is string => !!n) ?? [];
         return {
           id: row.id,
           title,
@@ -104,6 +139,7 @@ export function WatchPageContainer() {
           posterPath: details?.poster_path ?? null,
           backdropPath: details?.backdrop_path ?? null,
           mediaType: row.media_type,
+          tags,
         } satisfies WatchCardEntry;
       });
 
@@ -155,6 +191,11 @@ export function WatchPageContainer() {
                 overview,
                 name,
                 release_date
+              ),
+              entry_tags (
+                tags (
+                  name
+                )
               )
             `
           )
@@ -171,6 +212,10 @@ export function WatchPageContainer() {
         const row = data as unknown as EntriesQueryRow;
         const details = normalizeDetails(row.tmdb_details);
         const title = details?.name || "Untitled";
+        const tags =
+          row.entry_tags
+            ?.map((et) => normalizeTagName(et.tags))
+            .filter((n): n is string => !!n) ?? [];
         setWinnerEntry({
           id: row.id,
           title,
@@ -179,6 +224,7 @@ export function WatchPageContainer() {
           posterPath: details?.poster_path ?? null,
           backdropPath: details?.backdrop_path ?? null,
           mediaType: row.media_type,
+          tags,
         });
       } catch (err) {
         const message =
