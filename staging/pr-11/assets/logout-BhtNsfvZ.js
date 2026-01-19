@@ -1,1 +1,0 @@
-import{w as a,v as s,a as e}from"./chunk-JMJ3UQ3L-DNRSL2Hf.js";import{c as n}from"./client-B_XR4Hye.js";const p=a(function(){const t=s();return e.useEffect(()=>{n().auth.signOut().then(({error:o})=>{o&&console.error(o),t("/")})},[t]),null});export{p as default};

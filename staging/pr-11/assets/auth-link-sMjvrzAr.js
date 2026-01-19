@@ -1,1 +1,0 @@
-import{j as r}from"./jsx-runtime-u17CrQMm.js";import{x as n}from"./chunk-JMJ3UQ3L-DNRSL2Hf.js";import{c as e}from"./utils-ByhHhwOs.js";function d({to:t,children:i,className:o}){return r.jsx(n,{to:t,className:e("text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300","underline underline-offset-4 transition-colors",o),children:i})}export{d as A};
