@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { createClient } from "../lib/supabase/client";
 import { WatchPage, type WatchCardEntry } from "./watch-page";
 
@@ -24,6 +24,18 @@ type EntriesQueryRow = {
         release_date: string | null;
       }>
     | null;
+  entry_tags:
+    | Array<{
+        tags:
+          | {
+              name: string | null;
+            }
+          | Array<{
+              name: string | null;
+            }>
+          | null;
+      }>
+    | null;
 };
 
 function getReleaseYear(releaseDate: string | null | undefined) {
@@ -45,9 +57,24 @@ function normalizeDetails(
   return Array.isArray(details) ? details[0] ?? null : details;
 }
 
+function normalizeTagName(
+  tags:
+    | {
+        name: string | null;
+      }
+    | Array<{
+        name: string | null;
+      }>
+    | null
+) {
+  if (!tags) return null;
+  return Array.isArray(tags) ? tags[0]?.name ?? null : tags.name ?? null;
+}
+
 export function WatchPageContainer() {
   const params = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const winnerEntryId = useMemo(() => {
     const raw = params.entryId;
@@ -60,7 +87,9 @@ export function WatchPageContainer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [winnerEntry, setWinnerEntry] = useState<WatchCardEntry | null>(null);
+  const locationWinnerEntry =
+    (location.state as { winnerEntry?: WatchCardEntry } | null)?.winnerEntry ?? null;
+  const [winnerEntry, setWinnerEntry] = useState<WatchCardEntry | null>(locationWinnerEntry);
   const [winnerLoading, setWinnerLoading] = useState(false);
   const [winnerError, setWinnerError] = useState<string | null>(null);
 
@@ -84,6 +113,11 @@ export function WatchPageContainer() {
               overview,
               name,
               release_date
+            ),
+            entry_tags (
+              tags (
+                name
+              )
             )
           `
         )
@@ -96,6 +130,10 @@ export function WatchPageContainer() {
       const normalized = ((data ?? []) as unknown as EntriesQueryRow[]).map((row) => {
         const details = normalizeDetails(row.tmdb_details);
         const title = details?.name || "Untitled";
+        const tags =
+          row.entry_tags
+            ?.map((et) => normalizeTagName(et.tags))
+            .filter((n): n is string => !!n) ?? [];
         return {
           id: row.id,
           title,
@@ -104,6 +142,7 @@ export function WatchPageContainer() {
           posterPath: details?.poster_path ?? null,
           backdropPath: details?.backdrop_path ?? null,
           mediaType: row.media_type,
+          tags,
         } satisfies WatchCardEntry;
       });
 
@@ -155,6 +194,11 @@ export function WatchPageContainer() {
                 overview,
                 name,
                 release_date
+              ),
+              entry_tags (
+                tags (
+                  name
+                )
               )
             `
           )
@@ -171,6 +215,10 @@ export function WatchPageContainer() {
         const row = data as unknown as EntriesQueryRow;
         const details = normalizeDetails(row.tmdb_details);
         const title = details?.name || "Untitled";
+        const tags =
+          row.entry_tags
+            ?.map((et) => normalizeTagName(et.tags))
+            .filter((n): n is string => !!n) ?? [];
         setWinnerEntry({
           id: row.id,
           title,
@@ -179,6 +227,7 @@ export function WatchPageContainer() {
           posterPath: details?.poster_path ?? null,
           backdropPath: details?.backdrop_path ?? null,
           mediaType: row.media_type,
+          tags,
         });
       } catch (err) {
         const message =
@@ -207,15 +256,24 @@ export function WatchPageContainer() {
       return;
     }
 
+    if (locationWinnerEntry?.id === winnerEntryId) {
+      if (winnerEntry?.id !== winnerEntryId) {
+        setWinnerEntry(locationWinnerEntry);
+      }
+      setWinnerError(null);
+      setWinnerLoading(false);
+      return;
+    }
+
     // If we already have it (e.g. from immediate navigation), don't refetch.
     if (winnerEntry?.id === winnerEntryId) return;
     void loadWinner(winnerEntryId);
-  }, [loadWinner, winnerEntry?.id, winnerEntryId]);
+  }, [loadWinner, locationWinnerEntry, winnerEntry?.id, winnerEntryId]);
 
   const goToWinner = useCallback(
     (entry: WatchCardEntry) => {
       setWinnerEntry(entry);
-      navigate(`/app/watch/${entry.id}`);
+      navigate(`/app/watch/${entry.id}`, { state: { winnerEntry: entry } });
     },
     [navigate]
   );

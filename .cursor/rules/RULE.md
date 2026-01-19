@@ -47,7 +47,7 @@ A mobile-first web application that solves the "what do we watch?" conundrum. It
   * Create unit tests for classes and public methods
   * Create interaction tests for pages and features
 * Write tests in a spec style, e.g. `it('does something')` with a verb and then the expected effect. Do not start tests with "should."
-* After making changes, run `npm test` to validate your changes.
+* After making changes, run `npm test` locally or rely on GitHub Actions in the cloud.
 
 -----
 

@@ -28,6 +28,7 @@ function makeEntry(id: number, title: string): WatchCardEntry {
     posterPath: null,
     backdropPath: null,
     mediaType: "movie",
+    tags: [],
   };
 }
 
@@ -174,6 +175,22 @@ describe("WatchPage", () => {
 
     expect(screen.getByText(/Loading selection/i)).toBeInTheDocument();
     expect(screen.getByText("Boom")).toBeInTheDocument();
+  });
+
+  it("renders tags next to the media label on the card", () => {
+    const entry: WatchCardEntry = {
+      id: 1,
+      title: "Tagged",
+      overview: "Overview Tagged",
+      releaseYear: "2025",
+      posterPath: null,
+      backdropPath: null,
+      mediaType: "tv",
+      tags: ["Action", "Drama"],
+    };
+    renderWatchPage({ initialEntries: [entry] });
+
+    expect(screen.getByText("TV | Action, Drama")).toBeInTheDocument();
   });
 });
 

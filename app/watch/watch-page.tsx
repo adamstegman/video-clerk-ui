@@ -10,6 +10,7 @@ export interface WatchCardEntry {
   posterPath: string | null;
   backdropPath: string | null;
   mediaType: string;
+  tags: string[];
 }
 
 type SwipeDecision = "like" | "nope";
@@ -61,6 +62,9 @@ function WatchCard({
           ? `${config.images.secure_base_url}${posterSize}${entry.posterPath}`
           : null
       : null;
+  const mediaLabel =
+    entry.mediaType === "movie" ? "Movie" : entry.mediaType === "tv" ? "TV" : entry.mediaType;
+  const tagLabel = entry.tags.length > 0 ? ` | ${entry.tags.join(", ")}` : "";
 
   return (
     <div
@@ -118,7 +122,8 @@ function WatchCard({
             <p className={cn("mt-2 line-clamp-4 text-sm", secondaryTextClasses)}>{entry.overview}</p>
           )}
           <p className={cn("mt-3 text-xs", secondaryTextClasses)}>
-            {entry.mediaType === "movie" ? "Movie" : entry.mediaType === "tv" ? "TV" : entry.mediaType}
+            {mediaLabel}
+            {tagLabel}
           </p>
         </div>
       </div>
