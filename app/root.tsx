@@ -6,35 +6,43 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { useEffect } from "react";
 
 import type { Route } from "./+types/root";
 import "./app.css";
 
+function withBasePath(path: string) {
+  const base = import.meta.env.BASE_URL || "/";
+  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+  const normalizedPath = path.replace(/^\/+/, "");
+  return `${normalizedBase}${normalizedPath}`;
+}
+
 export const links: Route.LinksFunction = () => [
-  { rel: "manifest", href: "/manifest.webmanifest" },
-  { rel: "apple-touch-icon", href: "/tv-minimal-play.light.png" },
+  { rel: "manifest", href: withBasePath("manifest.webmanifest") },
+  { rel: "apple-touch-icon", href: withBasePath("tv-minimal-play.light.png") },
   {
     rel: "icon",
     type: "image/svg+xml",
-    href: "/tv-minimal-play.light.svg",
+    href: withBasePath("tv-minimal-play.light.svg"),
     media: "(prefers-color-scheme: light)",
   },
   {
     rel: "icon",
     type: "image/svg+xml",
-    href: "/tv-minimal-play.dark.svg",
+    href: withBasePath("tv-minimal-play.dark.svg"),
     media: "(prefers-color-scheme: dark)",
   },
   {
     rel: "icon",
     type: "image/png",
-    href: "/tv-minimal-play.light.png",
+    href: withBasePath("tv-minimal-play.light.png"),
     media: "(prefers-color-scheme: light)",
   },
   {
     rel: "icon",
     type: "image/png",
-    href: "/tv-minimal-play.dark.png",
+    href: withBasePath("tv-minimal-play.dark.png"),
     media: "(prefers-color-scheme: dark)",
   },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -78,6 +86,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  // Support GitHub Pages SPA routing for both production (/) and staging previews (/staging/pr-<n>/).
+  // The root `public/404.html` stores the original URL and redirects to the base path.
+  // On app load, we restore the intended URL if it belongs to this build's base.
+  // This enables refresh/deep-links inside staging previews.
+  useEffect(() => {
+    const key = "__video_clerk_redirect__";
+    try {
+      const stored = window.sessionStorage.getItem(key);
+      if (!stored) return;
+
+      const base = import.meta.env.BASE_URL || "/";
+      const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+      const normalizedStored = stored.startsWith("/") ? stored : `/${stored}`;
+
+      const isStagingPreviewPath = /^\/staging\/pr-\d+(?=\/|$)/.test(normalizedStored);
+      const matchesThisBuild =
+        normalizedBase === ""
+          ? !isStagingPreviewPath
+          : normalizedStored === normalizedBase || normalizedStored.startsWith(`${normalizedBase}/`);
+
+      if (!matchesThisBuild) return;
+
+      window.sessionStorage.removeItem(key);
+      window.history.replaceState(null, "", normalizedStored);
+    } catch {
+      // ignore
+    }
+  }, []);
   return <Outlet />;
 }
 
