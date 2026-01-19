@@ -260,8 +260,11 @@ export function WatchPage({
     initialEntries.length === 0 ? 0 : initialEntries.length < 3 ? 1 : 3;
   const isInPickMode = likeGoal > 0 && liked.length >= likeGoal;
 
-  const likeOpacity = top ? clamp(Math.max(0, drag.dx) / swipeThreshold, 0, 1) : 0;
-  const nopeOpacity = top ? clamp(Math.max(0, -drag.dx) / swipeThreshold, 0, 1) : 0;
+  const isTopActive = !!top && drag.activeId === top.id;
+  const activeDx = isTopActive ? drag.dx : 0;
+  const activeDy = isTopActive ? drag.dy : 0;
+  const likeOpacity = top ? clamp(Math.max(0, activeDx) / swipeThreshold, 0, 1) : 0;
+  const nopeOpacity = top ? clamp(Math.max(0, -activeDx) / swipeThreshold, 0, 1) : 0;
 
   const startDrag = (
     point: { x: number; y: number },
@@ -522,8 +525,9 @@ export function WatchPage({
                         nopeOpacity={nopeOpacity}
                         style={{
                           zIndex: 50,
-                          transform: `translate3d(${drag.dx}px, ${drag.dy}px, 0) rotate(${drag.dx / 14}deg)`,
-                          transition: drag.isDragging ? "none" : "transform 220ms ease",
+                          transform: `translate3d(${activeDx}px, ${activeDy}px, 0) rotate(${activeDx / 14}deg)`,
+                          transition:
+                            isTopActive && !drag.isDragging ? "transform 220ms ease" : "none",
                         }}
                         onPointerDown={(e) => {
                           const started = startDrag(getPointerXY(e), e.pointerId, "pointer");
