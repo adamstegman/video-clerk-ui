@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { createClient } from "../lib/supabase/client";
 import { WatchPage, type WatchCardEntry } from "./watch-page";
 
@@ -74,6 +74,7 @@ function normalizeTagName(
 export function WatchPageContainer() {
   const params = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const winnerEntryId = useMemo(() => {
     const raw = params.entryId;
@@ -86,7 +87,9 @@ export function WatchPageContainer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [winnerEntry, setWinnerEntry] = useState<WatchCardEntry | null>(null);
+  const locationWinnerEntry =
+    (location.state as { winnerEntry?: WatchCardEntry } | null)?.winnerEntry ?? null;
+  const [winnerEntry, setWinnerEntry] = useState<WatchCardEntry | null>(locationWinnerEntry);
   const [winnerLoading, setWinnerLoading] = useState(false);
   const [winnerError, setWinnerError] = useState<string | null>(null);
 
@@ -253,15 +256,24 @@ export function WatchPageContainer() {
       return;
     }
 
+    if (locationWinnerEntry?.id === winnerEntryId) {
+      if (winnerEntry?.id !== winnerEntryId) {
+        setWinnerEntry(locationWinnerEntry);
+      }
+      setWinnerError(null);
+      setWinnerLoading(false);
+      return;
+    }
+
     // If we already have it (e.g. from immediate navigation), don't refetch.
     if (winnerEntry?.id === winnerEntryId) return;
     void loadWinner(winnerEntryId);
-  }, [loadWinner, winnerEntry?.id, winnerEntryId]);
+  }, [loadWinner, locationWinnerEntry, winnerEntry?.id, winnerEntryId]);
 
   const goToWinner = useCallback(
     (entry: WatchCardEntry) => {
       setWinnerEntry(entry);
-      navigate(`/app/watch/${entry.id}`);
+      navigate(`/app/watch/${entry.id}`, { state: { winnerEntry: entry } });
     },
     [navigate]
   );
