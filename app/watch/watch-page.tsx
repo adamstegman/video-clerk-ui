@@ -1,4 +1,5 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { motion, type MotionProps } from "framer-motion";
 import { TMDBConfigurationContext } from "../tmdb-api/tmdb-configuration";
 import { cn, pageTitleClasses, primaryHeadingClasses, secondaryTextClasses } from "../lib/utils";
 
@@ -40,6 +41,7 @@ function WatchCard({
   entry,
   isTop,
   style,
+  motionProps,
   onPointerDown,
   onPointerMove,
   onPointerUp,
@@ -54,6 +56,7 @@ function WatchCard({
   entry: WatchCardEntry;
   isTop: boolean;
   style: React.CSSProperties;
+  motionProps?: Pick<MotionProps, "animate" | "transition">;
   onPointerDown?: (e: React.PointerEvent) => void;
   onPointerMove?: (e: React.PointerEvent) => void;
   onPointerUp?: (e: React.PointerEvent) => void;
@@ -94,13 +97,16 @@ function WatchCard({
   const tagLabel = entry.tags.length > 0 ? ` | ${entry.tags.join(", ")}` : "";
 
   return (
-    <div
+    <motion.div
       className={cn(
         "absolute inset-0 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-lg",
         "overflow-hidden select-none touch-none",
         isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"
       )}
       style={style}
+      animate={motionProps?.animate}
+      transition={motionProps?.transition}
+      initial={false}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -161,7 +167,7 @@ function WatchCard({
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -265,6 +271,9 @@ export function WatchPage({
   const activeDy = isTopActive ? drag.dy : 0;
   const likeOpacity = top ? clamp(Math.max(0, activeDx) / swipeThreshold, 0, 1) : 0;
   const nopeOpacity = top ? clamp(Math.max(0, -activeDx) / swipeThreshold, 0, 1) : 0;
+  const stackTransition: MotionProps["transition"] = { duration: 0.22, ease: "easeOut" };
+  const topTransition: MotionProps["transition"] =
+    isTopActive && !drag.isDragging ? stackTransition : { duration: 0 };
 
   const startDrag = (
     point: { x: number; y: number },
@@ -406,10 +415,10 @@ export function WatchPage({
                     isTop={false}
                     likeOpacity={0}
                     nopeOpacity={0}
-                    style={{
-                      zIndex: 1,
-                      transform: "none",
-                      transition: "none",
+                    style={{ zIndex: 1 }}
+                    motionProps={{
+                      animate: { x: 0, y: 0, rotate: 0, scale: 1 },
+                      transition: { duration: 0 },
                     }}
                   />
                 </div>
@@ -523,11 +532,15 @@ export function WatchPage({
                         isTop={true}
                         likeOpacity={likeOpacity}
                         nopeOpacity={nopeOpacity}
-                        style={{
-                          zIndex: 50,
-                          transform: `translate3d(${activeDx}px, ${activeDy}px, 0) rotate(${activeDx / 14}deg)`,
-                          transition:
-                            isTopActive && !drag.isDragging ? "transform 220ms ease" : "none",
+                        style={{ zIndex: 50 }}
+                        motionProps={{
+                          animate: {
+                            x: activeDx,
+                            y: activeDy,
+                            rotate: activeDx / 14,
+                            scale: 1,
+                          },
+                          transition: topTransition,
                         }}
                         onPointerDown={(e) => {
                           const started = startDrag(getPointerXY(e), e.pointerId, "pointer");
@@ -598,10 +611,15 @@ export function WatchPage({
                         isTop={false}
                         likeOpacity={0}
                         nopeOpacity={0}
-                        style={{
-                          zIndex: 40 - idx,
-                          transform: `translate3d(0, ${10 + idx * 10}px, 0) scale(${1 - (idx + 1) * 0.03})`,
-                          transition: "transform 220ms ease",
+                        style={{ zIndex: 40 - idx }}
+                        motionProps={{
+                          animate: {
+                            x: 0,
+                            y: 10 + idx * 10,
+                            scale: 1 - (idx + 1) * 0.03,
+                            rotate: 0,
+                          },
+                          transition: stackTransition,
                         }}
                       />
                     ))}
