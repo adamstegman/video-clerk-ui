@@ -171,6 +171,275 @@ function WatchCard({
   );
 }
 
+function WatchHeader({ subtitle }: { subtitle: string }) {
+  return (
+    <div className="flex-shrink-0 pb-2 pt-4">
+      <h2 className={pageTitleClasses}>Watch</h2>
+      <p className={cn("mt-1 text-sm", secondaryTextClasses)}>{subtitle}</p>
+    </div>
+  );
+}
+
+function WatchLoadingState() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-indigo-500"></div>
+        <p className={secondaryTextClasses}>Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+function WatchEmptyState({ onReload }: { onReload: () => Promise<void> }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+      <p className={cn("text-sm", secondaryTextClasses)}>No unwatched items to swipe on.</p>
+      <button
+        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+        onClick={() => void onReload()}
+      >
+        Reload
+      </button>
+    </div>
+  );
+}
+
+function WatchWinnerView({
+  winnerEntry,
+  winnerLoading,
+  winnerError,
+  markError,
+  markingWatched,
+  onBackToCards,
+  onMarkWatched,
+}: {
+  winnerEntry: WatchCardEntry | null;
+  winnerLoading: boolean;
+  winnerError: string | null;
+  markError: string | null;
+  markingWatched: boolean;
+  onBackToCards: () => void;
+  onMarkWatched: (entryId: number) => void;
+}) {
+  return (
+    <div className="mx-auto w-full max-w-md">
+      {winnerLoading && <p className={cn("text-sm", secondaryTextClasses)}>Loading selection…</p>}
+      {winnerError && <p className="text-sm text-red-500">{winnerError}</p>}
+      {!winnerLoading && !winnerError && winnerEntry && (
+        <>
+          <p className={cn("mb-3 text-sm", secondaryTextClasses)}>Selected to watch:</p>
+          <div className="relative h-[520px] md:h-[560px]">
+            <WatchCard
+              entry={winnerEntry}
+              isTop={false}
+              likeOpacity={0}
+              nopeOpacity={0}
+              style={{ zIndex: 1 }}
+              motionProps={{
+                animate: { x: 0, y: 0, rotate: 0, scale: 1 },
+                transition: { duration: 0 },
+              }}
+            />
+          </div>
+
+          {markError && <p className="mt-3 text-sm text-red-500">{markError}</p>}
+
+          <div className="mt-4 flex gap-2">
+            <button
+              className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
+              onClick={onBackToCards}
+              disabled={markingWatched}
+            >
+              Back to cards
+            </button>
+            <button
+              className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+              onClick={() => void onMarkWatched(winnerEntry.id)}
+              disabled={markingWatched}
+            >
+              {markingWatched ? "Marking..." : "Mark as Watched"}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function WatchPickerView({
+  liked,
+  likeGoal,
+  chosenId,
+  markingWatched,
+  onChooseId,
+  onStartOver,
+  onChooseWinner,
+}: {
+  liked: WatchCardEntry[];
+  likeGoal: number;
+  chosenId: number | null;
+  markingWatched: boolean;
+  onChooseId: (id: number) => void;
+  onStartOver: () => void;
+  onChooseWinner: () => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <p className={cn("text-sm", secondaryTextClasses)}>
+        You liked {liked.length}. Pick one to watch:
+      </p>
+      <div className="grid gap-3 md:grid-cols-3">
+        {(likeGoal === 1 ? liked : liked.slice(0, 3)).map((entry) => (
+          <button
+            key={entry.id}
+            className={cn(
+              "rounded-xl border p-4 text-left transition",
+              "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 hover:border-indigo-400",
+              chosenId === entry.id ? "ring-2 ring-indigo-500" : ""
+            )}
+            onClick={() => onChooseId(entry.id)}
+          >
+            <div className={cn("font-semibold", primaryHeadingClasses)}>{entry.title}</div>
+            {entry.releaseYear && (
+              <div className={cn("text-sm", secondaryTextClasses)}>{entry.releaseYear}</div>
+            )}
+            {entry.overview && (
+              <div className={cn("mt-2 text-sm line-clamp-3", secondaryTextClasses)}>
+                {entry.overview}
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <button
+          className="rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
+          onClick={onStartOver}
+          disabled={markingWatched}
+        >
+          Start over
+        </button>
+        <button
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+          onClick={onChooseWinner}
+          disabled={!chosenId}
+        >
+          Choose winner
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type WatchDeckHandlers = {
+  onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove: (e: React.PointerEvent) => void;
+  onPointerUp: (e: React.PointerEvent) => void;
+  onPointerCancel: (e: React.PointerEvent) => void;
+  onTouchStart: (e: React.TouchEvent) => void;
+  onTouchMove: (e: React.TouchEvent) => void;
+  onTouchEnd: (e: React.TouchEvent) => void;
+  onTouchCancel: (e: React.TouchEvent) => void;
+};
+
+function WatchDeckView({
+  top,
+  next,
+  likeOpacity,
+  nopeOpacity,
+  topMotionProps,
+  stackTransition,
+  handlers,
+  onNope,
+  onLike,
+  isAnimatingOut,
+  likedCount,
+  likeGoal,
+}: {
+  top: WatchCardEntry | null;
+  next: WatchCardEntry[];
+  likeOpacity: number;
+  nopeOpacity: number;
+  topMotionProps: Pick<MotionProps, "animate" | "transition">;
+  stackTransition: MotionProps["transition"];
+  handlers: WatchDeckHandlers;
+  onNope: () => void;
+  onLike: () => void;
+  isAnimatingOut: boolean;
+  likedCount: number;
+  likeGoal: number;
+}) {
+  const isDisabled = !top || isAnimatingOut || likedCount >= likeGoal;
+
+  return (
+    <div className="mx-auto flex h-full w-full max-w-md flex-col">
+      <div className="relative flex-1 min-h-[440px] md:min-h-[520px]">
+        {top && (
+          <WatchCard
+            entry={top}
+            isTop={true}
+            likeOpacity={likeOpacity}
+            nopeOpacity={nopeOpacity}
+            style={{ zIndex: 50 }}
+            motionProps={topMotionProps}
+            onPointerDown={handlers.onPointerDown}
+            onPointerMove={handlers.onPointerMove}
+            onPointerUp={handlers.onPointerUp}
+            onPointerCancel={handlers.onPointerCancel}
+            onTouchStart={handlers.onTouchStart}
+            onTouchMove={handlers.onTouchMove}
+            onTouchEnd={handlers.onTouchEnd}
+            onTouchCancel={handlers.onTouchCancel}
+          />
+        )}
+
+        {next.map((entry, idx) => (
+          <WatchCard
+            key={entry.id}
+            entry={entry}
+            isTop={false}
+            likeOpacity={0}
+            nopeOpacity={0}
+            style={{ zIndex: 40 - idx }}
+            motionProps={{
+              animate: {
+                x: 0,
+                y: 10 + idx * 10,
+                scale: 1 - (idx + 1) * 0.03,
+                rotate: 0,
+              },
+              transition: stackTransition,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="mt-4 flex-shrink-0 pb-2">
+        <div className="flex w-full items-center justify-between gap-3">
+          <button
+            className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-60"
+            onClick={onNope}
+            disabled={isDisabled}
+          >
+            Nope
+          </button>
+          <div className={cn("text-sm", secondaryTextClasses)}>
+            Liked: <span className="font-semibold">{likedCount}</span>/{likeGoal || 3}
+          </div>
+          <button
+            className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+            onClick={onLike}
+            disabled={isDisabled}
+          >
+            Like
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function WatchPage({
   initialEntries,
   loading,
@@ -398,268 +667,128 @@ export function WatchPage({
   }
 
   const isWinnerMode = winnerEntryId !== null;
+  const topMotionProps: Pick<MotionProps, "animate" | "transition"> = {
+    animate: { x: activeDx, y: activeDy, rotate: activeDx / 14, scale: 1 },
+    transition: topTransition,
+  };
+  const deckHandlers: WatchDeckHandlers = {
+    onPointerDown: (e) => {
+      const started = startDrag(getPointerXY(e), e.pointerId, "pointer");
+      if (!started) return;
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        // Ignore unsupported pointer capture.
+      }
+    },
+    onPointerMove: (e) => {
+      updateDrag(getPointerXY(e), e.pointerId, "pointer");
+    },
+    onPointerUp: (e) => {
+      endDrag(getPointerXY(e), e.pointerId, "pointer");
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignore unsupported pointer capture.
+      }
+    },
+    onPointerCancel: (e) => {
+      cancelDrag("pointer");
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignore unsupported pointer capture.
+      }
+    },
+    onTouchStart: (e) => {
+      if (activePointerRef.current.id !== null) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+      startDrag(getTouchXY(touch), touch.identifier, "touch");
+    },
+    onTouchMove: (e) => {
+      const active = activePointerRef.current;
+      if (active.type !== "touch" || active.id === null) return;
+      const touch =
+        findTouchById(e.touches, active.id) ?? findTouchById(e.changedTouches, active.id);
+      if (!touch) return;
+      if (drag.isDragging && e.cancelable) {
+        e.preventDefault();
+      }
+      updateDrag(getTouchXY(touch), active.id, "touch");
+    },
+    onTouchEnd: (e) => {
+      const active = activePointerRef.current;
+      if (active.type !== "touch" || active.id === null) return;
+      const touch = findTouchById(e.changedTouches, active.id);
+      if (!touch) {
+        cancelDrag("touch");
+        return;
+      }
+      endDrag(getTouchXY(touch), active.id, "touch");
+    },
+    onTouchCancel: () => {
+      cancelDrag("touch");
+    },
+  };
+  const handleChooseWinner = () => {
+    if (!chosenId) return;
+    const entry = liked.find((e) => e.id === chosenId);
+    if (!entry) return;
+    setMarkError(null);
+    onGoToWinner(entry);
+  };
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-shrink-0 pb-2 pt-4">
-        <h2 className={pageTitleClasses}>Watch</h2>
-        <p className={cn("mt-1 text-sm", secondaryTextClasses)}>
-          Swipe right to like, left to skip. Pick 1 once you have enough likes.
-        </p>
-      </div>
+      <WatchHeader subtitle="Swipe right to like, left to skip. Pick 1 once you have enough likes." />
 
       <div className="flex-1 min-h-0 pb-4 overflow-y-auto">
         {isWinnerMode ? (
-          <div className="mx-auto w-full max-w-md">
-            {winnerLoading && (
-              <p className={cn("text-sm", secondaryTextClasses)}>Loading selection…</p>
-            )}
-            {winnerError && <p className="text-sm text-red-500">{winnerError}</p>}
-            {!winnerLoading && !winnerError && winnerEntry && (
-              <>
-                <p className={cn("mb-3 text-sm", secondaryTextClasses)}>
-                  Selected to watch:
-                </p>
-                <div className="relative h-[520px] md:h-[560px]">
-                  <WatchCard
-                    entry={winnerEntry}
-                    isTop={false}
-                    likeOpacity={0}
-                    nopeOpacity={0}
-                    style={{ zIndex: 1 }}
-                    motionProps={{
-                      animate: { x: 0, y: 0, rotate: 0, scale: 1 },
-                      transition: { duration: 0 },
-                    }}
-                  />
-                </div>
-
-                {markError && <p className="mt-3 text-sm text-red-500">{markError}</p>}
-
-                <div className="mt-4 flex gap-2">
-                  <button
-                    className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
-                    onClick={onBackToCards}
-                    disabled={markingWatched}
-                  >
-                    Back to cards
-                  </button>
-                  <button
-                    className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
-                    onClick={() => void markWatched(winnerEntry.id)}
-                    disabled={markingWatched}
-                  >
-                    {markingWatched ? "Marking..." : "Mark as Watched"}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+          <WatchWinnerView
+            winnerEntry={winnerEntry}
+            winnerLoading={winnerLoading}
+            winnerError={winnerError}
+            markError={markError}
+            markingWatched={markingWatched}
+            onBackToCards={onBackToCards}
+            onMarkWatched={(entryId) => void markWatched(entryId)}
+          />
         ) : (
           <>
-            {loading && !error && deck.length === 0 && (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-indigo-500"></div>
-                  <p className={secondaryTextClasses}>Loading...</p>
-                </div>
-              </div>
-            )}
+            {loading && !error && deck.length === 0 && <WatchLoadingState />}
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
             {!loading && !error && deck.length === 0 && liked.length < likeGoal && (
-              <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-                <p className={cn("text-sm", secondaryTextClasses)}>No unwatched items to swipe on.</p>
-                <button
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
-                  onClick={() => void onReload()}
-                >
-                  Reload
-                </button>
-              </div>
+              <WatchEmptyState onReload={onReload} />
             )}
 
             {isInPickMode ? (
-              <div className="space-y-3">
-                <p className={cn("text-sm", secondaryTextClasses)}>
-                  You liked {liked.length}. Pick one to watch:
-                </p>
-                <div className="grid gap-3 md:grid-cols-3">
-                  {(likeGoal === 1 ? liked : liked.slice(0, 3)).map((e) => (
-                    <button
-                      key={e.id}
-                      className={cn(
-                        "rounded-xl border p-4 text-left transition",
-                        "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 hover:border-indigo-400",
-                        chosenId === e.id ? "ring-2 ring-indigo-500" : ""
-                      )}
-                      onClick={() => setChosenId(e.id)}
-                    >
-                      <div className={cn("font-semibold", primaryHeadingClasses)}>{e.title}</div>
-                      {e.releaseYear && (
-                        <div className={cn("text-sm", secondaryTextClasses)}>{e.releaseYear}</div>
-                      )}
-                      {e.overview && (
-                        <div className={cn("mt-2 text-sm line-clamp-3", secondaryTextClasses)}>
-                          {e.overview}
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    className="rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
-                    onClick={() => {
-                      resetLocalFlow();
-                    }}
-                    disabled={markingWatched}
-                  >
-                    Start over
-                  </button>
-                  <button
-                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
-                    onClick={() => {
-                      if (!chosenId) return;
-                      const entry = liked.find((e) => e.id === chosenId);
-                      if (!entry) return;
-                      setMarkError(null);
-                      onGoToWinner(entry);
-                    }}
-                    disabled={!chosenId}
-                  >
-                    Choose winner
-                  </button>
-                </div>
-              </div>
+              <WatchPickerView
+                liked={liked}
+                likeGoal={likeGoal}
+                chosenId={chosenId}
+                markingWatched={markingWatched}
+                onChooseId={setChosenId}
+                onStartOver={resetLocalFlow}
+                onChooseWinner={handleChooseWinner}
+              />
             ) : (
-              <>
-                <div className="mx-auto flex h-full w-full max-w-md flex-col">
-                  <div className="relative flex-1 min-h-[440px] md:min-h-[520px]">
-                    {top && (
-                      <WatchCard
-                        entry={top}
-                        isTop={true}
-                        likeOpacity={likeOpacity}
-                        nopeOpacity={nopeOpacity}
-                        style={{ zIndex: 50 }}
-                        motionProps={{
-                          animate: {
-                            x: activeDx,
-                            y: activeDy,
-                            rotate: activeDx / 14,
-                            scale: 1,
-                          },
-                          transition: topTransition,
-                        }}
-                        onPointerDown={(e) => {
-                          const started = startDrag(getPointerXY(e), e.pointerId, "pointer");
-                          if (!started) return;
-                          try {
-                            e.currentTarget.setPointerCapture(e.pointerId);
-                          } catch {
-                            // Ignore unsupported pointer capture.
-                          }
-                        }}
-                        onPointerMove={(e) => {
-                          updateDrag(getPointerXY(e), e.pointerId, "pointer");
-                        }}
-                        onPointerUp={(e) => {
-                          endDrag(getPointerXY(e), e.pointerId, "pointer");
-                          try {
-                            e.currentTarget.releasePointerCapture(e.pointerId);
-                          } catch {
-                            // Ignore unsupported pointer capture.
-                          }
-                        }}
-                        onPointerCancel={(e) => {
-                          cancelDrag("pointer");
-                          try {
-                            e.currentTarget.releasePointerCapture(e.pointerId);
-                          } catch {
-                            // Ignore unsupported pointer capture.
-                          }
-                        }}
-                        onTouchStart={(e) => {
-                          if (activePointerRef.current.id !== null) return;
-                          const touch = e.changedTouches[0];
-                          if (!touch) return;
-                          startDrag(getTouchXY(touch), touch.identifier, "touch");
-                        }}
-                        onTouchMove={(e) => {
-                          const active = activePointerRef.current;
-                          if (active.type !== "touch" || active.id === null) return;
-                          const touch =
-                            findTouchById(e.touches, active.id) ??
-                            findTouchById(e.changedTouches, active.id);
-                          if (!touch) return;
-                          if (drag.isDragging && e.cancelable) {
-                            e.preventDefault();
-                          }
-                          updateDrag(getTouchXY(touch), active.id, "touch");
-                        }}
-                        onTouchEnd={(e) => {
-                          const active = activePointerRef.current;
-                          if (active.type !== "touch" || active.id === null) return;
-                          const touch = findTouchById(e.changedTouches, active.id);
-                          if (!touch) {
-                            cancelDrag("touch");
-                            return;
-                          }
-                          endDrag(getTouchXY(touch), active.id, "touch");
-                        }}
-                        onTouchCancel={() => {
-                          cancelDrag("touch");
-                        }}
-                      />
-                    )}
-
-                    {next.map((e, idx) => (
-                      <WatchCard
-                        key={e.id}
-                        entry={e}
-                        isTop={false}
-                        likeOpacity={0}
-                        nopeOpacity={0}
-                        style={{ zIndex: 40 - idx }}
-                        motionProps={{
-                          animate: {
-                            x: 0,
-                            y: 10 + idx * 10,
-                            scale: 1 - (idx + 1) * 0.03,
-                            rotate: 0,
-                          },
-                          transition: stackTransition,
-                        }}
-                      />
-                    ))}
-
-                  </div>
-
-                  <div className="mt-4 flex-shrink-0 pb-2">
-                    <div className="flex w-full items-center justify-between gap-3">
-                      <button
-                        className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-60"
-                        onClick={() => animateOut("nope")}
-                        disabled={!top || drag.animatingOut || liked.length >= likeGoal}
-                      >
-                        Nope
-                      </button>
-                      <div className={cn("text-sm", secondaryTextClasses)}>
-                        Liked: <span className="font-semibold">{liked.length}</span>/{likeGoal || 3}
-                      </div>
-                      <button
-                        className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
-                        onClick={() => animateOut("like")}
-                        disabled={!top || drag.animatingOut || liked.length >= likeGoal}
-                      >
-                        Like
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </>
+              <WatchDeckView
+                top={top}
+                next={next}
+                likeOpacity={likeOpacity}
+                nopeOpacity={nopeOpacity}
+                topMotionProps={topMotionProps}
+                stackTransition={stackTransition}
+                handlers={deckHandlers}
+                onNope={() => animateOut("nope")}
+                onLike={() => animateOut("like")}
+                isAnimatingOut={drag.animatingOut}
+                likedCount={liked.length}
+                likeGoal={likeGoal}
+              />
             )}
           </>
         )}
