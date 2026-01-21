@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { motion, type MotionProps } from "framer-motion";
 import { TMDBConfigurationContext } from "../tmdb-api/tmdb-configuration";
+import { ActionButton } from "../components/action-button";
 import { cn, pageTitleClasses, primaryHeadingClasses, secondaryTextClasses } from "../lib/utils";
 
 export interface WatchCardEntry {
@@ -195,12 +196,9 @@ function WatchEmptyState({ onReload }: { onReload: () => Promise<void> }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
       <p className={cn("text-sm", secondaryTextClasses)}>No unwatched items to swipe on.</p>
-      <button
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
-        onClick={() => void onReload()}
-      >
+      <ActionButton size="lg" onClick={() => void onReload()}>
         Reload
-      </button>
+      </ActionButton>
     </div>
   );
 }
@@ -246,20 +244,24 @@ function WatchWinnerView({
           {markError && <p className="mt-3 text-sm text-red-500">{markError}</p>}
 
           <div className="mt-4 flex gap-2">
-            <button
-              className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
+            <ActionButton
+              variant="secondary"
+              size="lg"
+              className="flex-1"
               onClick={onBackToCards}
               disabled={markingWatched}
             >
               Back to cards
-            </button>
-            <button
-              className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+            </ActionButton>
+            <ActionButton
+              size="lg"
+              className="flex-1"
               onClick={() => void onMarkWatched(winnerEntry.id)}
-              disabled={markingWatched}
+              loading={markingWatched}
+              loadingText="Marking..."
             >
-              {markingWatched ? "Marking..." : "Mark as Watched"}
-            </button>
+              Mark as Watched
+            </ActionButton>
           </div>
         </>
       )}
@@ -313,20 +315,17 @@ function WatchPickerView({
         ))}
       </div>
       <div className="flex gap-2">
-        <button
-          className="rounded-lg border border-zinc-200 dark:border-zinc-800 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900"
+        <ActionButton
+          variant="secondary"
+          size="lg"
           onClick={onStartOver}
           disabled={markingWatched}
         >
           Start over
-        </button>
-        <button
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
-          onClick={onChooseWinner}
-          disabled={!chosenId}
-        >
+        </ActionButton>
+        <ActionButton size="lg" onClick={onChooseWinner} disabled={!chosenId}>
           Choose winner
-        </button>
+        </ActionButton>
       </div>
     </div>
   );
@@ -417,23 +416,21 @@ function WatchDeckView({
 
       <div className="mt-4 flex-shrink-0 pb-2">
         <div className="flex w-full items-center justify-between gap-3">
-          <button
-            className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-60"
+          <ActionButton
+            variant="secondary"
+            size="lg"
+            className="flex-1"
             onClick={onNope}
             disabled={isDisabled}
           >
             Nope
-          </button>
+          </ActionButton>
           <div className={cn("text-sm", secondaryTextClasses)}>
             Liked: <span className="font-semibold">{likedCount}</span>/{likeGoal || 3}
           </div>
-          <button
-            className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
-            onClick={onLike}
-            disabled={isDisabled}
-          >
+          <ActionButton size="lg" className="flex-1" onClick={onLike} disabled={isDisabled}>
             Like
-          </button>
+          </ActionButton>
         </div>
       </div>
     </div>
