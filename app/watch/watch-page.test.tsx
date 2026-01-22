@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, fireEvent } from "@testing-library/react";
-import { WatchPage, type WatchCardEntry } from "./watch-page";
+import { WatchPage } from "./watch-page";
+import type { WatchCardEntry } from "./components/watch-card";
 import { TMDBConfigurationContext } from "../tmdb-api/tmdb-configuration";
 import type { TMDBConfig } from "../tmdb-api/tmdb-api";
 
@@ -107,6 +108,36 @@ describe("WatchPage", () => {
 
     expect(screen.getByText("You liked 1. Pick one to watch:")).toBeInTheDocument();
     expect(screen.getByText("Only A")).toBeInTheDocument();
+  });
+
+  it("cards view: renders stacked cards from the deck", () => {
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    renderWatchPage({ initialEntries: entries });
+
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+    expect(screen.getByText("C")).toBeInTheDocument();
+  });
+
+  it("cards view: does not enter picker before like threshold", async () => {
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    renderWatchPage({ initialEntries: entries });
+
+    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    act(() => vi.advanceTimersByTime(250));
+
+    expect(screen.queryByText(/Pick one to watch/i)).not.toBeInTheDocument();
+  });
+
+  it("cards view: promotes the next card after a swipe", async () => {
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    renderWatchPage({ initialEntries: entries });
+
+    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    act(() => vi.advanceTimersByTime(250));
+
+    expect(screen.queryByText("A")).not.toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
   });
 
   it("picker branch: Choose winner calls onGoToWinner with the selected entry", async () => {

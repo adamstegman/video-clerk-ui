@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { createClient } from "../lib/supabase/client";
-import { WatchPage, type WatchCardEntry } from "./watch-page";
+import { WatchPage } from "./watch-page";
+import type { WatchCardEntry } from "./components/watch-card";
 
 type EntriesQueryRow = {
   id: number;
