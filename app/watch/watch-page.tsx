@@ -8,8 +8,6 @@ import { WatchLoadingState } from "./components/watch-loading-state";
 import { WatchPickerView } from "./components/watch-picker-view";
 import { WatchWinnerView } from "./components/watch-winner-view";
 
-export type { WatchCardEntry };
-
 type SwipeDecision = "like" | "nope";
 type DragInputType = "pointer" | "touch";
 

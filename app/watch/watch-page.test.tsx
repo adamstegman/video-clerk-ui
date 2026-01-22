@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, fireEvent } from "@testing-library/react";
-import { WatchPage, type WatchCardEntry } from "./watch-page";
+import { WatchPage } from "./watch-page";
+import type { WatchCardEntry } from "./components/watch-card";
 import { TMDBConfigurationContext } from "../tmdb-api/tmdb-configuration";
 import type { TMDBConfig } from "../tmdb-api/tmdb-api";
 
