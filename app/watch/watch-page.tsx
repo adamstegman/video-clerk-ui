@@ -139,7 +139,7 @@ export function WatchPage({
     damping: 30,
   };
   const topTransition: MotionProps["transition"] = !isTopActive
-    ? { duration: 0 }
+    ? stackTransition
     : drag.isDragging
       ? { duration: 0 }
       : drag.animatingOut
