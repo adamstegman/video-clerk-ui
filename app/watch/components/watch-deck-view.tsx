@@ -96,8 +96,6 @@ export function WatchDeckView({
           ))}
         </div>
 
-        <div className="mt-4 hidden items-center justify-center lg:flex">{likedSummary}</div>
-
         <div className="mt-4 flex-shrink-0 pb-2 lg:hidden">
           <div className="flex w-full items-center justify-between gap-3">
             <ActionButton
@@ -117,7 +115,8 @@ export function WatchDeckView({
         </div>
       </div>
 
-      <div className="hidden lg:flex lg:w-40 lg:flex-col lg:items-stretch lg:justify-center">
+      <div className="hidden lg:flex lg:w-40 lg:flex-col lg:items-stretch lg:justify-center lg:gap-3">
+        <div className="flex items-center justify-center">{likedSummary}</div>
         <ActionButton size="lg" className="w-full" onClick={onLike} disabled={isDisabled}>
           Like
         </ActionButton>
