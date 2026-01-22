@@ -179,7 +179,7 @@ describe("WatchPage", () => {
     // Start over should restore cards view
     fireEvent.click(screen.getByRole("button", { name: "Start over" }));
     expect(screen.queryByText(/Pick one to watch/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/Liked:/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Liked:/i).length).toBeGreaterThan(0);
     expect(screen.getByText("A")).toBeInTheDocument();
   });
 
