@@ -15,8 +15,7 @@ export type WatchDeckHandlers = {
 };
 
 export function WatchDeckView({
-  top,
-  next,
+  cards,
   likeOpacity,
   nopeOpacity,
   topMotionProps,
@@ -28,8 +27,7 @@ export function WatchDeckView({
   likedCount,
   likeGoal,
 }: {
-  top: WatchCardEntry | null;
-  next: WatchCardEntry[];
+  cards: WatchCardEntry[];
   likeOpacity: number;
   nopeOpacity: number;
   topMotionProps: Pick<MotionProps, "animate" | "transition">;
@@ -41,47 +39,41 @@ export function WatchDeckView({
   likedCount: number;
   likeGoal: number;
 }) {
+  const top = cards[0] ?? null;
   const isDisabled = !top || isAnimatingOut || likedCount >= likeGoal;
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col">
       <div className="relative flex-1 min-h-[440px] md:min-h-[520px]">
-        {top && (
-          <WatchCard
-            entry={top}
-            isTop={true}
-            likeOpacity={likeOpacity}
-            nopeOpacity={nopeOpacity}
-            style={{ zIndex: 50 }}
-            motionProps={topMotionProps}
-            onPointerDown={handlers.onPointerDown}
-            onPointerMove={handlers.onPointerMove}
-            onPointerUp={handlers.onPointerUp}
-            onPointerCancel={handlers.onPointerCancel}
-            onTouchStart={handlers.onTouchStart}
-            onTouchMove={handlers.onTouchMove}
-            onTouchEnd={handlers.onTouchEnd}
-            onTouchCancel={handlers.onTouchCancel}
-          />
-        )}
-
-        {next.map((entry, idx) => (
+        {cards.map((entry, idx) => (
           <WatchCard
             key={entry.id}
             entry={entry}
-            isTop={false}
-            likeOpacity={0}
-            nopeOpacity={0}
-            style={{ zIndex: 40 - idx }}
-            motionProps={{
-              animate: {
-                x: 0,
-                y: 10 + idx * 10,
-                scale: 1 - (idx + 1) * 0.03,
-                rotate: 0,
-              },
-              transition: stackTransition,
-            }}
+            isTop={idx === 0}
+            likeOpacity={idx === 0 ? likeOpacity : 0}
+            nopeOpacity={idx === 0 ? nopeOpacity : 0}
+            style={{ zIndex: 50 - idx }}
+            motionProps={
+              idx === 0
+                ? topMotionProps
+                : {
+                    animate: {
+                      x: 0,
+                      y: 10 + idx * 10,
+                      scale: 1 - (idx + 1) * 0.03,
+                      rotate: 0,
+                    },
+                    transition: stackTransition,
+                  }
+            }
+            onPointerDown={idx === 0 ? handlers.onPointerDown : undefined}
+            onPointerMove={idx === 0 ? handlers.onPointerMove : undefined}
+            onPointerUp={idx === 0 ? handlers.onPointerUp : undefined}
+            onPointerCancel={idx === 0 ? handlers.onPointerCancel : undefined}
+            onTouchStart={idx === 0 ? handlers.onTouchStart : undefined}
+            onTouchMove={idx === 0 ? handlers.onTouchMove : undefined}
+            onTouchEnd={idx === 0 ? handlers.onTouchEnd : undefined}
+            onTouchCancel={idx === 0 ? handlers.onTouchCancel : undefined}
           />
         ))}
       </div>

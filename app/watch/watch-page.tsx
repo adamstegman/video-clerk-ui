@@ -119,7 +119,7 @@ export function WatchPage({
   }, []);
 
   const top = deck[0] ?? null;
-  const next = deck.slice(1, 4); // just for stacked look
+  const visibleCards = deck.slice(0, 4); // just for stacked look
 
   const swipeThreshold = 110;
   const likeGoal =
@@ -367,8 +367,7 @@ export function WatchPage({
               />
             ) : (
               <WatchDeckView
-                top={top}
-                next={next}
+                cards={visibleCards}
                 likeOpacity={likeOpacity}
                 nopeOpacity={nopeOpacity}
                 topMotionProps={topMotionProps}

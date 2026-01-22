@@ -110,6 +110,15 @@ describe("WatchPage", () => {
     expect(screen.getByText("Only A")).toBeInTheDocument();
   });
 
+  it("cards view: renders stacked cards from the deck", () => {
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    renderWatchPage({ initialEntries: entries });
+
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+    expect(screen.getByText("C")).toBeInTheDocument();
+  });
+
   it("picker branch: Choose winner calls onGoToWinner with the selected entry", async () => {
     const onGoToWinner = vi.fn();
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
