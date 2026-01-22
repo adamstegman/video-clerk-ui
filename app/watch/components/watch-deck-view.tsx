@@ -1,4 +1,4 @@
-import type { MotionProps } from "framer-motion";
+import type { MotionProps } from "motion/react";
 import { ActionButton } from "../../components/action-button";
 import { cn, secondaryTextClasses } from "../../lib/utils";
 import { WatchCard, type WatchCardEntry } from "./watch-card";

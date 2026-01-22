@@ -1,5 +1,5 @@
 import { useContext, useMemo } from "react";
-import { motion, type MotionProps } from "framer-motion";
+import { motion, type MotionProps } from "motion/react";
 import { TMDBConfigurationContext } from "../../tmdb-api/tmdb-configuration";
 import { cn, primaryHeadingClasses, secondaryTextClasses } from "../../lib/utils";
 

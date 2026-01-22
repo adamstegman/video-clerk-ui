@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { MotionProps } from "framer-motion";
+import type { MotionProps } from "motion/react";
 import type { WatchCardEntry } from "./components/watch-card";
 import { WatchDeckView, type WatchDeckHandlers } from "./components/watch-deck-view";
 import { WatchEmptyState } from "./components/watch-empty-state";
