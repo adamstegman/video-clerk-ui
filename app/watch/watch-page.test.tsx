@@ -119,6 +119,16 @@ describe("WatchPage", () => {
     expect(screen.getByText("C")).toBeInTheDocument();
   });
 
+  it("cards view: does not enter picker before like threshold", async () => {
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    renderWatchPage({ initialEntries: entries });
+
+    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    act(() => vi.advanceTimersByTime(250));
+
+    expect(screen.queryByText(/Pick one to watch/i)).not.toBeInTheDocument();
+  });
+
   it("picker branch: Choose winner calls onGoToWinner with the selected entry", async () => {
     const onGoToWinner = vi.fn();
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];

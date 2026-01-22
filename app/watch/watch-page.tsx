@@ -131,12 +131,12 @@ export function WatchPage({
   const activeDy = isTopActive ? drag.dy : 0;
   const likeOpacity = top ? clamp(Math.max(0, activeDx) / swipeThreshold, 0, 1) : 0;
   const nopeOpacity = top ? clamp(Math.max(0, -activeDx) / swipeThreshold, 0, 1) : 0;
-  const stackTransition: MotionProps["transition"] = { duration: 0.22, ease: "easeOut" };
-  const swipeOutTransition: MotionProps["transition"] = { duration: 0.22, ease: "easeOut" };
+  const stackTransition: MotionProps["transition"] = { duration: 0.32, ease: "easeInOut" };
+  const swipeOutTransition: MotionProps["transition"] = { duration: 0.26, ease: "easeInOut" };
   const snapBackTransition: MotionProps["transition"] = {
     type: "spring",
-    stiffness: 320,
-    damping: 26,
+    stiffness: 220,
+    damping: 30,
   };
   const topTransition: MotionProps["transition"] = !isTopActive
     ? { duration: 0 }
