@@ -117,8 +117,14 @@ describeIf("Integration (UI + Supabase): edit entry page", () => {
       });
 
       const tagsInput = await screen.findByLabelText("Tags");
+      await waitFor(() => {
+        expect(tagsInput).toHaveValue("Drama");
+      });
       const customTag = `Custom-${Math.floor(Math.random() * 1_000_000)}`;
       await user.clear(tagsInput);
+      await waitFor(() => {
+        expect(tagsInput).toHaveValue("");
+      });
       await user.type(tagsInput, `Drama, ${customTag}`);
       await user.click(screen.getByRole("button", { name: "Save tags" }));
 
