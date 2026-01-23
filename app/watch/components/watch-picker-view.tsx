@@ -24,12 +24,12 @@ export function WatchPickerView({
       <p className={cn("text-sm", secondaryTextClasses)}>
         You liked {liked.length}. Pick one to watch:
       </p>
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="flex flex-col gap-3">
         {(likeGoal === 1 ? liked : liked.slice(0, 3)).map((entry) => (
           <button
             key={entry.id}
             className={cn(
-              "rounded-xl border p-4 text-left transition",
+              "w-full rounded-xl border p-4 text-left transition",
               "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 hover:border-indigo-400",
               chosenId === entry.id ? "ring-2 ring-indigo-500" : ""
             )}
@@ -47,16 +47,22 @@ export function WatchPickerView({
           </button>
         ))}
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap justify-around gap-3">
         <ActionButton
           variant="secondary"
           size="lg"
+          className="min-w-[180px]"
           onClick={onStartOver}
           disabled={markingWatched}
         >
           Start over
         </ActionButton>
-        <ActionButton size="lg" onClick={onChooseWinner} disabled={!chosenId}>
+        <ActionButton
+          size="lg"
+          className="min-w-[180px]"
+          onClick={onChooseWinner}
+          disabled={!chosenId}
+        >
           Choose winner
         </ActionButton>
       </div>
