@@ -72,6 +72,10 @@ function getPrimaryLikeButton() {
   return screen.getAllByRole("button", { name: "Like" })[0];
 }
 
+function getPrimaryNopeButton() {
+  return screen.getAllByRole("button", { name: "Nope" })[0];
+}
+
 describe("WatchPage", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -101,6 +105,28 @@ describe("WatchPage", () => {
     act(() => vi.advanceTimersByTime(250));
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
     expect(screen.getByText("You liked 3. Pick one to watch:")).toBeInTheDocument();
+  });
+
+  it("main branch: shows picker if deck ends with 1-2 likes", async () => {
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
+    renderWatchPage({ initialEntries: entries });
+
+    // Like 2
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+
+    // Nope remaining cards to exhaust the deck
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+
+    expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
+    expect(screen.getByText("You liked 2. Pick one to watch:")).toBeInTheDocument();
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
   });
 
   it("small-deck branch: if fewer than 3 entries exist, picker appears after 1 like", async () => {
