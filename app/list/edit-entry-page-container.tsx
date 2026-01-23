@@ -264,21 +264,15 @@ export function EditEntryPageContainer() {
             throw new Error("Could not determine group.");
           }
 
-          const { data: created, error: createError } = await supabase
+          const { data: existingCustom, error: existingError } = await supabase
             .from("tags")
-            .upsert(
-              namesToCreate.map((name) => ({
-                name,
-                tmdb_id: null,
-                group_id: groupId,
-                is_custom: true,
-              })),
-              { onConflict: "name,group_id" }
-            )
-            .select("id,name,is_custom");
-          if (createError) throw createError;
+            .select("id,name,is_custom")
+            .eq("group_id", groupId)
+            .eq("is_custom", true)
+            .in("name", namesToCreate);
+          if (existingError) throw existingError;
 
-          for (const row of created ?? []) {
+          for (const row of existingCustom ?? []) {
             if (!row.name || typeof row.id !== "number") continue;
             const tag: EditEntryTag = {
               id: row.id,
@@ -286,6 +280,35 @@ export function EditEntryPageContainer() {
               is_custom: Boolean(row.is_custom),
             };
             resolvedByKey.set(normalizeTagKey(tag.name), tag);
+          }
+
+          const remaining = namesToCreate.filter(
+            (name) => !resolvedByKey.has(normalizeTagKey(name))
+          );
+
+          if (remaining.length > 0) {
+            const { data: created, error: createError } = await supabase
+              .from("tags")
+              .insert(
+                remaining.map((name) => ({
+                  name,
+                  tmdb_id: null,
+                  group_id: groupId,
+                  is_custom: true,
+                }))
+              )
+              .select("id,name,is_custom");
+            if (createError) throw createError;
+
+            for (const row of created ?? []) {
+              if (!row.name || typeof row.id !== "number") continue;
+              const tag: EditEntryTag = {
+                id: row.id,
+                name: row.name,
+                is_custom: Boolean(row.is_custom),
+              };
+              resolvedByKey.set(normalizeTagKey(tag.name), tag);
+            }
           }
         }
       }
