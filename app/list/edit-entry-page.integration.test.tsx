@@ -116,16 +116,17 @@ describeIf("Integration (UI + Supabase): edit entry page", () => {
         expect(screen.getByText("Edit entry")).toBeInTheDocument();
       });
 
-      const tagsInput = await screen.findByLabelText("Tags");
       await waitFor(() => {
-        expect(tagsInput).toHaveValue("Drama");
+        expect(screen.getByRole("button", { name: "Remove tag Drama" })).toBeInTheDocument();
       });
+      const tagsInput = await screen.findByLabelText("Add tag");
       const customTag = `Custom-${Math.floor(Math.random() * 1_000_000)}`;
-      await user.clear(tagsInput);
+      await user.type(tagsInput, `${customTag}{enter}`);
       await waitFor(() => {
-        expect(tagsInput).toHaveValue("");
+        expect(
+          screen.getByRole("button", { name: `Remove tag ${customTag}` })
+        ).toBeInTheDocument();
       });
-      await user.type(tagsInput, `Drama, ${customTag}`);
       await user.click(screen.getByRole("button", { name: "Save tags" }));
 
       await waitFor(() => {

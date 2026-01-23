@@ -60,22 +60,6 @@ function normalizeTagKey(name: string) {
   return name.trim().toLowerCase();
 }
 
-function parseTagInput(raw: string) {
-  const seen = new Set<string>();
-  const tags: string[] = [];
-  raw
-    .split(/[,\\n]/)
-    .map((tag) => tag.trim())
-    .filter((tag) => tag.length > 0)
-    .forEach((tag) => {
-      const key = normalizeTagKey(tag);
-      if (seen.has(key)) return;
-      seen.add(key);
-      tags.push(tag);
-    });
-  return tags;
-}
-
 function getErrorMessage(err: unknown, fallback: string) {
   return err instanceof Error
     ? err.message
@@ -101,10 +85,13 @@ export function EditEntryPageContainer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [tagsInput, setTagsInput] = useState("");
+  const [selectedTags, setSelectedTags] = useState<EditEntryTag[]>([]);
+  const [availableTags, setAvailableTags] = useState<EditEntryTag[]>([]);
+  const [tagQuery, setTagQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [creatingTag, setCreatingTag] = useState(false);
 
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -121,37 +108,55 @@ export function EditEntryPageContainer() {
     setError(null);
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("entries")
-        .select(
-          `
-            id,
-            added_at,
-            tmdb_details (
-              poster_path,
-              name,
-              release_date
-            ),
-            entry_tags (
-              tags (
-                id,
+      const [entryResponse, tagsResponse] = await Promise.all([
+        supabase
+          .from("entries")
+          .select(
+            `
+              id,
+              added_at,
+              tmdb_details (
+                poster_path,
                 name,
-                is_custom
+                release_date
+              ),
+              entry_tags (
+                tags (
+                  id,
+                  name,
+                  is_custom
+                )
               )
-            )
-          `
-        )
-        .eq("id", entryId)
-        .maybeSingle();
+            `
+          )
+          .eq("id", entryId)
+          .maybeSingle(),
+        supabase.from("tags").select("id,name,is_custom").order("name"),
+      ]);
 
-      if (error) throw error;
-      if (!data) {
+      if (entryResponse.error) throw entryResponse.error;
+      if (!entryResponse.data) {
         setEntry(null);
         setError("Entry not found.");
         return;
       }
 
-      const row = data as unknown as EntriesQueryRow;
+      if (tagsResponse.error) {
+        console.error("Failed to load tags", tagsResponse.error);
+        setAvailableTags([]);
+      } else {
+        const normalizedTags =
+          tagsResponse.data
+            ?.filter((row) => row.name && typeof row.id === "number")
+            .map((row) => ({
+              id: row.id,
+              name: row.name as string,
+              is_custom: Boolean(row.is_custom),
+            })) ?? [];
+        setAvailableTags(normalizedTags);
+      }
+
+      const row = entryResponse.data as unknown as EntriesQueryRow;
       const details = normalizeDetails(row.tmdb_details);
       const tags =
         row.entry_tags
@@ -170,8 +175,8 @@ export function EditEntryPageContainer() {
         title: details?.name || "Untitled",
         releaseYear: getReleaseYear(details?.release_date ?? null),
         posterPath: details?.poster_path ?? null,
-        tags,
       });
+      setSelectedTags(tags);
     } catch (err) {
       setEntry(null);
       setError(getErrorMessage(err, "Failed to load entry"));
@@ -186,16 +191,186 @@ export function EditEntryPageContainer() {
 
   useEffect(() => {
     if (!entry) return;
-    setTagsInput(entry.tags.map((tag) => tag.name).join(", "));
+    setTagQuery("");
     setSaveError(null);
     setSaveSuccess(false);
   }, [entry?.id]);
 
-  const handleTagsChange = useCallback((value: string) => {
-    setTagsInput(value);
+  const resetSaveStatus = useCallback(() => {
     setSaveError(null);
     setSaveSuccess(false);
   }, []);
+
+  const handleTagQueryChange = useCallback(
+    (value: string) => {
+      setTagQuery(value);
+      resetSaveStatus();
+    },
+    [resetSaveStatus]
+  );
+
+  const handleAddTag = useCallback(
+    (tag: EditEntryTag) => {
+      setSelectedTags((prev) => {
+        const exists = prev.some(
+          (selected) => normalizeTagKey(selected.name) === normalizeTagKey(tag.name)
+        );
+        if (exists) return prev;
+        return [...prev, tag];
+      });
+      setTagQuery("");
+      resetSaveStatus();
+    },
+    [resetSaveStatus]
+  );
+
+  const handleRemoveTag = useCallback(
+    (tag: EditEntryTag) => {
+      setSelectedTags((prev) => prev.filter((selected) => selected.id !== tag.id));
+      resetSaveStatus();
+    },
+    [resetSaveStatus]
+  );
+
+  const handleToggleTag = useCallback(
+    (tag: EditEntryTag) => {
+      setSelectedTags((prev) => {
+        const exists = prev.some((selected) => selected.id === tag.id);
+        if (exists) {
+          return prev.filter((selected) => selected.id !== tag.id);
+        }
+        return [...prev, tag];
+      });
+      setTagQuery("");
+      resetSaveStatus();
+    },
+    [resetSaveStatus]
+  );
+
+  const fetchExistingTag = useCallback(
+    async (supabase: ReturnType<typeof createClient>, name: string) => {
+      const { data, error } = await supabase
+        .from("tags")
+        .select("id,name,is_custom")
+        .eq("name", name);
+      if (error) throw error;
+      const normalized =
+        data
+          ?.filter((row) => row.name && typeof row.id === "number")
+          .map((row) => ({
+            id: row.id,
+            name: row.name as string,
+            is_custom: Boolean(row.is_custom),
+          })) ?? [];
+      if (normalized.length === 0) return null;
+      const pick = normalized.find((tag) => tag.is_custom) ?? normalized[0] ?? null;
+      if (!pick) return null;
+      setAvailableTags((prev) => {
+        const exists = prev.some(
+          (tag) => normalizeTagKey(tag.name) === normalizeTagKey(pick.name)
+        );
+        if (exists) return prev;
+        return [...prev, pick];
+      });
+      return pick;
+    },
+    []
+  );
+
+  const ensureTagExists = useCallback(
+    async (rawName: string) => {
+      const trimmed = rawName.trim();
+      if (!trimmed) return null;
+      const key = normalizeTagKey(trimmed);
+      const existing = availableTags.find((tag) => normalizeTagKey(tag.name) === key);
+      if (existing) return existing;
+
+      const supabase = createClient();
+      const { data: groupId, error: groupError } = await supabase.rpc("current_user_group_id");
+      if (groupError) throw groupError;
+      if (!groupId) {
+        throw new Error("Could not determine group.");
+      }
+
+      const { data: created, error: createError } = await supabase
+        .from("tags")
+        .insert({
+          name: trimmed,
+          tmdb_id: null,
+          group_id: groupId,
+          is_custom: true,
+        })
+        .select("id,name,is_custom")
+        .maybeSingle();
+
+      if (createError) {
+        const existingTag = await fetchExistingTag(supabase, trimmed);
+        if (existingTag) return existingTag;
+        throw createError;
+      }
+
+      if (!created || !created.name || typeof created.id !== "number") {
+        return null;
+      }
+
+      const newTag: EditEntryTag = {
+        id: created.id,
+        name: created.name,
+        is_custom: Boolean(created.is_custom),
+      };
+      setAvailableTags((prev) => {
+        const exists = prev.some((tag) => normalizeTagKey(tag.name) === key);
+        if (exists) return prev;
+        return [...prev, newTag];
+      });
+      return newTag;
+    },
+    [availableTags, fetchExistingTag]
+  );
+
+  const handleCreateTag = useCallback(
+    async (value: string) => {
+      if (creatingTag) return;
+      const trimmed = value.trim();
+      if (!trimmed) return;
+      setCreatingTag(true);
+      resetSaveStatus();
+      try {
+        const tag = await ensureTagExists(trimmed);
+        if (tag) {
+          setSelectedTags((prev) => {
+            const exists = prev.some(
+              (selected) => normalizeTagKey(selected.name) === normalizeTagKey(tag.name)
+            );
+            if (exists) return prev;
+            return [...prev, tag];
+          });
+        }
+        setTagQuery("");
+      } catch (err) {
+        setSaveError(getErrorMessage(err, "Failed to create tag"));
+      } finally {
+        setCreatingTag(false);
+      }
+    },
+    [creatingTag, ensureTagExists, resetSaveStatus]
+  );
+
+  const suggestions = useMemo(() => {
+    const query = normalizeTagKey(tagQuery);
+    if (!query) return [];
+    const selectedKeys = new Set(selectedTags.map((tag) => normalizeTagKey(tag.name)));
+    return availableTags.filter((tag) => {
+      const key = normalizeTagKey(tag.name);
+      return key.includes(query) && !selectedKeys.has(key);
+    });
+  }, [availableTags, selectedTags, tagQuery]);
+
+  const canCreateTag = useMemo(() => {
+    const query = normalizeTagKey(tagQuery);
+    if (!query) return false;
+    return !availableTags.some((tag) => normalizeTagKey(tag.name) === query);
+  }, [availableTags, tagQuery]);
 
   const handleSaveTags = useCallback(async () => {
     if (!entryId || !entry) return;
@@ -204,125 +379,22 @@ export function EditEntryPageContainer() {
     setSaveSuccess(false);
 
     try {
-      const desiredNames = parseTagInput(tagsInput);
-      const existingByKey = new Map<string, EditEntryTag>();
-      for (const tag of entry.tags) {
-        existingByKey.set(normalizeTagKey(tag.name), tag);
-      }
-
-      const nameByKey = new Map<string, string>();
-      for (const name of desiredNames) {
-        const key = normalizeTagKey(name);
-        if (!nameByKey.has(key)) {
-          nameByKey.set(key, name);
-        }
-      }
-
-      const unresolvedKeys = Array.from(nameByKey.keys()).filter((key) => !existingByKey.has(key));
-      const namesToFind = unresolvedKeys.map((key) => nameByKey.get(key) as string);
-
-      const resolvedByKey = new Map<string, EditEntryTag>();
-      const supabase = createClient();
-
-      if (namesToFind.length > 0) {
-        const { data: tagRows, error: tagsError } = await supabase
-          .from("tags")
-          .select("id,name,is_custom")
-          .in("name", namesToFind);
-        if (tagsError) throw tagsError;
-
-        const grouped = new Map<string, EditEntryTag[]>();
-        for (const row of tagRows ?? []) {
-          if (!row.name || typeof row.id !== "number") continue;
-          const tag: EditEntryTag = {
-            id: row.id,
-            name: row.name,
-            is_custom: Boolean(row.is_custom),
-          };
-          const key = normalizeTagKey(tag.name);
-          const list = grouped.get(key) ?? [];
-          list.push(tag);
-          grouped.set(key, list);
-        }
-
-        const namesToCreate: string[] = [];
-        for (const key of unresolvedKeys) {
-          const candidates = grouped.get(key) ?? [];
-          const pick = candidates.find((tag) => tag.is_custom) ?? candidates[0];
-          if (pick) {
-            resolvedByKey.set(key, pick);
-          } else {
-            const name = nameByKey.get(key);
-            if (name) namesToCreate.push(name);
-          }
-        }
-
-        if (namesToCreate.length > 0) {
-          const { data: groupId, error: groupError } = await supabase.rpc("current_user_group_id");
-          if (groupError) throw groupError;
-          if (!groupId) {
-            throw new Error("Could not determine group.");
-          }
-
-          const { data: existingCustom, error: existingError } = await supabase
-            .from("tags")
-            .select("id,name,is_custom")
-            .eq("group_id", groupId)
-            .eq("is_custom", true)
-            .in("name", namesToCreate);
-          if (existingError) throw existingError;
-
-          for (const row of existingCustom ?? []) {
-            if (!row.name || typeof row.id !== "number") continue;
-            const tag: EditEntryTag = {
-              id: row.id,
-              name: row.name,
-              is_custom: Boolean(row.is_custom),
-            };
-            resolvedByKey.set(normalizeTagKey(tag.name), tag);
-          }
-
-          const remaining = namesToCreate.filter(
-            (name) => !resolvedByKey.has(normalizeTagKey(name))
+      let finalTags = selectedTags;
+      if (tagQuery.trim().length > 0) {
+        const created = await ensureTagExists(tagQuery);
+        if (created) {
+          const exists = finalTags.some(
+            (tag) => normalizeTagKey(tag.name) === normalizeTagKey(created.name)
           );
-
-          if (remaining.length > 0) {
-            const { data: created, error: createError } = await supabase
-              .from("tags")
-              .insert(
-                remaining.map((name) => ({
-                  name,
-                  tmdb_id: null,
-                  group_id: groupId,
-                  is_custom: true,
-                }))
-              )
-              .select("id,name,is_custom");
-            if (createError) throw createError;
-
-            for (const row of created ?? []) {
-              if (!row.name || typeof row.id !== "number") continue;
-              const tag: EditEntryTag = {
-                id: row.id,
-                name: row.name,
-                is_custom: Boolean(row.is_custom),
-              };
-              resolvedByKey.set(normalizeTagKey(tag.name), tag);
-            }
+          if (!exists) {
+            finalTags = [...finalTags, created];
           }
+          setSelectedTags(finalTags);
         }
+        setTagQuery("");
       }
 
-      const finalTags: EditEntryTag[] = [];
-      const seenIds = new Set<number>();
-      for (const name of desiredNames) {
-        const key = normalizeTagKey(name);
-        const tag = existingByKey.get(key) ?? resolvedByKey.get(key);
-        if (!tag || seenIds.has(tag.id)) continue;
-        seenIds.add(tag.id);
-        finalTags.push(tag);
-      }
-
+      const supabase = createClient();
       const { error: clearError } = await supabase
         .from("entry_tags")
         .delete()
@@ -339,15 +411,13 @@ export function EditEntryPageContainer() {
         if (insertError) throw insertError;
       }
 
-      setEntry((prev) => (prev ? { ...prev, tags: finalTags } : prev));
-      setTagsInput(finalTags.map((tag) => tag.name).join(", "));
       setSaveSuccess(true);
     } catch (err) {
       setSaveError(getErrorMessage(err, "Failed to update tags"));
     } finally {
       setSaving(false);
     }
-  }, [entry, entryId, tagsInput]);
+  }, [entry, entryId, ensureTagExists, selectedTags, tagQuery]);
 
   const handleDelete = useCallback(async () => {
     if (!entryId || deleting) return;
@@ -375,12 +445,21 @@ export function EditEntryPageContainer() {
       entry={entry}
       loading={loading}
       error={error}
-      tagsInput={tagsInput}
-      onTagsChange={handleTagsChange}
+      selectedTags={selectedTags}
+      availableTags={availableTags}
+      tagQuery={tagQuery}
+      suggestions={suggestions}
+      canCreateTag={canCreateTag}
+      onTagQueryChange={handleTagQueryChange}
+      onAddTag={handleAddTag}
+      onRemoveTag={handleRemoveTag}
+      onToggleTag={handleToggleTag}
+      onCreateTag={handleCreateTag}
       onSaveTags={handleSaveTags}
       saving={saving}
       saveError={saveError}
       saveSuccess={saveSuccess}
+      creatingTag={creatingTag}
       deleting={deleting}
       deleteError={deleteError}
       onDelete={handleDelete}

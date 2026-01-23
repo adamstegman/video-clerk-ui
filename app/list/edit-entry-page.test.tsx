@@ -30,22 +30,32 @@ function renderEditEntryPage(props: Partial<Parameters<typeof EditEntryPage>[0]>
     title: "Example Movie",
     releaseYear: "2025",
     posterPath: "/poster.jpg",
-    tags: [
-      { id: 1, name: "Drama", is_custom: false },
-      { id: 2, name: "Cozy", is_custom: true },
-    ],
   };
+  const selectedTags = [
+    { id: 1, name: "Drama", is_custom: false },
+    { id: 2, name: "Cozy", is_custom: true },
+  ];
+  const availableTags = [...selectedTags, { id: 3, name: "Weekend", is_custom: true }];
 
   const defaultProps: Parameters<typeof EditEntryPage>[0] = {
     entry,
     loading: false,
     error: null,
-    tagsInput: "Drama, Cozy",
-    onTagsChange: vi.fn(),
+    selectedTags,
+    availableTags,
+    tagQuery: "Weekend",
+    suggestions: [],
+    canCreateTag: true,
+    onTagQueryChange: vi.fn(),
+    onAddTag: vi.fn(),
+    onRemoveTag: vi.fn(),
+    onToggleTag: vi.fn(),
+    onCreateTag: vi.fn(),
     onSaveTags: vi.fn(),
     saving: false,
     saveError: null,
     saveSuccess: false,
+    creatingTag: false,
     deleting: false,
     deleteError: null,
     onDelete: vi.fn(),
@@ -68,12 +78,16 @@ describe("EditEntryPage", () => {
 
   it("renders entry details and handles tag and delete actions", async () => {
     const user = userEvent.setup();
-    const onTagsChange = vi.fn();
+    const onTagQueryChange = vi.fn();
+    const onRemoveTag = vi.fn();
+    const onCreateTag = vi.fn();
     const onSaveTags = vi.fn();
     const onDelete = vi.fn();
 
     renderEditEntryPage({
-      onTagsChange,
+      onTagQueryChange,
+      onRemoveTag,
+      onCreateTag,
       onSaveTags,
       onDelete,
       saveSuccess: true,
@@ -84,15 +98,18 @@ describe("EditEntryPage", () => {
     expect(screen.getByText("Drama, Cozy", { selector: "p" })).toBeInTheDocument();
     expect(screen.getByText("Tags updated.")).toBeInTheDocument();
 
-    const tagsInput = screen.getByLabelText("Tags") as HTMLTextAreaElement;
-    expect(tagsInput.value).toBe("Drama, Cozy");
+    const tagInput = screen.getByLabelText("Add tag");
+    await user.type(tagInput, "New Tag");
+    expect(onTagQueryChange).toHaveBeenCalled();
 
-    await user.clear(tagsInput);
-    await user.type(tagsInput, "Action, Weekend");
-    expect(onTagsChange).toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Add" }));
+    expect(onCreateTag).toHaveBeenCalledWith("Weekend");
 
     await user.click(screen.getByRole("button", { name: "Save tags" }));
     expect(onSaveTags).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole("button", { name: "Remove tag Drama" }));
+    expect(onRemoveTag).toHaveBeenCalledTimes(1);
 
     await user.click(screen.getByRole("button", { name: "Delete entry" }));
     expect(onDelete).toHaveBeenCalledTimes(1);
