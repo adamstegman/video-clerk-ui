@@ -141,11 +141,8 @@ export function EditEntryPage({
                 </ActionButton>
               </SettingsSubsection>
             </SettingsSection>
-            <SettingsSection title="Delete entry">
-              <SettingsSubsection
-                description="Remove this entry from your list. This cannot be undone."
-                error={deleteError}
-              >
+            <div className={sectionSpacingClasses}>
+              <div className="flex flex-col gap-2">
                 <ActionButton
                   onClick={onDelete}
                   loading={deleting}
@@ -155,8 +152,9 @@ export function EditEntryPage({
                 >
                   Delete entry
                 </ActionButton>
-              </SettingsSubsection>
-            </SettingsSection>
+                {deleteError && <p className={cn("text-sm", errorTextClasses)}>{deleteError}</p>}
+              </div>
+            </div>
           </>
         )}
       </div>
