@@ -81,7 +81,7 @@ describe("EditEntryPage", () => {
 
     expect(screen.getByText("Example Movie")).toBeInTheDocument();
     expect(screen.getByText("2025")).toBeInTheDocument();
-    expect(screen.getByText("Drama, Cozy")).toBeInTheDocument();
+    expect(screen.getByText("Drama, Cozy", { selector: "p" })).toBeInTheDocument();
     expect(screen.getByText("Tags updated.")).toBeInTheDocument();
 
     const tagsInput = screen.getByLabelText("Tags") as HTMLTextAreaElement;
