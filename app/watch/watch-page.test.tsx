@@ -68,6 +68,10 @@ function renderWatchPage(opts: {
   return { ...result, onGoToWinner, onMarkWatched, onBackToCards };
 }
 
+function getPrimaryLikeButton() {
+  return screen.getAllByRole("button", { name: "Like" })[0];
+}
+
 describe("WatchPage", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -83,17 +87,17 @@ describe("WatchPage", () => {
     renderWatchPage({ initialEntries: entries });
 
     // Like 1
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
     expect(screen.queryByText(/Pick one to watch/i)).not.toBeInTheDocument();
 
     // Like 2
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
     expect(screen.queryByText(/Pick one to watch/i)).not.toBeInTheDocument();
 
     // Like 3 => picker
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
     expect(screen.getByText("You liked 3. Pick one to watch:")).toBeInTheDocument();
@@ -103,7 +107,7 @@ describe("WatchPage", () => {
     const entries = [makeEntry(1, "Only A"), makeEntry(2, "Only B")];
     renderWatchPage({ initialEntries: entries });
 
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
 
     expect(screen.getByText("You liked 1. Pick one to watch:")).toBeInTheDocument();
@@ -123,7 +127,7 @@ describe("WatchPage", () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
     renderWatchPage({ initialEntries: entries });
 
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
 
     expect(screen.queryByText(/Pick one to watch/i)).not.toBeInTheDocument();
@@ -133,7 +137,7 @@ describe("WatchPage", () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
     renderWatchPage({ initialEntries: entries });
 
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
 
     expect(screen.queryByText("A")).not.toBeInTheDocument();
@@ -146,11 +150,11 @@ describe("WatchPage", () => {
     renderWatchPage({ initialEntries: entries, onGoToWinner });
 
     // Like 3 items to enter pick mode (likeGoal=3)
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
 
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
@@ -168,14 +172,14 @@ describe("WatchPage", () => {
     renderWatchPage({ initialEntries: entries });
 
     // Like once -> pick mode (likeGoal=1)
-    fireEvent.click(screen.getByRole("button", { name: "Like" }));
+    fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
 
     // Start over should restore cards view
     fireEvent.click(screen.getByRole("button", { name: "Start over" }));
     expect(screen.queryByText(/Pick one to watch/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/Liked:/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Liked:/i).length).toBeGreaterThan(0);
     expect(screen.getByText("A")).toBeInTheDocument();
   });
 
