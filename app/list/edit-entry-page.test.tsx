@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router";
 import { EditEntryPage, type EditEntryData } from "./edit-entry-page";
 import { TMDBConfigurationContext } from "../tmdb-api/tmdb-configuration";
 import type { TMDBConfig } from "../tmdb-api/tmdb-api";
@@ -51,9 +52,11 @@ function renderEditEntryPage(props: Partial<Parameters<typeof EditEntryPage>[0]>
   };
 
   return render(
-    <TMDBConfigurationContext value={mockConfigurationState}>
-      <EditEntryPage {...defaultProps} {...props} />
-    </TMDBConfigurationContext>
+    <MemoryRouter>
+      <TMDBConfigurationContext value={mockConfigurationState}>
+        <EditEntryPage {...defaultProps} {...props} />
+      </TMDBConfigurationContext>
+    </MemoryRouter>
   );
 }
 
