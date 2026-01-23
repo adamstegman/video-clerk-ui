@@ -105,7 +105,7 @@ describe("EditEntryPage", () => {
     await user.click(screen.getByRole("button", { name: "Add" }));
     expect(onCreateTag).toHaveBeenCalledWith("Weekend");
 
-    await user.click(screen.getByRole("button", { name: "Save tags" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
     expect(onSaveTags).toHaveBeenCalledTimes(1);
 
     await user.click(screen.getByRole("button", { name: "Remove tag Drama" }));

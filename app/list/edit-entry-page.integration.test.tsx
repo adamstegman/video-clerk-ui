@@ -127,7 +127,7 @@ describeIf("Integration (UI + Supabase): edit entry page", () => {
           screen.getByRole("button", { name: `Remove tag ${customTag}` })
         ).toBeInTheDocument();
       });
-      await user.click(screen.getByRole("button", { name: "Save tags" }));
+      await user.click(screen.getByRole("button", { name: "Save" }));
 
       await waitFor(() => {
         expect(screen.getByText("Tags updated.")).toBeInTheDocument();

@@ -215,14 +215,6 @@ export function EditEntryPage({
                     </div>
                   )}
                 </div>
-                <ActionButton
-                  onClick={onSaveTags}
-                  loading={saving}
-                  disabled={!entry || creatingTag}
-                  loadingText="Saving..."
-                >
-                  Save tags
-                </ActionButton>
                 <div className="flex flex-col gap-2">
                   <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
                     Existing tags
@@ -255,6 +247,17 @@ export function EditEntryPage({
                 </div>
               </SettingsSubsection>
             </SettingsSection>
+            <div className={sectionSpacingClasses}>
+              <ActionButton
+                onClick={onSaveTags}
+                loading={saving}
+                disabled={!entry || creatingTag}
+                loadingText="Saving..."
+                className="w-full sm:w-auto"
+              >
+                Save
+              </ActionButton>
+            </div>
             <div className={sectionSpacingClasses}>
               <div className="flex flex-col gap-2">
                 <ActionButton
