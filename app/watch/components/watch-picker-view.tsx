@@ -24,7 +24,7 @@ export function WatchPickerView({
       <p className={cn("text-sm", secondaryTextClasses)}>
         You liked {liked.length}. Pick one to watch:
       </p>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 px-1">
         {(likeGoal === 1 ? liked : liked.slice(0, 3)).map((entry) => (
           <button
             key={entry.id}
