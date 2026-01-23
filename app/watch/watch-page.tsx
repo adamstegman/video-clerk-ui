@@ -124,7 +124,10 @@ export function WatchPage({
   const swipeThreshold = 110;
   const likeGoal =
     initialEntries.length === 0 ? 0 : initialEntries.length < 3 ? 1 : 3;
-  const isInPickMode = likeGoal > 0 && liked.length >= likeGoal;
+  const isDeckExhausted = deck.length === 0;
+  const canPickWithRemainingLikes =
+    isDeckExhausted && liked.length > 0 && liked.length < 3;
+  const isInPickMode = likeGoal > 0 && (liked.length >= likeGoal || canPickWithRemainingLikes);
 
   const isTopActive = !!top && drag.activeId === top.id;
   const activeDx = isTopActive ? drag.dx : 0;
@@ -351,7 +354,7 @@ export function WatchPage({
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            {!loading && !error && deck.length === 0 && liked.length < likeGoal && (
+            {!loading && !error && isDeckExhausted && liked.length === 0 && (
               <WatchEmptyState onReload={onReload} />
             )}
 
