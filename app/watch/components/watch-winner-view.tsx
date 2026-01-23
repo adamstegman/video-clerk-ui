@@ -20,13 +20,13 @@ export function WatchWinnerView({
   onMarkWatched: (entryId: number) => void;
 }) {
   return (
-    <div className="mx-auto w-full max-w-md lg:max-w-5xl">
+    <div className="mx-auto w-full max-w-md">
       {winnerLoading && <p className={cn("text-sm", secondaryTextClasses)}>Loading selection…</p>}
       {winnerError && <p className="text-sm text-red-500">{winnerError}</p>}
       {!winnerLoading && !winnerError && winnerEntry && (
         <>
           <p className={cn("mb-3 text-sm", secondaryTextClasses)}>Selected to watch:</p>
-          <div className="relative h-[520px] md:h-[560px] lg:h-[600px]">
+          <div className="relative h-[520px] md:h-[560px]">
             <WatchCard
               entry={winnerEntry}
               isTop={false}
@@ -42,11 +42,11 @@ export function WatchWinnerView({
 
           {markError && <p className="mt-3 text-sm text-red-500">{markError}</p>}
 
-          <div className="mt-4 flex flex-wrap justify-evenly gap-3">
+          <div className="mt-4 flex gap-2">
             <ActionButton
               variant="secondary"
               size="lg"
-              className="min-w-[180px] flex-1"
+              className="flex-1"
               onClick={onBackToCards}
               disabled={markingWatched}
             >
@@ -54,7 +54,7 @@ export function WatchWinnerView({
             </ActionButton>
             <ActionButton
               size="lg"
-              className="min-w-[180px] flex-1"
+              className="flex-1"
               onClick={() => void onMarkWatched(winnerEntry.id)}
               loading={markingWatched}
               loadingText="Marking..."
