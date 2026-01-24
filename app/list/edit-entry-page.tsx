@@ -1,6 +1,4 @@
 import { ActionButton } from "../components/action-button";
-import { SettingsSection } from "../components/settings-section";
-import { SettingsSubsection } from "../components/settings-subsection";
 import {
   cn,
   errorTextClasses,
@@ -9,11 +7,8 @@ import {
   sectionSpacingClasses,
 } from "../lib/utils";
 import { EditEntryHeader } from "./components/edit-entry-header";
-import { EditEntryWatchedStatus } from "./components/edit-entry-watched-status";
-import { EditEntrySelectedTags } from "./components/edit-entry-selected-tags";
-import { EditEntryTagInput } from "./components/edit-entry-tag-input";
-import { EditEntryTagSuggestions } from "./components/edit-entry-tag-suggestions";
-import { EditEntryAvailableTags } from "./components/edit-entry-available-tags";
+import { EditEntryWatchedStatusSection } from "./components/edit-entry-watched-status-section";
+import { EditEntryTagsSection } from "./components/edit-entry-tags-section";
 import { EditEntryDeleteSection } from "./components/edit-entry-delete-section";
 
 export interface EditEntryTag {
@@ -100,37 +95,21 @@ export function EditEntryPage({
             <div className={sectionSpacingClasses}>
               <EditEntryHeader entry={entry} />
             </div>
-            <SettingsSection title="Status">
-              <EditEntryWatchedStatus watched={watched} onWatchedChange={onWatchedChange} />
-            </SettingsSection>
-            <SettingsSection title="Tags">
-              <SettingsSubsection
-                description=""
-                error={saveError}
-              >
-                <EditEntrySelectedTags selectedTags={selectedTags} onRemoveTag={onRemoveTag} />
-                <EditEntryTagInput
-                  tagQuery={tagQuery}
-                  onTagQueryChange={onTagQueryChange}
-                  onCreateTag={onCreateTag}
-                  creatingTag={creatingTag}
-                  suggestions={suggestions}
-                  canCreateTag={canCreateTag}
-                />
-                <EditEntryTagSuggestions
-                  suggestions={suggestions}
-                  canCreateTag={canCreateTag}
-                  tagQuery={tagQuery}
-                  onCreateTag={onCreateTag}
-                  onAddTag={onAddTag}
-                />
-                <EditEntryAvailableTags
-                  availableTags={availableTags}
-                  selectedTags={selectedTags}
-                  onToggleTag={onToggleTag}
-                />
-              </SettingsSubsection>
-            </SettingsSection>
+            <EditEntryWatchedStatusSection watched={watched} onWatchedChange={onWatchedChange} />
+            <EditEntryTagsSection
+              selectedTags={selectedTags}
+              availableTags={availableTags}
+              tagQuery={tagQuery}
+              suggestions={suggestions}
+              canCreateTag={canCreateTag}
+              creatingTag={creatingTag}
+              saveError={saveError}
+              onTagQueryChange={onTagQueryChange}
+              onAddTag={onAddTag}
+              onRemoveTag={onRemoveTag}
+              onToggleTag={onToggleTag}
+              onCreateTag={onCreateTag}
+            />
             <div
               className={cn(
                 sectionSpacingClasses,
