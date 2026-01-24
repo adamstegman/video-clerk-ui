@@ -103,6 +103,9 @@ describe("ListPageContainer", () => {
     renderWithProviders();
 
     await waitFor(() => {
+      const fightClubLink = screen.getByRole("link", { name: /Fight Club/i });
+      expect(fightClubLink).toBeInTheDocument();
+      expect(fightClubLink).toHaveAttribute("href", "/app/list/1");
       expect(screen.getByText("Fight Club")).toBeInTheDocument();
       expect(screen.getByText("1999")).toBeInTheDocument();
       expect(screen.getByText("Drama, Thriller")).toBeInTheDocument();

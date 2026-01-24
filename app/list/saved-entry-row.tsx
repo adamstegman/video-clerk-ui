@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { Link } from "react-router";
 import { TMDBConfigurationContext } from "../tmdb-api/tmdb-configuration";
 import { cn, primaryHeadingClasses, secondaryTextClasses } from "../lib/utils";
 
@@ -20,7 +21,13 @@ export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
   const posterSize = config.images.poster_sizes[posterSizeIndex] || config.images.poster_sizes[0];
 
   return (
-    <div className={cn("flex gap-4 md:gap-6 items-start", entry.isWatched && "opacity-70")}>
+    <Link
+      to={`/app/list/${entry.id}`}
+      className={cn(
+        "group flex gap-4 md:gap-6 items-start rounded-lg p-2 -m-2 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500",
+        entry.isWatched && "opacity-70"
+      )}
+    >
       {entry.posterPath && config.images.secure_base_url && (
         <img
           src={`${config.images.secure_base_url}${posterSize}${entry.posterPath}`}
@@ -41,7 +48,7 @@ export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
           </p>
         )}
       </div>
-    </div>
+    </Link>
   );
 }
 
