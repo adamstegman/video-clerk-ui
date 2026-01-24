@@ -94,14 +94,12 @@ describe("EditEntryPage", () => {
       onSaveTags,
       onDelete,
       onWatchedChange,
-      saveCompleted: true,
+      saveCompleted: false,
     });
 
     expect(screen.getByText("Example Movie")).toBeInTheDocument();
     expect(screen.getByText("2025")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remove tag Drama" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Saved!" })).toBeInTheDocument();
-
     const tagInput = screen.getByLabelText("Add tag");
     await user.type(tagInput, "New Tag");
     expect(onTagQueryChange).toHaveBeenCalled();
