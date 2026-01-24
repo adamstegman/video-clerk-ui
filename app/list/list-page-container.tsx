@@ -6,6 +6,7 @@ import type { SavedEntryRowData } from "./saved-entry-row";
 type EntriesQueryRow = {
   id: number;
   added_at: string;
+  watched_at: string | null;
   tmdb_details:
     | {
         poster_path: string | null;
@@ -79,6 +80,7 @@ export function ListPageContainer() {
             `
               id,
               added_at,
+              watched_at,
               tmdb_details (
                 poster_path,
                 name,
@@ -109,10 +111,15 @@ export function ListPageContainer() {
             releaseYear: getReleaseYear(details?.release_date ?? null),
             posterPath: details?.poster_path ?? null,
             tags,
+            isWatched: Boolean(row.watched_at),
           } satisfies SavedEntryRowData;
         });
 
-        if (!cancelled) setEntries(normalized);
+        const unwatched = normalized.filter((entry) => !entry.isWatched);
+        const watched = normalized.filter((entry) => entry.isWatched);
+        const sorted = [...unwatched, ...watched];
+
+        if (!cancelled) setEntries(sorted);
       } catch (err) {
         if (!cancelled) {
           const message =

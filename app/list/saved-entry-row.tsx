@@ -9,6 +9,7 @@ export interface SavedEntryRowData {
   releaseYear: string;
   posterPath: string | null;
   tags: string[];
+  isWatched: boolean;
 }
 
 export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
@@ -22,7 +23,10 @@ export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
   return (
     <Link
       to={`/app/list/${entry.id}`}
-      className="group flex gap-4 md:gap-6 items-start rounded-lg p-2 -m-2 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+      className={cn(
+        "group flex gap-4 md:gap-6 items-start rounded-lg p-2 -m-2 transition hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500",
+        entry.isWatched && "opacity-70"
+      )}
     >
       {entry.posterPath && config.images.secure_base_url && (
         <img

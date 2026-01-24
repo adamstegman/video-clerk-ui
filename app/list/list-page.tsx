@@ -12,6 +12,9 @@ export function ListPage({
   loading: boolean;
   error: string | null;
 }) {
+  const watchedStartIndex = entries.findIndex((entry) => entry.isWatched);
+  const showWatchedHeader = watchedStartIndex > 0;
+
   return (
     <>
       <div className={sectionSpacingClasses}>
@@ -32,9 +35,24 @@ export function ListPage({
         )}
         {!error && entries.length > 0 && (
           <div className="space-y-4 md:space-y-6">
-            {entries.map((entry) => (
-              <SavedEntryRow key={entry.id} entry={entry} />
-            ))}
+            {entries.flatMap((entry, index) => {
+              const rows = [];
+              if (showWatchedHeader && index === watchedStartIndex) {
+                rows.push(
+                  <h4
+                    key="watched-header"
+                    className={cn(
+                      "pt-2 text-xs font-semibold uppercase tracking-wide",
+                      secondaryTextClasses
+                    )}
+                  >
+                    Watched
+                  </h4>
+                );
+              }
+              rows.push(<SavedEntryRow key={entry.id} entry={entry} />);
+              return rows;
+            })}
           </div>
         )}
       </div>
