@@ -427,14 +427,23 @@ export function EditEntryPageContainer() {
       }
 
       const supabase = createClient();
+      const { data: groupId, error: groupError } = await supabase.rpc("current_user_group_id");
+      if (groupError) throw groupError;
+      if (!groupId) {
+        throw new Error("Could not determine group.");
+      }
       const nextWatchedAt = watched ? watchedAt ?? new Date().toISOString() : null;
       const { data: updatedEntry, error: watchedError } = await supabase
         .from("entries")
         .update({ watched_at: nextWatchedAt })
         .eq("id", entryId)
+        .eq("group_id", groupId)
         .select("watched_at")
         .maybeSingle();
       if (watchedError) throw watchedError;
+      if (!updatedEntry) {
+        throw new Error("Unable to update watched status.");
+      }
       setWatchedAt(updatedEntry?.watched_at ?? null);
       setWatched(Boolean(updatedEntry?.watched_at));
 
