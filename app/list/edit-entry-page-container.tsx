@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { createClient } from "../lib/supabase/client";
 import { EditEntryPage, type EditEntryData, type EditEntryTag } from "./edit-entry-page";
@@ -97,7 +97,7 @@ export function EditEntryPageContainer() {
   const [watchedAt, setWatchedAt] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveCompleted, setSaveCompleted] = useState(false);
   const [creatingTag, setCreatingTag] = useState(false);
 
   const [deleting, setDeleting] = useState(false);
@@ -205,16 +205,27 @@ export function EditEntryPageContainer() {
     load();
   }, [load]);
 
+  const redirectTimeoutRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!entry) return;
     setTagQuery("");
     setSaveError(null);
-    setSaveSuccess(false);
+    setSaveCompleted(false);
   }, [entry?.id]);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current !== null) {
+        window.clearTimeout(redirectTimeoutRef.current);
+        redirectTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const resetSaveStatus = useCallback(() => {
     setSaveError(null);
-    setSaveSuccess(false);
+    setSaveCompleted(false);
   }, []);
 
   const handleTagQueryChange = useCallback(
@@ -437,13 +448,19 @@ export function EditEntryPageContainer() {
       }
 
       setWatchedAt(nextWatchedAt);
-      setSaveSuccess(true);
+      setSaveCompleted(true);
+      if (redirectTimeoutRef.current !== null) {
+        window.clearTimeout(redirectTimeoutRef.current);
+      }
+      redirectTimeoutRef.current = window.setTimeout(() => {
+        navigate("/app/list");
+      }, 500);
     } catch (err) {
       setSaveError(getErrorMessage(err, "Failed to update tags"));
     } finally {
       setSaving(false);
     }
-  }, [entry, entryId, ensureTagExists, selectedTags, tagQuery, watched, watchedAt]);
+  }, [entry, entryId, ensureTagExists, navigate, selectedTags, tagQuery, watched, watchedAt]);
 
   const handleDelete = useCallback(async () => {
     if (!entryId || deleting) return;
@@ -486,7 +503,7 @@ export function EditEntryPageContainer() {
       onSaveTags={handleSaveTags}
       saving={saving}
       saveError={saveError}
-      saveSuccess={saveSuccess}
+      saveCompleted={saveCompleted}
       creatingTag={creatingTag}
       deleting={deleting}
       deleteError={deleteError}

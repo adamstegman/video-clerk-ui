@@ -130,7 +130,12 @@ describeIf("Integration (UI + Supabase): edit entry page", () => {
       await user.click(screen.getByRole("button", { name: "Save" }));
 
       await waitFor(() => {
-        expect(screen.getByText("Tags updated.")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Saved!" })).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(router.state.location.pathname).toBe("/app/list");
+        expect(screen.getByText("List view")).toBeInTheDocument();
       });
 
       const { data: entryTags, error: tagsError } = await authedClient
@@ -148,6 +153,11 @@ describeIf("Integration (UI + Supabase): edit entry page", () => {
           })
           .filter(Boolean) ?? [];
       expect(tagNames).toEqual(expect.arrayContaining(["Drama", customTag]));
+
+      await router.navigate(`/app/list/${entryId}`);
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "Delete entry" })).toBeInTheDocument();
+      });
 
       const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
       await user.click(screen.getByRole("button", { name: "Delete entry" }));

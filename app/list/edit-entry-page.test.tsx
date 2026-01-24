@@ -56,7 +56,7 @@ function renderEditEntryPage(props: Partial<Parameters<typeof EditEntryPage>[0]>
     onSaveTags: vi.fn(),
     saving: false,
     saveError: null,
-    saveSuccess: false,
+    saveCompleted: false,
     creatingTag: false,
     deleting: false,
     deleteError: null,
@@ -94,13 +94,13 @@ describe("EditEntryPage", () => {
       onSaveTags,
       onDelete,
       onWatchedChange,
-      saveSuccess: true,
+      saveCompleted: true,
     });
 
     expect(screen.getByText("Example Movie")).toBeInTheDocument();
     expect(screen.getByText("2025")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remove tag Drama" })).toBeInTheDocument();
-    expect(screen.getByText("Tags updated.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Saved!" })).toBeInTheDocument();
 
     const tagInput = screen.getByLabelText("Add tag");
     await user.type(tagInput, "New Tag");

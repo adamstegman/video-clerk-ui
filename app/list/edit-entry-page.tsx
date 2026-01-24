@@ -44,7 +44,7 @@ export function EditEntryPage({
   onSaveTags,
   saving,
   saveError,
-  saveSuccess,
+  saveCompleted,
   creatingTag,
   deleting,
   deleteError,
@@ -68,7 +68,7 @@ export function EditEntryPage({
   onSaveTags: () => void;
   saving: boolean;
   saveError: string | null;
-  saveSuccess: boolean;
+  saveCompleted: boolean;
   creatingTag: boolean;
   deleting: boolean;
   deleteError: string | null;
@@ -141,7 +141,6 @@ export function EditEntryPage({
               <SettingsSubsection
                 description=""
                 error={saveError}
-                success={saveSuccess ? "Tags updated." : null}
               >
                 <div className="flex flex-wrap gap-2">
                   {selectedTags.length === 0 && (
@@ -279,6 +278,8 @@ export function EditEntryPage({
                 loading={saving}
                 disabled={!entry || creatingTag}
                 loadingText="Saving..."
+                completed={saveCompleted}
+                completedText="Saved!"
                 className="w-full md:w-auto md:ml-auto"
               >
                 Save
