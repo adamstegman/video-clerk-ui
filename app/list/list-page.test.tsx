@@ -158,6 +158,14 @@ describe("ListPageContainer", () => {
         .getAllByRole("heading", { level: 3 })
         .map((heading) => heading.textContent);
       expect(titles).toEqual(["Unwatched One", "Unwatched Two", "Watched One"]);
+
+      const watchedHeader = screen.getByRole("heading", { level: 4, name: "Watched" });
+      const list = watchedHeader.parentElement;
+      expect(list).not.toBeNull();
+      const headingOrder = Array.from(list?.querySelectorAll("h3, h4") ?? []).map(
+        (heading) => heading.textContent
+      );
+      expect(headingOrder).toEqual(["Unwatched One", "Unwatched Two", "Watched", "Watched One"]);
     });
   });
 
