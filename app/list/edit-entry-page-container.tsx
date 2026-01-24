@@ -228,6 +228,15 @@ export function EditEntryPageContainer() {
     setSaveCompleted(false);
   }, []);
 
+  const handleWatchedChange = useCallback(
+    (value: boolean) => {
+      setWatched(value);
+      setWatchedAt((prev) => (value ? prev ?? new Date().toISOString() : null));
+      resetSaveStatus();
+    },
+    [resetSaveStatus]
+  );
+
   const handleTagQueryChange = useCallback(
     (value: string) => {
       setTagQuery(value);
@@ -425,11 +434,15 @@ export function EditEntryPageContainer() {
 
       const supabase = createClient();
       const nextWatchedAt = watched ? watchedAt ?? new Date().toISOString() : null;
-      const { error: watchedError } = await supabase
+      const { data: updatedEntry, error: watchedError } = await supabase
         .from("entries")
         .update({ watched_at: nextWatchedAt })
-        .eq("id", entryId);
+        .eq("id", entryId)
+        .select("watched_at")
+        .maybeSingle();
       if (watchedError) throw watchedError;
+      setWatchedAt(updatedEntry?.watched_at ?? null);
+      setWatched(Boolean(updatedEntry?.watched_at));
 
       const { error: clearError } = await supabase
         .from("entry_tags")
@@ -447,7 +460,6 @@ export function EditEntryPageContainer() {
         if (insertError) throw insertError;
       }
 
-      setWatchedAt(nextWatchedAt);
       setSaveCompleted(true);
       if (redirectTimeoutRef.current !== null) {
         window.clearTimeout(redirectTimeoutRef.current);
@@ -494,7 +506,7 @@ export function EditEntryPageContainer() {
       suggestions={suggestions}
       canCreateTag={canCreateTag}
       watched={watched}
-      onWatchedChange={setWatched}
+      onWatchedChange={handleWatchedChange}
       onTagQueryChange={handleTagQueryChange}
       onAddTag={handleAddTag}
       onRemoveTag={handleRemoveTag}
