@@ -118,7 +118,7 @@ export function EditEntryPage({
             </div>
             <SettingsSection title="Tags">
               <SettingsSubsection
-                description="Separate tags with commas to add or remove labels for this entry."
+                description=""
                 error={saveError}
                 success={saveSuccess ? "Tags updated." : null}
               >
