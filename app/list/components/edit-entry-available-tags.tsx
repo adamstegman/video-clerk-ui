@@ -1,5 +1,6 @@
 import { cn, secondaryTextClasses } from "../../lib/utils";
 import type { EditEntryTag } from "../edit-entry-page";
+import { EditEntryTagButton } from "./edit-entry-tag-button";
 
 interface EditEntryAvailableTagsProps {
   availableTags: EditEntryTag[];
@@ -24,20 +25,14 @@ export function EditEntryAvailableTags({
           {availableTags.map((tag) => {
             const selected = selectedTags.some((selectedTag) => selectedTag.id === tag.id);
             return (
-              <button
+              <EditEntryTagButton
                 key={tag.id}
-                type="button"
-                onClick={() => onToggleTag(tag)}
-                aria-pressed={selected}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition",
-                  selected
-                    ? "border-indigo-400 bg-indigo-500 text-white hover:bg-indigo-400 dark:border-indigo-500 dark:bg-indigo-500"
-                    : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                )}
-              >
-                {tag.name}
-              </button>
+                tag={tag}
+                variant="toggle"
+                selected={selected}
+                onClick={onToggleTag}
+                ariaLabel={`${selected ? "Deselect" : "Select"} tag ${tag.name}`}
+              />
             );
           })}
         </div>
