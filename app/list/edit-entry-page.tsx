@@ -23,7 +23,7 @@ export interface EditEntryData {
   id: number;
   title: string;
   releaseYear: string;
-  posterPath: string | null;
+  backdropPath: string | null;
 }
 
 export function EditEntryPage({
@@ -73,9 +73,13 @@ export function EditEntryPage({
 }) {
   const config = useContext(TMDBConfigurationContext);
 
-  const posterSizeIndex =
-    config.images.poster_sizes.length > 2 ? 2 : config.images.poster_sizes.length - 1;
-  const posterSize = config.images.poster_sizes[posterSizeIndex] || config.images.poster_sizes[0];
+  const backdropSizes = config.images.backdrop_sizes;
+  const backdropSize =
+    backdropSizes.length > 1
+      ? backdropSizes[1]
+      : backdropSizes.length === 1
+        ? backdropSizes[0]
+        : "";
 
   return (
     <>
@@ -102,32 +106,25 @@ export function EditEntryPage({
         {error && <p className={cn("text-sm", errorTextClasses)}>{error}</p>}
         {!loading && !error && entry && (
           <>
-            <SettingsSection title="Entry">
-              <div className="flex gap-4 md:gap-6 items-start">
-                {entry.posterPath && config.images.secure_base_url && (
-                  <img
-                    src={`${config.images.secure_base_url}${posterSize}${entry.posterPath}`}
-                    alt={entry.title}
-                    className="flex-shrink-0 w-16 h-24 object-cover rounded md:w-20 md:h-[120px]"
-                  />
+            <div className={sectionSpacingClasses}>
+              {entry.backdropPath && config.images.secure_base_url && backdropSize && (
+                <img
+                  src={`${config.images.secure_base_url}${backdropSize}${entry.backdropPath}`}
+                  alt={`${entry.title} backdrop`}
+                  className="w-full rounded-lg object-cover aspect-[16/9] mb-4"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <h3 className={cn("font-bold text-base md:text-lg", primaryHeadingClasses)}>
+                  {entry.title}
+                </h3>
+                {entry.releaseYear && (
+                  <p className={cn("text-sm md:text-base", secondaryTextClasses)}>
+                    {entry.releaseYear}
+                  </p>
                 )}
-                <div className="flex-1 min-w-0">
-                  <h3 className={cn("font-bold text-base md:text-lg", primaryHeadingClasses)}>
-                    {entry.title}
-                  </h3>
-                  {entry.releaseYear && (
-                    <p className={cn("text-sm md:text-base", secondaryTextClasses)}>
-                      {entry.releaseYear}
-                    </p>
-                  )}
-                  {selectedTags.length > 0 && (
-                    <p className={cn("text-sm md:text-base", secondaryTextClasses)}>
-                      {selectedTags.map((tag) => tag.name).join(", ")}
-                    </p>
-                  )}
-                </div>
               </div>
-            </SettingsSection>
+            </div>
             <SettingsSection title="Tags">
               <SettingsSubsection
                 description="Separate tags with commas to add or remove labels for this entry."

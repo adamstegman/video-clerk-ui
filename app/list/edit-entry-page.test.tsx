@@ -29,7 +29,7 @@ function renderEditEntryPage(props: Partial<Parameters<typeof EditEntryPage>[0]>
     id: 1,
     title: "Example Movie",
     releaseYear: "2025",
-    posterPath: "/poster.jpg",
+    backdropPath: "/backdrop.jpg",
   };
   const selectedTags = [
     { id: 1, name: "Drama", is_custom: false },
@@ -95,7 +95,7 @@ describe("EditEntryPage", () => {
 
     expect(screen.getByText("Example Movie")).toBeInTheDocument();
     expect(screen.getByText("2025")).toBeInTheDocument();
-    expect(screen.getByText("Drama, Cozy", { selector: "p" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove tag Drama" })).toBeInTheDocument();
     expect(screen.getByText("Tags updated.")).toBeInTheDocument();
 
     const tagInput = screen.getByLabelText("Add tag");
