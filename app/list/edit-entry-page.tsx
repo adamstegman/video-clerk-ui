@@ -111,7 +111,7 @@ export function EditEntryPage({
                 <img
                   src={`${config.images.secure_base_url}${backdropSize}${entry.backdropPath}`}
                   alt={`${entry.title} backdrop`}
-                  className="w-full rounded-lg object-cover aspect-[16/9] mb-4"
+                  className="w-full rounded-lg object-cover aspect-[21/9] mb-4"
                 />
               )}
               <div className="flex-1 min-w-0">
