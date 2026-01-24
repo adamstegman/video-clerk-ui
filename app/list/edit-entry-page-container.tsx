@@ -23,12 +23,12 @@ type EntriesQueryRow = {
   added_at: string;
   tmdb_details:
     | {
-        backdrop_path: string | null;
+        poster_path: string | null;
         name: string | null;
         release_date: string | null;
       }
     | Array<{
-        backdrop_path: string | null;
+        poster_path: string | null;
         name: string | null;
         release_date: string | null;
       }>
@@ -44,7 +44,7 @@ function getReleaseYear(releaseDate: string | null | undefined) {
 
 function normalizeDetails(
   details: EntriesQueryRow["tmdb_details"]
-): { backdrop_path: string | null; name: string | null; release_date: string | null } | null {
+): { poster_path: string | null; name: string | null; release_date: string | null } | null {
   if (!details) return null;
   return Array.isArray(details) ? details[0] ?? null : details;
 }
@@ -116,7 +116,7 @@ export function EditEntryPageContainer() {
               id,
               added_at,
               tmdb_details (
-                backdrop_path,
+                poster_path,
                 name,
                 release_date
               ),
@@ -174,7 +174,7 @@ export function EditEntryPageContainer() {
         id: row.id,
         title: details?.name || "Untitled",
         releaseYear: getReleaseYear(details?.release_date ?? null),
-        backdropPath: details?.backdrop_path ?? null,
+        posterPath: details?.poster_path ?? null,
       });
       setSelectedTags(tags);
     } catch (err) {

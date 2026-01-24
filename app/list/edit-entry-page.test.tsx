@@ -29,7 +29,7 @@ function renderEditEntryPage(props: Partial<Parameters<typeof EditEntryPage>[0]>
     id: 1,
     title: "Example Movie",
     releaseYear: "2025",
-    backdropPath: "/backdrop.jpg",
+    posterPath: "/poster.jpg",
   };
   const selectedTags = [
     { id: 1, name: "Drama", is_custom: false },
