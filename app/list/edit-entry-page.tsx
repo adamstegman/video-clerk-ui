@@ -242,30 +242,33 @@ export function EditEntryPage({
                 </div>
               </SettingsSubsection>
             </SettingsSection>
-            <div className={sectionSpacingClasses}>
-              <ActionButton
-                onClick={onSaveTags}
-                loading={saving}
-                disabled={!entry || creatingTag}
-                loadingText="Saving..."
-                className="w-full sm:w-auto"
-              >
-                Save
-              </ActionButton>
-            </div>
-            <div className={sectionSpacingClasses}>
+            <div
+              className={cn(
+                sectionSpacingClasses,
+                "flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
+              )}
+            >
               <div className="flex flex-col gap-2">
                 <ActionButton
                   onClick={onDelete}
                   loading={deleting}
                   loadingText="Deleting..."
                   variant="secondary"
-                  className="border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+                  className="border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 w-full md:w-auto"
                 >
                   Delete entry
                 </ActionButton>
                 {deleteError && <p className={cn("text-sm", errorTextClasses)}>{deleteError}</p>}
               </div>
+              <ActionButton
+                onClick={onSaveTags}
+                loading={saving}
+                disabled={!entry || creatingTag}
+                loadingText="Saving..."
+                className="w-full md:w-auto md:ml-auto"
+              >
+                Save
+              </ActionButton>
             </div>
           </>
         )}
