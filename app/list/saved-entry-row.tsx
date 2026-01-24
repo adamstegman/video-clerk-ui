@@ -8,6 +8,7 @@ export interface SavedEntryRowData {
   releaseYear: string;
   posterPath: string | null;
   tags: string[];
+  isWatched: boolean;
 }
 
 export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
@@ -19,7 +20,7 @@ export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
   const posterSize = config.images.poster_sizes[posterSizeIndex] || config.images.poster_sizes[0];
 
   return (
-    <div className="flex gap-4 md:gap-6 items-start">
+    <div className={cn("flex gap-4 md:gap-6 items-start", entry.isWatched && "opacity-70")}>
       {entry.posterPath && config.images.secure_base_url && (
         <img
           src={`${config.images.secure_base_url}${posterSize}${entry.posterPath}`}

@@ -111,6 +111,56 @@ describe("ListPageContainer", () => {
     });
   });
 
+  it("puts watched entries after unwatched entries", async () => {
+    mockOrder.mockResolvedValue({
+      data: [
+        {
+          id: 10,
+          added_at: "2026-01-04T00:00:00Z",
+          watched_at: "2026-01-05T00:00:00Z",
+          tmdb_details: {
+            poster_path: null,
+            name: "Watched One",
+            release_date: "2021-01-01",
+          },
+          entry_tags: null,
+        },
+        {
+          id: 11,
+          added_at: "2026-01-03T00:00:00Z",
+          watched_at: null,
+          tmdb_details: {
+            poster_path: null,
+            name: "Unwatched One",
+            release_date: "2022-01-01",
+          },
+          entry_tags: null,
+        },
+        {
+          id: 12,
+          added_at: "2026-01-02T00:00:00Z",
+          watched_at: null,
+          tmdb_details: {
+            poster_path: null,
+            name: "Unwatched Two",
+            release_date: "2023-01-01",
+          },
+          entry_tags: null,
+        },
+      ],
+      error: null,
+    });
+
+    renderWithProviders();
+
+    await waitFor(() => {
+      const titles = screen
+        .getAllByRole("heading", { level: 3 })
+        .map((heading) => heading.textContent);
+      expect(titles).toEqual(["Unwatched One", "Unwatched Two", "Watched One"]);
+    });
+  });
+
   it("renders an empty state when there are no entries", async () => {
     mockOrder.mockResolvedValue({ data: [], error: null });
     renderWithProviders();
