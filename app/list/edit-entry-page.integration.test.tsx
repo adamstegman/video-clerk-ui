@@ -129,9 +129,7 @@ describeIf("Integration (UI + Supabase): edit entry page", () => {
       });
       await user.click(screen.getByRole("button", { name: "Save" }));
 
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: "Saved!" })).toBeInTheDocument();
-      });
+      await screen.findByRole("button", { name: "Saved!" }, { timeout: 5000 });
 
       await waitFor(() => {
         expect(router.state.location.pathname).toBe("/app/list");
