@@ -405,7 +405,7 @@ export function EditEntryPageContainer() {
     if (!entryId || !entry) return;
     setSaving(true);
     setSaveError(null);
-    setSaveSuccess(false);
+    setSaveCompleted(false);
 
     try {
       let finalTags = selectedTags;
