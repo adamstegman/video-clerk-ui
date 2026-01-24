@@ -413,6 +413,13 @@ export function EditEntryPageContainer() {
       }
 
       const supabase = createClient();
+      const nextWatchedAt = watched ? watchedAt ?? new Date().toISOString() : null;
+      const { error: watchedError } = await supabase
+        .from("entries")
+        .update({ watched_at: nextWatchedAt })
+        .eq("id", entryId);
+      if (watchedError) throw watchedError;
+
       const { error: clearError } = await supabase
         .from("entry_tags")
         .delete()
