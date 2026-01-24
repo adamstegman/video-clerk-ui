@@ -1,9 +1,10 @@
 import { cn, secondaryTextClasses } from "../../lib/utils";
-import type { EditEntryTag } from "../edit-entry-page";
+import type { EditEntryTag as EditEntryTagType } from "../edit-entry-page";
+import { EditEntryTag } from "./edit-entry-tag";
 
 interface EditEntrySelectedTagsProps {
-  selectedTags: EditEntryTag[];
-  onRemoveTag: (tag: EditEntryTag) => void;
+  selectedTags: EditEntryTagType[];
+  onRemoveTag: (tag: EditEntryTagType) => void;
 }
 
 export function EditEntrySelectedTags({
@@ -16,15 +17,7 @@ export function EditEntrySelectedTags({
         <p className={cn("text-sm", secondaryTextClasses)}>No tags selected.</p>
       )}
       {selectedTags.map((tag) => (
-        <button
-          key={tag.id}
-          type="button"
-          onClick={() => onRemoveTag(tag)}
-          className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-950 dark:text-indigo-200"
-          aria-label={`Remove tag ${tag.name}`}
-        >
-          {tag.name}
-        </button>
+        <EditEntryTag key={tag.id} tag={tag} onRemove={onRemoveTag} />
       ))}
     </div>
   );
