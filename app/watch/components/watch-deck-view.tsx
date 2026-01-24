@@ -48,8 +48,8 @@ export function WatchDeckView({
   );
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col lg:max-w-5xl lg:flex-row lg:items-stretch lg:justify-center lg:gap-8">
-      <div className="hidden lg:flex lg:w-40 lg:flex-col lg:items-stretch lg:justify-center">
+    <div className="mx-auto flex h-full w-full max-w-md flex-col md:max-w-4xl md:flex-row md:items-stretch md:justify-center md:gap-6 lg:max-w-5xl lg:gap-8">
+      <div className="hidden md:flex md:w-28 md:flex-col md:items-stretch md:justify-center lg:w-40">
         <ActionButton
           variant="secondary"
           size="lg"
@@ -61,7 +61,7 @@ export function WatchDeckView({
         </ActionButton>
       </div>
 
-      <div className="flex w-full flex-1 flex-col lg:max-w-2xl">
+      <div className="flex w-full flex-1 flex-col md:max-w-2xl">
         <div className="relative flex-1 min-h-[440px] md:min-h-[520px] lg:min-h-[560px]">
           {cards.map((entry, idx) => (
             <WatchCard
@@ -96,7 +96,7 @@ export function WatchDeckView({
           ))}
         </div>
 
-        <div className="mt-4 flex-shrink-0 pb-2 lg:hidden">
+        <div className="mt-4 flex-shrink-0 pb-2 md:hidden">
           <div className="flex w-full items-center justify-between gap-3">
             <ActionButton
               variant="secondary"
@@ -115,7 +115,7 @@ export function WatchDeckView({
         </div>
       </div>
 
-      <div className="hidden lg:flex lg:w-40 lg:flex-col lg:items-stretch lg:justify-center lg:gap-3">
+      <div className="hidden md:flex md:w-28 md:flex-col md:items-stretch md:justify-center md:gap-3 lg:w-40">
         <div className="flex items-center justify-center">{likedSummary}</div>
         <ActionButton size="lg" className="w-full" onClick={onLike} disabled={isDisabled}>
           Like
