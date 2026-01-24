@@ -46,6 +46,8 @@ function renderEditEntryPage(props: Partial<Parameters<typeof EditEntryPage>[0]>
     tagQuery: "Weekend",
     suggestions: [],
     canCreateTag: true,
+    watched: false,
+    onWatchedChange: vi.fn(),
     onTagQueryChange: vi.fn(),
     onAddTag: vi.fn(),
     onRemoveTag: vi.fn(),
@@ -83,6 +85,7 @@ describe("EditEntryPage", () => {
     const onCreateTag = vi.fn();
     const onSaveTags = vi.fn();
     const onDelete = vi.fn();
+    const onWatchedChange = vi.fn();
 
     renderEditEntryPage({
       onTagQueryChange,
@@ -90,6 +93,7 @@ describe("EditEntryPage", () => {
       onCreateTag,
       onSaveTags,
       onDelete,
+      onWatchedChange,
       saveSuccess: true,
     });
 
@@ -110,6 +114,9 @@ describe("EditEntryPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Remove tag Drama" }));
     expect(onRemoveTag).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole("checkbox", { name: "Watched" }));
+    expect(onWatchedChange).toHaveBeenCalledWith(true);
 
     await user.click(screen.getByRole("button", { name: "Delete entry" }));
     expect(onDelete).toHaveBeenCalledTimes(1);

@@ -21,6 +21,7 @@ type EntryTagRow = {
 type EntriesQueryRow = {
   id: number;
   added_at: string;
+  watched_at: string | null;
   tmdb_details:
     | {
         poster_path: string | null;
@@ -92,6 +93,8 @@ export function EditEntryPageContainer() {
   const [selectedTags, setSelectedTags] = useState<EditEntryTag[]>([]);
   const [availableTags, setAvailableTags] = useState<EditEntryTag[]>([]);
   const [tagQuery, setTagQuery] = useState("");
+  const [watched, setWatched] = useState(false);
+  const [watchedAt, setWatchedAt] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -112,6 +115,12 @@ export function EditEntryPageContainer() {
     setError(null);
     try {
       const supabase = createClient();
+      const nextWatchedAt = watched ? watchedAt ?? new Date().toISOString() : null;
+      const { error: watchedError } = await supabase
+        .from("entries")
+        .update({ watched_at: nextWatchedAt })
+        .eq("id", entryId);
+      if (watchedError) throw watchedError;
       const [entryResponse, tagsResponse] = await Promise.all([
         supabase
           .from("entries")
@@ -119,6 +128,7 @@ export function EditEntryPageContainer() {
             `
               id,
               added_at,
+              watched_at,
               tmdb_details (
                 poster_path,
                 name,
@@ -181,6 +191,8 @@ export function EditEntryPageContainer() {
         posterPath: details?.poster_path ?? null,
       });
       setSelectedTags(tags);
+      setWatched(Boolean(row.watched_at));
+      setWatchedAt(row.watched_at ?? null);
     } catch (err) {
       setEntry(null);
       setError(getErrorMessage(err, "Failed to load entry"));
@@ -417,13 +429,14 @@ export function EditEntryPageContainer() {
         if (insertError) throw insertError;
       }
 
+      setWatchedAt(nextWatchedAt);
       setSaveSuccess(true);
     } catch (err) {
       setSaveError(getErrorMessage(err, "Failed to update tags"));
     } finally {
       setSaving(false);
     }
-  }, [entry, entryId, ensureTagExists, selectedTags, tagQuery]);
+  }, [entry, entryId, ensureTagExists, selectedTags, tagQuery, watched, watchedAt]);
 
   const handleDelete = useCallback(async () => {
     if (!entryId || deleting) return;
@@ -456,6 +469,8 @@ export function EditEntryPageContainer() {
       tagQuery={tagQuery}
       suggestions={suggestions}
       canCreateTag={canCreateTag}
+      watched={watched}
+      onWatchedChange={setWatched}
       onTagQueryChange={handleTagQueryChange}
       onAddTag={handleAddTag}
       onRemoveTag={handleRemoveTag}

@@ -34,6 +34,8 @@ export function EditEntryPage({
   tagQuery,
   suggestions,
   canCreateTag,
+  watched,
+  onWatchedChange,
   onTagQueryChange,
   onAddTag,
   onRemoveTag,
@@ -56,6 +58,8 @@ export function EditEntryPage({
   tagQuery: string;
   suggestions: EditEntryTag[];
   canCreateTag: boolean;
+  watched: boolean;
+  onWatchedChange: (value: boolean) => void;
   onTagQueryChange: (value: string) => void;
   onAddTag: (tag: EditEntryTag) => void;
   onRemoveTag: (tag: EditEntryTag) => void;
@@ -116,6 +120,23 @@ export function EditEntryPage({
                 </div>
               </div>
             </div>
+            <SettingsSection title="Status">
+              <div className="flex items-center gap-3">
+                <input
+                  id="entry-watched"
+                  type="checkbox"
+                  checked={watched}
+                  onChange={(event) => onWatchedChange(event.target.checked)}
+                  className="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950"
+                />
+                <label
+                  htmlFor="entry-watched"
+                  className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                >
+                  Watched
+                </label>
+              </div>
+            </SettingsSection>
             <SettingsSection title="Tags">
               <SettingsSubsection
                 description=""
