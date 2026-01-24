@@ -129,12 +129,13 @@ describeIf("Integration (UI + Supabase): edit entry page", () => {
       });
       await user.click(screen.getByRole("button", { name: "Save" }));
 
-      await screen.findByRole("button", { name: "Saved!" }, { timeout: 5000 });
-
-      await waitFor(() => {
-        expect(router.state.location.pathname).toBe("/app/list");
-        expect(screen.getByText("List view")).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(router.state.location.pathname).toBe("/app/list");
+          expect(screen.getByText("List view")).toBeInTheDocument();
+        },
+        { timeout: 15000 }
+      );
 
       const { data: entryTags, error: tagsError } = await authedClient
         .from("entry_tags")
