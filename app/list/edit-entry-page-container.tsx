@@ -57,7 +57,11 @@ function normalizeTag(
 }
 
 function normalizeTagKey(name: string) {
-  return name.trim().toLowerCase();
+  return normalizeTagName(name).toLowerCase();
+}
+
+function normalizeTagName(name: string) {
+  return name.trim().replace(/\s+/g, " ");
 }
 
 function getErrorMessage(err: unknown, fallback: string) {
@@ -249,10 +253,12 @@ export function EditEntryPageContainer() {
 
   const fetchExistingTag = useCallback(
     async (supabase: ReturnType<typeof createClient>, name: string) => {
+      const normalizedName = normalizeTagName(name);
+      if (!normalizedName) return null;
       const { data, error } = await supabase
         .from("tags")
         .select("id,name,is_custom")
-        .eq("name", name);
+        .ilike("name", normalizedName);
       if (error) throw error;
       const normalized =
         data
@@ -279,9 +285,9 @@ export function EditEntryPageContainer() {
 
   const ensureTagExists = useCallback(
     async (rawName: string) => {
-      const trimmed = rawName.trim();
-      if (!trimmed) return null;
-      const key = normalizeTagKey(trimmed);
+      const normalizedName = normalizeTagName(rawName);
+      if (!normalizedName) return null;
+      const key = normalizeTagKey(normalizedName);
       const existing = availableTags.find((tag) => normalizeTagKey(tag.name) === key);
       if (existing) return existing;
 
@@ -295,7 +301,7 @@ export function EditEntryPageContainer() {
       const { data: created, error: createError } = await supabase
         .from("tags")
         .insert({
-          name: trimmed,
+          name: normalizedName,
           tmdb_id: null,
           group_id: groupId,
           is_custom: true,
@@ -304,7 +310,7 @@ export function EditEntryPageContainer() {
         .maybeSingle();
 
       if (createError) {
-        const existingTag = await fetchExistingTag(supabase, trimmed);
+        const existingTag = await fetchExistingTag(supabase, normalizedName);
         if (existingTag) return existingTag;
         throw createError;
       }
@@ -331,12 +337,12 @@ export function EditEntryPageContainer() {
   const handleCreateTag = useCallback(
     async (value: string) => {
       if (creatingTag) return;
-      const trimmed = value.trim();
-      if (!trimmed) return;
+      const normalizedName = normalizeTagName(value);
+      if (!normalizedName) return;
       setCreatingTag(true);
       resetSaveStatus();
       try {
-        const tag = await ensureTagExists(trimmed);
+        const tag = await ensureTagExists(normalizedName);
         if (tag) {
           setSelectedTags((prev) => {
             const exists = prev.some(
