@@ -1,5 +1,4 @@
 import { useContext } from "react";
-import { Link } from "react-router";
 import { TMDBConfigurationContext } from "../tmdb-api/tmdb-configuration";
 import { ActionButton } from "../components/action-button";
 import { SettingsSection } from "../components/settings-section";
@@ -82,12 +81,6 @@ export function EditEntryPage({
       <div className={sectionSpacingClasses}>
         <div className="flex items-center justify-between gap-4">
           <h2 className={pageTitleClasses}>Edit entry</h2>
-          <Link
-            to="/app/list"
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-          >
-            Back to list
-          </Link>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto min-h-0 pb-4">
