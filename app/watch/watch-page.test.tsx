@@ -29,6 +29,7 @@ function makeEntry(id: number, title: string): WatchCardEntry {
     posterPath: null,
     backdropPath: null,
     mediaType: "movie",
+    runtime: null,
     tags: [],
   };
 }
@@ -354,6 +355,7 @@ describe("WatchPage", () => {
       posterPath: null,
       backdropPath: null,
       mediaType: "tv",
+      runtime: null,
       tags: ["Action", "Drama"],
     };
     renderWatchPage({ initialEntries: [entry] });

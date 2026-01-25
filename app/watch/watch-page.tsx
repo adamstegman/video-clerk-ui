@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { MotionProps } from "motion/react";
 import type { WatchCardEntry } from "./components/watch-card";
 import { WatchDeckView, type WatchDeckHandlers } from "./components/watch-deck-view";
@@ -7,6 +7,7 @@ import { WatchHeader } from "./components/watch-header";
 import { WatchLoadingState } from "./components/watch-loading-state";
 import { WatchPickerView } from "./components/watch-picker-view";
 import { WatchWinnerView } from "./components/watch-winner-view";
+import { WatchQuestionnaire, type QuestionnaireFilters } from "./components/watch-questionnaire";
 
 type SwipeDecision = "like" | "nope";
 type DragInputType = "pointer" | "touch";
@@ -29,6 +30,47 @@ function findTouchById(touches: React.TouchList, id: number) {
     if (touch && touch.identifier === id) return touch;
   }
   return null;
+}
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function filterEntries(
+  entries: WatchCardEntry[],
+  filters: QuestionnaireFilters
+): WatchCardEntry[] {
+  if (filters.timeTypes.length === 0 && filters.selectedTags.length === 0) {
+    return entries;
+  }
+
+  return entries.filter((entry) => {
+    // Time filter
+    const matchesTime =
+      filters.timeTypes.length === 0 ||
+      filters.timeTypes.some((timeType) => {
+        if (timeType === "movie") {
+          return entry.mediaType === "movie";
+        } else if (timeType === "short-show") {
+          return entry.mediaType === "tv" && (entry.runtime ?? 0) < 30;
+        } else if (timeType === "long-show") {
+          return entry.mediaType === "tv" && (entry.runtime ?? 0) >= 30;
+        }
+        return false;
+      });
+
+    // Tag filter (OR logic - match any selected tag)
+    const matchesTags =
+      filters.selectedTags.length === 0 ||
+      filters.selectedTags.some((tag) => entry.tags.includes(tag));
+
+    return matchesTime && matchesTags;
+  });
 }
 
 export function WatchPage({
@@ -56,6 +98,11 @@ export function WatchPage({
   onMarkWatched: (entryId: number) => Promise<void>;
   onBackToCards: () => void;
 }) {
+  const [showQuestionnaire, setShowQuestionnaire] = useState(true);
+  const [filters, setFilters] = useState<QuestionnaireFilters>({
+    timeTypes: [],
+    selectedTags: [],
+  });
   const [deck, setDeck] = useState<WatchCardEntry[]>([]);
   const [liked, setLiked] = useState<WatchCardEntry[]>([]);
   const [chosenId, setChosenId] = useState<number | null>(null);
@@ -88,8 +135,26 @@ export function WatchPage({
     type: null,
   });
 
+  // Extract all unique tags from entries
+  const availableTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    initialEntries.forEach((entry) => {
+      entry.tags.forEach((tag) => tagSet.add(tag));
+    });
+    return Array.from(tagSet).sort();
+  }, [initialEntries]);
+
+  // Apply filters and randomize
+  const filteredAndRandomizedEntries = useMemo(() => {
+    if (showQuestionnaire) {
+      return [];
+    }
+    const filtered = filterEntries(initialEntries, filters);
+    return shuffleArray(filtered);
+  }, [initialEntries, filters, showQuestionnaire]);
+
   const resetLocalFlow = () => {
-    setDeck(initialEntries);
+    setDeck(filteredAndRandomizedEntries);
     setLiked([]);
     setChosenId(null);
     setMarkError(null);
@@ -107,10 +172,27 @@ export function WatchPage({
     });
   };
 
+  const handleStartQuestionnaire = () => {
+    setShowQuestionnaire(false);
+  };
+
   useEffect(() => {
-    // Reset local flow when data reloads.
-    resetLocalFlow();
+    // Reset questionnaire and local flow when data reloads
+    setShowQuestionnaire(true);
+    setFilters({ timeTypes: [], selectedTags: [] });
+    setDeck([]);
+    setLiked([]);
+    setChosenId(null);
+    setMarkError(null);
+    setMarkingWatched(false);
   }, [initialEntries]);
+
+  useEffect(() => {
+    // Update deck when filters change and questionnaire is done
+    if (!showQuestionnaire) {
+      setDeck(filteredAndRandomizedEntries);
+    }
+  }, [filteredAndRandomizedEntries, showQuestionnaire]);
 
   useEffect(() => {
     return () => {
@@ -353,6 +435,8 @@ export function WatchPage({
             markError={markError}
             markingWatched={markingWatched}
             onBackToCards={() => {
+              setShowQuestionnaire(true);
+              setFilters({ timeTypes: [], selectedTags: [] });
               resetLocalFlow();
               onBackToCards();
             }}
@@ -360,38 +444,68 @@ export function WatchPage({
           />
         ) : (
           <>
-            {loading && !error && deck.length === 0 && <WatchLoadingState />}
+            {loading && !error && initialEntries.length === 0 && <WatchLoadingState />}
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            {!loading && !error && isDeckExhausted && liked.length === 0 && (
+            {!loading && !error && initialEntries.length === 0 && (
               <WatchEmptyState onReload={onReload} />
             )}
 
-            {isInPickMode ? (
+            {!loading && !error && initialEntries.length > 0 && showQuestionnaire && (
+              <WatchQuestionnaire
+                availableTags={availableTags}
+                filters={filters}
+                onFiltersChange={setFilters}
+                onStart={handleStartQuestionnaire}
+              />
+            )}
+
+            {!loading && !error && !showQuestionnaire && isDeckExhausted && liked.length === 0 && (
+              <div className="flex flex-col items-center gap-4 p-6">
+                <p className="text-center text-zinc-600 dark:text-zinc-400">
+                  No entries match your filters. Try different options.
+                </p>
+                <button
+                  onClick={() => setShowQuestionnaire(true)}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  Change Filters
+                </button>
+              </div>
+            )}
+
+            {!showQuestionnaire && isInPickMode ? (
               <WatchPickerView
                 liked={liked}
                 likeGoal={likeGoal}
                 chosenId={chosenId}
                 markingWatched={markingWatched}
                 onChooseId={setChosenId}
-                onStartOver={resetLocalFlow}
+                onStartOver={() => {
+                  setShowQuestionnaire(true);
+                  resetLocalFlow();
+                }}
                 onChooseWinner={handleChooseWinner}
               />
             ) : (
-              <WatchDeckView
-                cards={visibleCards}
-                likeOpacity={likeOpacity}
-                nopeOpacity={nopeOpacity}
-                topMotionProps={topMotionProps}
-                stackTransition={stackTransition}
-                handlers={deckHandlers}
-                onNope={() => animateOut("nope")}
-                onLike={() => animateOut("like")}
-                isAnimatingOut={drag.animatingOut}
-                likedCount={liked.length}
-                likeGoal={likeGoal}
-              />
+              !showQuestionnaire &&
+              !isInPickMode &&
+              deck.length > 0 && (
+                <WatchDeckView
+                  cards={visibleCards}
+                  likeOpacity={likeOpacity}
+                  nopeOpacity={nopeOpacity}
+                  topMotionProps={topMotionProps}
+                  stackTransition={stackTransition}
+                  handlers={deckHandlers}
+                  onNope={() => animateOut("nope")}
+                  onLike={() => animateOut("like")}
+                  isAnimatingOut={drag.animatingOut}
+                  likedCount={liked.length}
+                  likeGoal={likeGoal}
+                />
+              )
             )}
           </>
         )}
