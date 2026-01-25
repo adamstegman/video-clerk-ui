@@ -150,7 +150,7 @@ describe("WatchPage", () => {
   });
 
   it("cards view: does not enter picker before like threshold", async () => {
-    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
 
     fireEvent.click(getPrimaryLikeButton());
@@ -160,7 +160,7 @@ describe("WatchPage", () => {
   });
 
   it("cards view: promotes the next card after a swipe", async () => {
-    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
 
     fireEvent.click(getPrimaryLikeButton());
@@ -172,7 +172,7 @@ describe("WatchPage", () => {
 
   it("picker branch: Choose winner calls onGoToWinner with the selected entry", async () => {
     const onGoToWinner = vi.fn();
-    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries, onGoToWinner });
 
     // Like 3 items to enter pick mode (likeGoal=3)
