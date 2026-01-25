@@ -107,7 +107,7 @@ describe("WatchPage", () => {
     expect(screen.getByText("You liked 3. Pick one to watch:")).toBeInTheDocument();
   });
 
-  it("main branch: shows picker if deck ends with 1-2 likes", async () => {
+  it("main branch: shows picker if deck ends with 2 likes", async () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
 
@@ -129,15 +129,116 @@ describe("WatchPage", () => {
     expect(screen.getByText("B")).toBeInTheDocument();
   });
 
-  it("small-deck branch: if fewer than 3 entries exist, picker appears after 1 like", async () => {
+  it("main branch: auto-selects winner if deck ends with only 1 like", async () => {
+    const onGoToWinner = vi.fn();
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
+    renderWatchPage({ initialEntries: entries, onGoToWinner });
+
+    // Like 1, nope 3 to exhaust deck
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+
+    // Should skip picker and auto-select the single liked entry
+    expect(onGoToWinner).toHaveBeenCalledTimes(1);
+    expect(onGoToWinner.mock.calls[0][0]).toMatchObject({ id: 1, title: "A" });
+  });
+
+  it("small-deck branch: auto-selects winner when only 1 entry is liked", async () => {
+    const onGoToWinner = vi.fn();
     const entries = [makeEntry(1, "Only A"), makeEntry(2, "Only B")];
-    renderWatchPage({ initialEntries: entries });
+    renderWatchPage({ initialEntries: entries, onGoToWinner });
 
     fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
 
-    expect(screen.getByText("You liked 1. Pick one to watch:")).toBeInTheDocument();
-    expect(screen.getByText("Only A")).toBeInTheDocument();
+    // Should skip picker and call onGoToWinner directly
+    expect(onGoToWinner).toHaveBeenCalledTimes(1);
+    expect(onGoToWinner.mock.calls[0][0]).toMatchObject({ id: 1, title: "Only A" });
+  });
+
+  it("winner branch: Back to cards resets local state after auto-select", async () => {
+    const onGoToWinner = vi.fn();
+    const onBackToCards = vi.fn();
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B")];
+    const winner = entries[0];
+
+    const { rerender } = render(
+      <TMDBConfigurationContext value={mockConfigurationState}>
+        <WatchPage
+          initialEntries={entries}
+          loading={false}
+          error={null}
+          onReload={vi.fn(async () => {})}
+          winnerEntryId={null}
+          winnerEntry={null}
+          winnerLoading={false}
+          winnerError={null}
+          onGoToWinner={onGoToWinner}
+          onMarkWatched={vi.fn(async () => {})}
+          onBackToCards={onBackToCards}
+        />
+      </TMDBConfigurationContext>
+    );
+
+    // Like 1 entry -> auto-selects winner
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    expect(onGoToWinner).toHaveBeenCalledTimes(1);
+
+    // Simulate container updating winnerEntryId (shows winner view)
+    rerender(
+      <TMDBConfigurationContext value={mockConfigurationState}>
+        <WatchPage
+          initialEntries={entries}
+          loading={false}
+          error={null}
+          onReload={vi.fn(async () => {})}
+          winnerEntryId={winner.id}
+          winnerEntry={winner}
+          winnerLoading={false}
+          winnerError={null}
+          onGoToWinner={onGoToWinner}
+          onMarkWatched={vi.fn(async () => {})}
+          onBackToCards={onBackToCards}
+        />
+      </TMDBConfigurationContext>
+    );
+
+    expect(screen.getAllByRole("button", { name: "Back to cards" })[0]).toBeInTheDocument();
+
+    // Click Back to cards
+    fireEvent.click(screen.getAllByRole("button", { name: "Back to cards" })[0]);
+    expect(onBackToCards).toHaveBeenCalledTimes(1);
+
+    // Simulate container clearing winnerEntryId
+    rerender(
+      <TMDBConfigurationContext value={mockConfigurationState}>
+        <WatchPage
+          initialEntries={entries}
+          loading={false}
+          error={null}
+          onReload={vi.fn(async () => {})}
+          winnerEntryId={null}
+          winnerEntry={null}
+          winnerLoading={false}
+          winnerError={null}
+          onGoToWinner={onGoToWinner}
+          onMarkWatched={vi.fn(async () => {})}
+          onBackToCards={onBackToCards}
+        />
+      </TMDBConfigurationContext>
+    );
+
+    // Should be back in deck view, not re-triggering onGoToWinner
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+    expect(onGoToWinner).toHaveBeenCalledTimes(1); // Still only 1 call
   });
 
   it("cards view: renders stacked cards from the deck", () => {
@@ -150,7 +251,7 @@ describe("WatchPage", () => {
   });
 
   it("cards view: does not enter picker before like threshold", async () => {
-    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
 
     fireEvent.click(getPrimaryLikeButton());
@@ -160,7 +261,7 @@ describe("WatchPage", () => {
   });
 
   it("cards view: promotes the next card after a swipe", async () => {
-    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
 
     fireEvent.click(getPrimaryLikeButton());
@@ -172,7 +273,7 @@ describe("WatchPage", () => {
 
   it("picker branch: Choose winner calls onGoToWinner with the selected entry", async () => {
     const onGoToWinner = vi.fn();
-    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries, onGoToWinner });
 
     // Like 3 items to enter pick mode (likeGoal=3)
@@ -194,11 +295,17 @@ describe("WatchPage", () => {
   });
 
   it("picker branch: Start over restores the deck (liked cards become available again)", async () => {
-    const entries = [makeEntry(1, "A"), makeEntry(2, "B")];
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
 
-    // Like once -> pick mode (likeGoal=1)
+    // Like 2, then nope remaining to exhaust deck -> pick mode with 2 likes
     fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
     act(() => vi.advanceTimersByTime(250));
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
 
@@ -220,7 +327,7 @@ describe("WatchPage", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Mark as Watched" }));
+      fireEvent.click(screen.getAllByRole("button", { name: "Mark as Watched" })[0]);
       await Promise.resolve();
     });
     expect(onMarkWatched).toHaveBeenCalledWith(99);

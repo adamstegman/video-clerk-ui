@@ -123,11 +123,18 @@ export function WatchPage({
 
   const swipeThreshold = 110;
   const likeGoal =
-    initialEntries.length === 0 ? 0 : initialEntries.length < 3 ? 1 : 3;
+    initialEntries.length === 0 ? 0 : initialEntries.length <= 3 ? 1 : 3;
   const isDeckExhausted = deck.length === 0;
   const canPickWithRemainingLikes =
     isDeckExhausted && liked.length > 0 && liked.length < 3;
   const isInPickMode = likeGoal > 0 && (liked.length >= likeGoal || canPickWithRemainingLikes);
+
+  // Auto-select winner when there's only one liked entry (skip picker view)
+  useEffect(() => {
+    if (isInPickMode && liked.length === 1 && !winnerEntryId) {
+      onGoToWinner(liked[0]);
+    }
+  }, [isInPickMode, liked, winnerEntryId, onGoToWinner]);
 
   const isTopActive = !!top && drag.activeId === top.id;
   const activeDx = isTopActive ? drag.dx : 0;
@@ -345,7 +352,10 @@ export function WatchPage({
             winnerError={winnerError}
             markError={markError}
             markingWatched={markingWatched}
-            onBackToCards={onBackToCards}
+            onBackToCards={() => {
+              resetLocalFlow();
+              onBackToCards();
+            }}
             onMarkWatched={(entryId) => void markWatched(entryId)}
           />
         ) : (
