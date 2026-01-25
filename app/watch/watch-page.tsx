@@ -129,6 +129,13 @@ export function WatchPage({
     isDeckExhausted && liked.length > 0 && liked.length < 3;
   const isInPickMode = likeGoal > 0 && (liked.length >= likeGoal || canPickWithRemainingLikes);
 
+  // Auto-select winner when there's only one liked entry (skip picker view)
+  useEffect(() => {
+    if (isInPickMode && liked.length === 1 && !winnerEntryId) {
+      onGoToWinner(liked[0]);
+    }
+  }, [isInPickMode, liked, winnerEntryId, onGoToWinner]);
+
   const isTopActive = !!top && drag.activeId === top.id;
   const activeDx = isTopActive ? drag.dx : 0;
   const activeDy = isTopActive ? drag.dy : 0;

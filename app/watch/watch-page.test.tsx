@@ -107,7 +107,7 @@ describe("WatchPage", () => {
     expect(screen.getByText("You liked 3. Pick one to watch:")).toBeInTheDocument();
   });
 
-  it("main branch: shows picker if deck ends with 1-2 likes", async () => {
+  it("main branch: shows picker if deck ends with 2 likes", async () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
 
@@ -129,15 +129,37 @@ describe("WatchPage", () => {
     expect(screen.getByText("B")).toBeInTheDocument();
   });
 
-  it("small-deck branch: if fewer than 3 entries exist, picker appears after 1 like", async () => {
+  it("main branch: auto-selects winner if deck ends with only 1 like", async () => {
+    const onGoToWinner = vi.fn();
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
+    renderWatchPage({ initialEntries: entries, onGoToWinner });
+
+    // Like 1, nope 3 to exhaust deck
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+
+    // Should skip picker and auto-select the single liked entry
+    expect(onGoToWinner).toHaveBeenCalledTimes(1);
+    expect(onGoToWinner.mock.calls[0][0]).toMatchObject({ id: 1, title: "A" });
+  });
+
+  it("small-deck branch: auto-selects winner when only 1 entry is liked", async () => {
+    const onGoToWinner = vi.fn();
     const entries = [makeEntry(1, "Only A"), makeEntry(2, "Only B")];
-    renderWatchPage({ initialEntries: entries });
+    renderWatchPage({ initialEntries: entries, onGoToWinner });
 
     fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
 
-    expect(screen.getByText("You liked 1. Pick one to watch:")).toBeInTheDocument();
-    expect(screen.getByText("Only A")).toBeInTheDocument();
+    // Should skip picker and call onGoToWinner directly
+    expect(onGoToWinner).toHaveBeenCalledTimes(1);
+    expect(onGoToWinner.mock.calls[0][0]).toMatchObject({ id: 1, title: "Only A" });
   });
 
   it("cards view: renders stacked cards from the deck", () => {
@@ -194,11 +216,17 @@ describe("WatchPage", () => {
   });
 
   it("picker branch: Start over restores the deck (liked cards become available again)", async () => {
-    const entries = [makeEntry(1, "A"), makeEntry(2, "B")];
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
 
-    // Like once -> pick mode (likeGoal=1)
+    // Like 2, then nope remaining to exhaust deck -> pick mode with 2 likes
     fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
+    act(() => vi.advanceTimersByTime(250));
+    fireEvent.click(getPrimaryNopeButton());
     act(() => vi.advanceTimersByTime(250));
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
 
