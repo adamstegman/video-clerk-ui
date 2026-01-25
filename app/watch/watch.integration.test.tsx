@@ -93,6 +93,21 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
     return n;
   }
 
+  async function completeQuestionnaire(user: ReturnType<typeof userEvent.setup>) {
+    // Wait for questionnaire to appear
+    await waitFor(() => {
+      expect(screen.getByText(/How much time do you have\?/i)).toBeInTheDocument();
+    });
+
+    // Select "Movie" option (simplest filter)
+    const movieButton = screen.getByRole("button", { name: /Movie.*Feature length film/i });
+    await user.click(movieButton);
+
+    // Click "Start Swiping"
+    const startButton = screen.getByRole("button", { name: /Start Swiping/i });
+    await user.click(startButton);
+  }
+
   async function waitForCardsViewReady(expectedGoalText: RegExp) {
     await waitFor(() => {
       // Ensure a card is present (deck loaded)
@@ -166,9 +181,14 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       const user = userEvent.setup();
       const { router } = renderWatchRouter(["/app/watch"]);
 
-      // Wait for deck to load
+      // Wait for page to load and complete questionnaire
       await waitFor(() => {
         expect(screen.getByText("Watch")).toBeInTheDocument();
+      });
+      await completeQuestionnaire(user);
+
+      // Wait for deck to load after questionnaire
+      await waitFor(() => {
         expect(getPrimaryLikeButton()).toBeInTheDocument();
       });
       await waitForCardsViewReady(/\/\s*3/);
@@ -251,6 +271,8 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       const user = userEvent.setup();
       const { router } = renderWatchRouter(["/app/watch"]);
 
+      await completeQuestionnaire(user);
+
       await waitFor(() => expect(getPrimaryLikeButton()).toBeInTheDocument());
       await waitForCardsViewReady(/\/\s*\d+/);
 
@@ -290,6 +312,8 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
 
       const user = userEvent.setup();
       const { router } = renderWatchRouter(["/app/watch"]);
+
+      await completeQuestionnaire(user);
 
       await waitFor(() => expect(getPrimaryLikeButton()).toBeInTheDocument());
       await waitForCardsViewReady(/\/\s*\d+/);

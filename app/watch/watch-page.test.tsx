@@ -77,6 +77,16 @@ function getPrimaryNopeButton() {
   return screen.getAllByRole("button", { name: "Nope" })[0];
 }
 
+function completeQuestionnaire() {
+  // Click "Movie" option (simplest filter that matches all movie entries)
+  const movieButton = screen.getByRole("button", { name: /Movie.*Feature length film/i });
+  fireEvent.click(movieButton);
+
+  // Click "Start Swiping"
+  const startButton = screen.getByRole("button", { name: /Start Swiping/i });
+  fireEvent.click(startButton);
+}
+
 describe("WatchPage", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -90,6 +100,7 @@ describe("WatchPage", () => {
   it("main branch: requires 3 likes before showing the picker", async () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
+    completeQuestionnaire();
 
     // Like 1
     fireEvent.click(getPrimaryLikeButton());
@@ -111,6 +122,7 @@ describe("WatchPage", () => {
   it("main branch: shows picker if deck ends with 2 likes", async () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
+    completeQuestionnaire();
 
     // Like 2
     fireEvent.click(getPrimaryLikeButton());
@@ -134,6 +146,7 @@ describe("WatchPage", () => {
     const onGoToWinner = vi.fn();
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries, onGoToWinner });
+    completeQuestionnaire();
 
     // Like 1, nope 3 to exhaust deck
     fireEvent.click(getPrimaryLikeButton());
@@ -154,6 +167,7 @@ describe("WatchPage", () => {
     const onGoToWinner = vi.fn();
     const entries = [makeEntry(1, "Only A"), makeEntry(2, "Only B")];
     renderWatchPage({ initialEntries: entries, onGoToWinner });
+    completeQuestionnaire();
 
     fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
@@ -186,6 +200,7 @@ describe("WatchPage", () => {
         />
       </TMDBConfigurationContext>
     );
+    completeQuestionnaire();
 
     // Like 1 entry -> auto-selects winner
     fireEvent.click(getPrimaryLikeButton());
@@ -236,15 +251,15 @@ describe("WatchPage", () => {
       </TMDBConfigurationContext>
     );
 
-    // Should be back in deck view, not re-triggering onGoToWinner
-    expect(screen.getByText("A")).toBeInTheDocument();
-    expect(screen.getByText("B")).toBeInTheDocument();
+    // Should be back at questionnaire, not re-triggering onGoToWinner
+    expect(screen.getByText(/How much time do you have\?/i)).toBeInTheDocument();
     expect(onGoToWinner).toHaveBeenCalledTimes(1); // Still only 1 call
   });
 
   it("cards view: renders stacked cards from the deck", () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
     renderWatchPage({ initialEntries: entries });
+    completeQuestionnaire();
 
     expect(screen.getByText("A")).toBeInTheDocument();
     expect(screen.getByText("B")).toBeInTheDocument();
@@ -254,6 +269,7 @@ describe("WatchPage", () => {
   it("cards view: does not enter picker before like threshold", async () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
+    completeQuestionnaire();
 
     fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
@@ -264,6 +280,7 @@ describe("WatchPage", () => {
   it("cards view: promotes the next card after a swipe", async () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
+    completeQuestionnaire();
 
     fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
@@ -276,6 +293,7 @@ describe("WatchPage", () => {
     const onGoToWinner = vi.fn();
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries, onGoToWinner });
+    completeQuestionnaire();
 
     // Like 3 items to enter pick mode (likeGoal=3)
     fireEvent.click(getPrimaryLikeButton());
@@ -298,6 +316,7 @@ describe("WatchPage", () => {
   it("picker branch: Start over restores the deck (liked cards become available again)", async () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
     renderWatchPage({ initialEntries: entries });
+    completeQuestionnaire();
 
     // Like 2, then nope remaining to exhaust deck -> pick mode with 2 likes
     fireEvent.click(getPrimaryLikeButton());
@@ -310,11 +329,10 @@ describe("WatchPage", () => {
     act(() => vi.advanceTimersByTime(250));
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
 
-    // Start over should restore cards view
+    // Start over should return to questionnaire
     fireEvent.click(screen.getByRole("button", { name: "Start over" }));
     expect(screen.queryByText(/Pick one to watch/i)).not.toBeInTheDocument();
-    expect(screen.getAllByText(/Liked:/i).length).toBeGreaterThan(0);
-    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText(/How much time do you have\?/i)).toBeInTheDocument();
   });
 
   it("winner branch: Mark as Watched calls onMarkWatched", async () => {
@@ -355,10 +373,16 @@ describe("WatchPage", () => {
       posterPath: null,
       backdropPath: null,
       mediaType: "tv",
-      runtime: null,
+      runtime: 45,
       tags: ["Action", "Drama"],
     };
     renderWatchPage({ initialEntries: [entry] });
+
+    // Complete questionnaire with long show filter (matches runtime: 45 min)
+    const longShowButton = screen.getByRole("button", { name: /Long Show.*Full episodes/i });
+    fireEvent.click(longShowButton);
+    const startButton = screen.getByRole("button", { name: /Start Swiping/i });
+    fireEvent.click(startButton);
 
     expect(screen.getByText("TV | Action, Drama")).toBeInTheDocument();
   });
