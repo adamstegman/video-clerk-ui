@@ -20,7 +20,7 @@ export function ListPage({
       <div className={sectionSpacingClasses}>
         <h2 className={pageTitleClasses}>List of Saved Items</h2>
       </div>
-      <div className="flex-1 overflow-y-auto min-h-0 pb-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 pb-4">
         {loading && !error && entries.length === 0 && (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-4">
