@@ -207,7 +207,7 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       expect(Number.isFinite(winnerId)).toBe(true);
 
       // Mark watched
-      await user.click(screen.getByRole("button", { name: "Mark as Watched" }));
+      await user.click(screen.getAllByRole("button", { name: "Mark as Watched" })[0]);
 
       // Should navigate back to /app/watch
       await waitFor(() => {
@@ -263,7 +263,7 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
         expect(screen.getByText(/Selected to watch/i)).toBeInTheDocument();
       });
 
-      await user.click(screen.getByRole("button", { name: "Mark as Watched" }));
+      await user.click(screen.getAllByRole("button", { name: "Mark as Watched" })[0]);
 
       await waitFor(() => expect(router.state.location.pathname).toBe("/app/watch"));
 
@@ -304,7 +304,7 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       });
 
       const winnerId = Number(router.state.location.pathname.split("/").pop());
-      await user.click(screen.getByRole("button", { name: "Mark as Watched" }));
+      await user.click(screen.getAllByRole("button", { name: "Mark as Watched" })[0]);
       await waitFor(() => expect(router.state.location.pathname).toBe("/app/watch"));
 
       const { data: row, error } = await authedClient.from("entries").select("watched_at").eq("id", winnerId).single();
