@@ -19,11 +19,11 @@ function getPointerXY(e: React.PointerEvent) {
   return { x: e.clientX, y: e.clientY };
 }
 
-function getTouchXY(touch: Touch) {
+function getTouchXY(touch: React.Touch) {
   return { x: touch.clientX, y: touch.clientY };
 }
 
-function findTouchById(touches: TouchList, id: number) {
+function findTouchById(touches: React.TouchList, id: number) {
   for (let i = 0; i < touches.length; i += 1) {
     const touch = touches.item(i);
     if (touch && touch.identifier === id) return touch;
