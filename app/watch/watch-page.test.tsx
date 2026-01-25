@@ -138,8 +138,13 @@ describe("WatchPage", () => {
 
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
     expect(screen.getByText("You liked 2. Pick one to watch:")).toBeInTheDocument();
-    expect(screen.getByText("A")).toBeInTheDocument();
-    expect(screen.getByText("B")).toBeInTheDocument();
+
+    // Verify we have exactly 2 picker buttons (randomization means we don't know which specific entries)
+    const pickerButtons = screen.getAllByRole("button").filter(btn => {
+      const text = btn.textContent || "";
+      return /^[A-D]\s+2024\s+Overview/.test(text);
+    });
+    expect(pickerButtons).toHaveLength(2);
   });
 
   it("main branch: auto-selects winner if deck ends with only 1 like", async () => {
@@ -160,7 +165,11 @@ describe("WatchPage", () => {
 
     // Should skip picker and auto-select the single liked entry
     expect(onGoToWinner).toHaveBeenCalledTimes(1);
-    expect(onGoToWinner.mock.calls[0][0]).toMatchObject({ id: 1, title: "A" });
+
+    // Could be any of the 4 entries due to randomization
+    const winner = onGoToWinner.mock.calls[0][0];
+    expect([1, 2, 3, 4]).toContain(winner.id);
+    expect(["A", "B", "C", "D"]).toContain(winner.title);
   });
 
   it("small-deck branch: auto-selects winner when only 1 entry is liked", async () => {
@@ -174,7 +183,11 @@ describe("WatchPage", () => {
 
     // Should skip picker and call onGoToWinner directly
     expect(onGoToWinner).toHaveBeenCalledTimes(1);
-    expect(onGoToWinner.mock.calls[0][0]).toMatchObject({ id: 1, title: "Only A" });
+
+    // Could be either entry due to randomization
+    const winner = onGoToWinner.mock.calls[0][0];
+    expect([1, 2]).toContain(winner.id);
+    expect(["Only A", "Only B"]).toContain(winner.title);
   });
 
   it("winner branch: Back to cards resets local state after auto-select", async () => {
@@ -282,11 +295,19 @@ describe("WatchPage", () => {
     renderWatchPage({ initialEntries: entries });
     completeQuestionnaire();
 
+    // Get the title of the first card (randomized, so we need to capture it)
+    const cardGroup = screen.getByRole("group", { name: /Swipe card for/i });
+    const firstCardTitle = cardGroup.querySelector("h3")?.textContent;
+    expect(firstCardTitle).toBeTruthy();
+
     fireEvent.click(getPrimaryLikeButton());
     act(() => vi.advanceTimersByTime(250));
 
-    expect(screen.queryByText("A")).not.toBeInTheDocument();
-    expect(screen.getByText("B")).toBeInTheDocument();
+    // First card should be gone, replaced by next card
+    const newCardGroup = screen.getByRole("group", { name: /Swipe card for/i });
+    const newCardTitle = newCardGroup.querySelector("h3")?.textContent;
+    expect(newCardTitle).toBeTruthy();
+    expect(newCardTitle).not.toBe(firstCardTitle);
   });
 
   it("picker branch: Choose winner calls onGoToWinner with the selected entry", async () => {
@@ -305,12 +326,21 @@ describe("WatchPage", () => {
 
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
 
-    // Select an entry and choose winner
-    fireEvent.click(screen.getByRole("button", { name: /^A 2024/i }));
+    // Select whichever entry is first in the picker (randomized)
+    const pickerButtons = screen.getAllByRole("button").filter(btn => {
+      const text = btn.textContent || "";
+      return /^[A-D]\s+2024\s+Overview/.test(text);
+    });
+    expect(pickerButtons.length).toBeGreaterThanOrEqual(3);
+
+    const firstPickerButton = pickerButtons[0];
+    const selectedTitle = firstPickerButton.textContent?.match(/^([A-D])/)?.[1];
+
+    fireEvent.click(firstPickerButton);
     fireEvent.click(screen.getByRole("button", { name: "Choose winner" }));
 
     expect(onGoToWinner).toHaveBeenCalledTimes(1);
-    expect(onGoToWinner.mock.calls[0][0]).toMatchObject({ id: 1, title: "A" });
+    expect(onGoToWinner.mock.calls[0][0].title).toBe(selectedTitle);
   });
 
   it("picker branch: Start over restores the deck (liked cards become available again)", async () => {
