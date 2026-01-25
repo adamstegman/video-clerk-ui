@@ -140,9 +140,10 @@ describe("WatchPage", () => {
     expect(screen.getByText("You liked 2. Pick one to watch:")).toBeInTheDocument();
 
     // Verify we have exactly 2 picker buttons (randomization means we don't know which specific entries)
+    // Picker buttons contain "Overview" and are not the action buttons
     const pickerButtons = screen.getAllByRole("button").filter(btn => {
       const text = btn.textContent || "";
-      return /^[A-D]\s+2024\s+Overview/.test(text);
+      return text.includes("Overview") && text.includes("2024");
     });
     expect(pickerButtons).toHaveLength(2);
   });
@@ -327,14 +328,16 @@ describe("WatchPage", () => {
     expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
 
     // Select whichever entry is first in the picker (randomized)
+    // Picker buttons contain "Overview" and are not the action buttons
     const pickerButtons = screen.getAllByRole("button").filter(btn => {
       const text = btn.textContent || "";
-      return /^[A-D]\s+2024\s+Overview/.test(text);
+      return text.includes("Overview") && text.includes("2024");
     });
     expect(pickerButtons.length).toBeGreaterThanOrEqual(3);
 
     const firstPickerButton = pickerButtons[0];
-    const selectedTitle = firstPickerButton.textContent?.match(/^([A-D])/)?.[1];
+    // Extract title from the first div child
+    const selectedTitle = firstPickerButton.querySelector("div")?.textContent;
 
     fireEvent.click(firstPickerButton);
     fireEvent.click(screen.getByRole("button", { name: "Choose winner" }));
