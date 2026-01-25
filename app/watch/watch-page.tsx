@@ -352,7 +352,10 @@ export function WatchPage({
             winnerError={winnerError}
             markError={markError}
             markingWatched={markingWatched}
-            onBackToCards={onBackToCards}
+            onBackToCards={() => {
+              resetLocalFlow();
+              onBackToCards();
+            }}
             onMarkWatched={(entryId) => void markWatched(entryId)}
           />
         ) : (

@@ -162,6 +162,85 @@ describe("WatchPage", () => {
     expect(onGoToWinner.mock.calls[0][0]).toMatchObject({ id: 1, title: "Only A" });
   });
 
+  it("winner branch: Back to cards resets local state after auto-select", async () => {
+    const onGoToWinner = vi.fn();
+    const onBackToCards = vi.fn();
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B")];
+    const winner = entries[0];
+
+    const { rerender } = render(
+      <TMDBConfigurationContext value={mockConfigurationState}>
+        <WatchPage
+          initialEntries={entries}
+          loading={false}
+          error={null}
+          onReload={vi.fn(async () => {})}
+          winnerEntryId={null}
+          winnerEntry={null}
+          winnerLoading={false}
+          winnerError={null}
+          onGoToWinner={onGoToWinner}
+          onMarkWatched={vi.fn(async () => {})}
+          onBackToCards={onBackToCards}
+        />
+      </TMDBConfigurationContext>
+    );
+
+    // Like 1 entry -> auto-selects winner
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+    expect(onGoToWinner).toHaveBeenCalledTimes(1);
+
+    // Simulate container updating winnerEntryId (shows winner view)
+    rerender(
+      <TMDBConfigurationContext value={mockConfigurationState}>
+        <WatchPage
+          initialEntries={entries}
+          loading={false}
+          error={null}
+          onReload={vi.fn(async () => {})}
+          winnerEntryId={winner.id}
+          winnerEntry={winner}
+          winnerLoading={false}
+          winnerError={null}
+          onGoToWinner={onGoToWinner}
+          onMarkWatched={vi.fn(async () => {})}
+          onBackToCards={onBackToCards}
+        />
+      </TMDBConfigurationContext>
+    );
+
+    expect(screen.getByRole("button", { name: "Back to cards" })).toBeInTheDocument();
+
+    // Click Back to cards
+    fireEvent.click(screen.getByRole("button", { name: "Back to cards" }));
+    expect(onBackToCards).toHaveBeenCalledTimes(1);
+
+    // Simulate container clearing winnerEntryId
+    rerender(
+      <TMDBConfigurationContext value={mockConfigurationState}>
+        <WatchPage
+          initialEntries={entries}
+          loading={false}
+          error={null}
+          onReload={vi.fn(async () => {})}
+          winnerEntryId={null}
+          winnerEntry={null}
+          winnerLoading={false}
+          winnerError={null}
+          onGoToWinner={onGoToWinner}
+          onMarkWatched={vi.fn(async () => {})}
+          onBackToCards={onBackToCards}
+        />
+      </TMDBConfigurationContext>
+    );
+
+    // Should be back in deck view, not re-triggering onGoToWinner
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+    expect(onGoToWinner).toHaveBeenCalledTimes(1); // Still only 1 call
+  });
+
   it("cards view: renders stacked cards from the deck", () => {
     const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C")];
     renderWatchPage({ initialEntries: entries });
