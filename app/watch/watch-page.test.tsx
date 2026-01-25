@@ -210,10 +210,10 @@ describe("WatchPage", () => {
       </TMDBConfigurationContext>
     );
 
-    expect(screen.getByRole("button", { name: "Back to cards" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Back to cards" })[0]).toBeInTheDocument();
 
     // Click Back to cards
-    fireEvent.click(screen.getByRole("button", { name: "Back to cards" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Back to cards" })[0]);
     expect(onBackToCards).toHaveBeenCalledTimes(1);
 
     // Simulate container clearing winnerEntryId
@@ -327,7 +327,7 @@ describe("WatchPage", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Mark as Watched" }));
+      fireEvent.click(screen.getAllByRole("button", { name: "Mark as Watched" })[0]);
       await Promise.resolve();
     });
     expect(onMarkWatched).toHaveBeenCalledWith(99);
