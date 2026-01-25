@@ -159,6 +159,7 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await seedEntry(authedClient, base + 1, "A");
       await seedEntry(authedClient, base + 2, "B");
       await seedEntry(authedClient, base + 3, "C");
+      await seedEntry(authedClient, base + 4, "D");
 
       const idA = await getEntryIdByTmdb(authedClient, groupId, base + 1);
 
@@ -235,7 +236,7 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
     }
   }, 30_000);
 
-  it("only-one-entry flow: picker after 1 like, then mark watched", async () => {
+  it("only-one-entry flow: auto-selects winner after 1 like, then mark watched", async () => {
     const admin = createAdminClient();
     const testUser = await createTestUser(admin);
     authedClient = testUser.client;
@@ -251,25 +252,17 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       const { router } = renderWatchRouter(["/app/watch"]);
 
       await waitFor(() => expect(getPrimaryLikeButton()).toBeInTheDocument());
-      // In this case, likeGoal should be 1, but the cards view still shows a goal of 3 in the UI.
-      // We just wait for the deck to be present before clicking.
       await waitForCardsViewReady(/\/\s*\d+/);
 
+      // Like the only entry - should auto-select and skip picker
       await user.click(getPrimaryLikeButton());
+
+      // Should go straight to winner view (no picker)
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
+        expect(router.state.location.pathname).toBe(`/app/watch/${entryId}`);
+        expect(screen.getByText(/Selected to watch/i)).toBeInTheDocument();
       });
 
-      // Pick mode should appear after 1 like when total entries < 3.
-      expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
-      await user.click(screen.getByRole("button", { name: /^Solo\b/i }));
-
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: "Choose winner" })).not.toBeDisabled();
-      });
-      await user.click(screen.getByRole("button", { name: "Choose winner" }));
-
-      await waitFor(() => expect(router.state.location.pathname).toBe(`/app/watch/${entryId}`));
       await user.click(screen.getByRole("button", { name: "Mark as Watched" }));
 
       await waitFor(() => expect(router.state.location.pathname).toBe("/app/watch"));
@@ -282,7 +275,7 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
     }
   }, 30_000);
 
-  it("only-two-entries flow: picker after 1 like, choose winner, mark watched", async () => {
+  it("only-two-entries flow: auto-selects winner after 1 like, mark watched", async () => {
     const admin = createAdminClient();
     const testUser = await createTestUser(admin);
     authedClient = testUser.client;
@@ -301,27 +294,13 @@ describeIf("Integration (UI + Supabase): watch flow", () => {
       await waitFor(() => expect(getPrimaryLikeButton()).toBeInTheDocument());
       await waitForCardsViewReady(/\/\s*\d+/);
 
+      // Like 1 of 2 entries - should auto-select and skip picker
       await user.click(getPrimaryLikeButton());
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
-      });
 
-      expect(screen.getByRole("button", { name: "Choose winner" })).toBeInTheDocument();
-
-      // Choose "One" if present; otherwise choose whatever is present
-      const onePick = screen.queryByRole("button", { name: /^One\b/i });
-      if (onePick) await user.click(onePick);
-      else await user.click(screen.getByRole("button", { name: /^Two\b/i }));
-
-      await waitFor(() => {
-        expect(screen.getByRole("button", { name: "Choose winner" })).not.toBeDisabled();
-      });
-
-      await user.click(screen.getByRole("button", { name: "Choose winner" }));
-
+      // Should go straight to winner view (no picker)
       await waitFor(() => {
         expect(router.state.location.pathname).toMatch(/^\/app\/watch\/\d+$/);
-        expect(screen.getByRole("button", { name: "Mark as Watched" })).toBeInTheDocument();
+        expect(screen.getByText(/Selected to watch/i)).toBeInTheDocument();
       });
 
       const winnerId = Number(router.state.location.pathname.split("/").pop());
