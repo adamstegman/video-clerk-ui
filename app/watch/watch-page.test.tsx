@@ -473,5 +473,107 @@ describe("WatchPage", () => {
     }
     // If no "Liked:" label, we've entered pick mode or winner selection, which is also correct
   });
+
+  it("questionnaire: displays matching count as filters change", () => {
+    // Create entries: 5 movies, 3 long TV shows, 2 short TV shows
+    const entries: WatchCardEntry[] = [
+      ...Array.from({ length: 5 }, (_, i) => ({
+        id: i + 1,
+        title: `Movie ${i + 1}`,
+        overview: `Overview Movie ${i + 1}`,
+        releaseYear: "2024",
+        posterPath: null,
+        backdropPath: null,
+        mediaType: "movie" as const,
+        runtime: 120,
+        tags: [],
+      })),
+      ...Array.from({ length: 3 }, (_, i) => ({
+        id: i + 6,
+        title: `Drama ${i + 1}`,
+        overview: `Overview Drama ${i + 1}`,
+        releaseYear: "2024",
+        posterPath: null,
+        backdropPath: null,
+        mediaType: "tv" as const,
+        runtime: 45,
+        tags: [],
+      })),
+      ...Array.from({ length: 2 }, (_, i) => ({
+        id: i + 9,
+        title: `Sitcom ${i + 1}`,
+        overview: `Overview Sitcom ${i + 1}`,
+        releaseYear: "2024",
+        posterPath: null,
+        backdropPath: null,
+        mediaType: "tv" as const,
+        runtime: 22,
+        tags: [],
+      })),
+    ];
+
+    renderWatchPage({ initialEntries: entries });
+
+    // Initially, no filters selected, so no count shown
+    expect(screen.queryByText(/entries match/i)).not.toBeInTheDocument();
+
+    // Select "Movie" filter
+    const movieButton = screen.getByRole("button", { name: /Movie.*Feature length film/i });
+    fireEvent.click(movieButton);
+
+    // Should show 5 matching entries
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getByText(/entries match your filters/i)).toBeInTheDocument();
+
+    // Add "Long Show" filter
+    const longShowButton = screen.getByRole("button", { name: /Long Show.*Full episodes/i });
+    fireEvent.click(longShowButton);
+
+    // Should now show 8 matching entries (5 movies + 3 long shows)
+    expect(screen.getByText("8")).toBeInTheDocument();
+
+    // Add "Short Show" filter
+    const shortShowButton = screen.getByRole("button", { name: /Short Show.*Quick episodes/i });
+    fireEvent.click(shortShowButton);
+
+    // Should now show 10 matching entries (all of them)
+    expect(screen.getByText("10")).toBeInTheDocument();
+
+    // Deselect "Movie" to see just TV shows
+    fireEvent.click(movieButton);
+
+    // Should now show 5 matching entries (3 long + 2 short shows)
+    expect(screen.getByText("5")).toBeInTheDocument();
+  });
+
+  it("questionnaire: disables start button when no matches", () => {
+    const entries: WatchCardEntry[] = [
+      {
+        id: 1,
+        title: "Movie",
+        overview: "Overview",
+        releaseYear: "2024",
+        posterPath: null,
+        backdropPath: null,
+        mediaType: "movie",
+        runtime: 120,
+        tags: [],
+      },
+    ];
+
+    renderWatchPage({ initialEntries: entries });
+
+    // Select "Long Show" filter (won't match any entries)
+    const longShowButton = screen.getByRole("button", { name: /Long Show.*Full episodes/i });
+    fireEvent.click(longShowButton);
+
+    // Should show 0 matching entries
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByText(/No entries match these filters/i)).toBeInTheDocument();
+
+    // Start button should be disabled
+    const startButton = screen.getByRole("button", { name: /Start Swiping/i });
+    expect(startButton).toBeDisabled();
+  });
 });
 

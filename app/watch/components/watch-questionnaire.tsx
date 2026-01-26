@@ -11,6 +11,7 @@ interface WatchQuestionnaireProps {
   filters: QuestionnaireFilters;
   onFiltersChange: (filters: QuestionnaireFilters) => void;
   onStart: () => void;
+  matchingCount: number;
 }
 
 export function WatchQuestionnaire({
@@ -18,6 +19,7 @@ export function WatchQuestionnaire({
   filters,
   onFiltersChange,
   onStart,
+  matchingCount,
 }: WatchQuestionnaireProps) {
   const toggleTimeType = (type: "short-show" | "long-show" | "movie") => {
     const newTimeTypes = filters.timeTypes.includes(type)
@@ -86,14 +88,33 @@ export function WatchQuestionnaire({
         </div>
       )}
 
+      {/* Matching Count */}
+      {hasSelections && (
+        <div
+          className={cn(
+            "p-4 rounded-lg border-2 text-center",
+            matchingCount > 0
+              ? "border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30"
+              : "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30"
+          )}
+        >
+          <div className={cn("text-3xl font-bold", primaryHeadingClasses)}>
+            {matchingCount}
+          </div>
+          <div className={cn("text-sm mt-1", secondaryTextClasses)}>
+            {matchingCount === 1 ? "entry matches" : "entries match"} your filters
+          </div>
+        </div>
+      )}
+
       {/* Start Button */}
       <button
         onClick={onStart}
-        disabled={!hasSelections}
+        disabled={!hasSelections || matchingCount === 0}
         className={cn(
           "w-full py-3 px-4 rounded-lg font-semibold transition-colors",
           "flex items-center justify-center gap-2",
-          hasSelections
+          hasSelections && matchingCount > 0
             ? "bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800"
             : "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
         )}
@@ -105,6 +126,12 @@ export function WatchQuestionnaire({
       {!hasSelections && (
         <p className={cn("text-xs text-center", secondaryTextClasses)}>
           Select at least one option to start
+        </p>
+      )}
+
+      {hasSelections && matchingCount === 0 && (
+        <p className={cn("text-xs text-center text-amber-600 dark:text-amber-400")}>
+          No entries match these filters. Try different options.
         </p>
       )}
     </div>

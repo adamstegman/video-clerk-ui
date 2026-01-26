@@ -144,6 +144,15 @@ export function WatchPage({
     return Array.from(tagSet).sort();
   }, [initialEntries]);
 
+  // Calculate matching count for questionnaire display
+  const matchingCount = useMemo(() => {
+    if (!showQuestionnaire) {
+      return 0;
+    }
+    const filtered = filterEntries(initialEntries, filters);
+    return filtered.length;
+  }, [initialEntries, filters, showQuestionnaire]);
+
   // Apply filters and randomize
   const filteredAndRandomizedEntries = useMemo(() => {
     if (showQuestionnaire) {
@@ -462,6 +471,7 @@ export function WatchPage({
                 filters={filters}
                 onFiltersChange={setFilters}
                 onStart={handleStartQuestionnaire}
+                matchingCount={matchingCount}
               />
             )}
 
