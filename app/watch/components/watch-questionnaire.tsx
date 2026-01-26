@@ -88,24 +88,7 @@ export function WatchQuestionnaire({
         </div>
       )}
 
-      {/* Matching Count */}
-      {hasSelections && (
-        <div
-          className={cn(
-            "p-4 rounded-lg border-2 text-center",
-            matchingCount > 0
-              ? "border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30"
-              : "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30"
-          )}
-        >
-          <div className={cn("text-3xl font-bold", primaryHeadingClasses)}>
-            {matchingCount}
-          </div>
-          <div className={cn("text-sm mt-1", secondaryTextClasses)}>
-            {matchingCount === 1 ? "entry matches" : "entries match"} your filters
-          </div>
-        </div>
-      )}
+      {hasSelections && <MatchingCountBadge matchingCount={matchingCount} />}
 
       {/* Start Button */}
       <button
@@ -198,5 +181,25 @@ function TagChip({
     >
       {label}
     </button>
+  );
+}
+
+function MatchingCountBadge({ matchingCount }: { matchingCount: number }) {
+  return (
+    <div
+      className={cn(
+        "p-4 rounded-lg border-2 text-center",
+        matchingCount > 0
+          ? "border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30"
+          : "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30"
+      )}
+    >
+      <div className={cn("text-3xl font-bold", primaryHeadingClasses)}>
+        {matchingCount}
+      </div>
+      <div className={cn("text-sm mt-1", secondaryTextClasses)}>
+        {matchingCount === 1 ? "entry matches" : "entries match"} your filters
+      </div>
+    </div>
   );
 }
