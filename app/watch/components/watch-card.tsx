@@ -11,6 +11,7 @@ export interface WatchCardEntry {
   posterPath: string | null;
   backdropPath: string | null;
   mediaType: string;
+  runtime: number | null;
   tags: string[];
 }
 

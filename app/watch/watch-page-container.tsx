@@ -16,6 +16,7 @@ type EntriesQueryRow = {
         overview: string | null;
         name: string | null;
         release_date: string | null;
+        runtime: number | null;
       }
     | Array<{
         poster_path: string | null;
@@ -23,6 +24,7 @@ type EntriesQueryRow = {
         overview: string | null;
         name: string | null;
         release_date: string | null;
+        runtime: number | null;
       }>
     | null;
   entry_tags:
@@ -53,6 +55,7 @@ function normalizeDetails(
   overview: string | null;
   name: string | null;
   release_date: string | null;
+  runtime: number | null;
 } | null {
   if (!details) return null;
   return Array.isArray(details) ? details[0] ?? null : details;
@@ -113,7 +116,8 @@ export function WatchPageContainer() {
               backdrop_path,
               overview,
               name,
-              release_date
+              release_date,
+              runtime
             ),
             entry_tags (
               tags (
@@ -143,6 +147,7 @@ export function WatchPageContainer() {
           posterPath: details?.poster_path ?? null,
           backdropPath: details?.backdrop_path ?? null,
           mediaType: row.media_type,
+          runtime: details?.runtime ?? null,
           tags,
         } satisfies WatchCardEntry;
       });
@@ -194,7 +199,8 @@ export function WatchPageContainer() {
                 backdrop_path,
                 overview,
                 name,
-                release_date
+                release_date,
+                runtime
               ),
               entry_tags (
                 tags (
@@ -228,6 +234,7 @@ export function WatchPageContainer() {
           posterPath: details?.poster_path ?? null,
           backdropPath: details?.backdrop_path ?? null,
           mediaType: row.media_type,
+          runtime: details?.runtime ?? null,
           tags,
         });
       } catch (err) {
