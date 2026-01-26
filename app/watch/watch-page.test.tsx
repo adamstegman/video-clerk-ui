@@ -419,5 +419,59 @@ describe("WatchPage", () => {
 
     expect(screen.getByText("TV | Action, Drama")).toBeInTheDocument();
   });
+
+  it("questionnaire: adjusts like goal based on filtered entries (not total)", () => {
+    // Create 10 entries: 7 movies and 3 TV shows
+    const entries: WatchCardEntry[] = [
+      ...Array.from({ length: 7 }, (_, i) => ({
+        id: i + 1,
+        title: `Movie ${i + 1}`,
+        overview: `Overview Movie ${i + 1}`,
+        releaseYear: "2024",
+        posterPath: null,
+        backdropPath: null,
+        mediaType: "movie" as const,
+        runtime: 120,
+        tags: [],
+      })),
+      ...Array.from({ length: 3 }, (_, i) => ({
+        id: i + 8,
+        title: `Show ${i + 1}`,
+        overview: `Overview Show ${i + 1}`,
+        releaseYear: "2024",
+        posterPath: null,
+        backdropPath: null,
+        mediaType: "tv" as const,
+        runtime: 45,
+        tags: [],
+      })),
+    ];
+
+    renderWatchPage({ initialEntries: entries });
+
+    // Filter to only long TV shows (3 results)
+    const longShowButton = screen.getByRole("button", { name: /Long Show.*Full episodes/i });
+    fireEvent.click(longShowButton);
+    const startButton = screen.getByRole("button", { name: /Start Swiping/i });
+    fireEvent.click(startButton);
+
+    // With 3 filtered entries, like goal should be 1 (not 3)
+    // Like 1 entry should immediately trigger pick mode
+    fireEvent.click(getPrimaryLikeButton());
+    act(() => vi.advanceTimersByTime(250));
+
+    // Should be in pick mode (or auto-selected winner)
+    // The entry might be auto-selected if it's the only liked one and deck is exhausted,
+    // but with 3 entries and liking 1, we should enter pick mode OR it auto-selects
+    // Either way, we shouldn't still be swiping with "Liked: 1/1" or similar
+    const likedLabels = screen.queryAllByText(/Liked:/i);
+    if (likedLabels.length > 0) {
+      // We're still in swipe mode, check the goal
+      const likedText = likedLabels[0].textContent || "";
+      // Should show "Liked: 1 / 1" not "Liked: 1 / 3"
+      expect(likedText).toMatch(/1\s*\/\s*1/);
+    }
+    // If no "Liked:" label, we've entered pick mode or winner selection, which is also correct
+  });
 });
 

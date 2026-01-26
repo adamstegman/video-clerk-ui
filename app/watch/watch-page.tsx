@@ -205,7 +205,11 @@ export function WatchPage({
 
   const swipeThreshold = 110;
   const likeGoal =
-    initialEntries.length === 0 ? 0 : initialEntries.length <= 3 ? 1 : 3;
+    filteredAndRandomizedEntries.length === 0
+      ? 0
+      : filteredAndRandomizedEntries.length <= 3
+        ? 1
+        : 3;
   const isDeckExhausted = deck.length === 0;
   const canPickWithRemainingLikes =
     isDeckExhausted && liked.length > 0 && liked.length < 3;
