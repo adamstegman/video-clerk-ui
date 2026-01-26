@@ -670,79 +670,293 @@ Update `app.json` plugins if needed (expo-image usually auto-configures).
 
 ## Test Guidance
 
-### Visual Regression Testing
+### Required Automated Tests
 
-1. **Compare layouts**:
-   - Take screenshots of current web app
-   - Compare with React Native app on same screen size
-   - Key screens: List view, Watch view, Settings, Login
+All tests must pass before this phase can be merged.
 
-2. **Test responsive breakpoints**:
-   - Resize window/simulator to different sizes
-   - Verify layouts adjust appropriately
-   - Test portrait and landscape orientations
+#### `src/__tests__/components/action-button.test.tsx`
 
-3. **Test safe areas**:
-   - Test on iPhone with notch (iPhone X+)
-   - Verify content doesn't overlap status bar
-   - Verify tab bar respects home indicator
-
-### Component Testing
-
-Create `__tests__/components/action-button.test.tsx`:
-
-```tsx
-import { render, fireEvent } from "@testing-library/react-native";
+```typescript
+import React from "react";
+import { render, fireEvent, screen } from "@testing-library/react-native";
 import { ActionButton } from "@/components/action-button";
 
 describe("ActionButton", () => {
-  it("renders children text", () => {
-    const { getByText } = render(
-      <ActionButton onPress={() => {}}>Click me</ActionButton>
-    );
-    expect(getByText("Click me")).toBeTruthy();
+  describe("rendering", () => {
+    it("renders children text", () => {
+      render(<ActionButton onPress={() => {}}>Click me</ActionButton>);
+      expect(screen.getByText("Click me")).toBeTruthy();
+    });
+
+    it("renders with primary variant by default", () => {
+      render(<ActionButton onPress={() => {}}>Primary</ActionButton>);
+      // Primary button should have indigo background
+      const button = screen.getByTestId("action-button");
+      expect(button.props.className).toContain("bg-indigo");
+    });
+
+    it("renders with secondary variant", () => {
+      render(<ActionButton onPress={() => {}} variant="secondary">Secondary</ActionButton>);
+      const button = screen.getByTestId("action-button");
+      expect(button.props.className).toContain("bg-zinc");
+    });
+
+    it("renders with ghost variant", () => {
+      render(<ActionButton onPress={() => {}} variant="ghost">Ghost</ActionButton>);
+      const button = screen.getByTestId("action-button");
+      expect(button.props.className).not.toContain("bg-indigo");
+    });
   });
 
-  it("calls onPress when pressed", () => {
-    const onPress = jest.fn();
-    const { getByText } = render(
-      <ActionButton onPress={onPress}>Click me</ActionButton>
-    );
-    fireEvent.press(getByText("Click me"));
-    expect(onPress).toHaveBeenCalled();
+  describe("interaction", () => {
+    it("calls onPress when pressed", () => {
+      const onPress = jest.fn();
+      render(<ActionButton onPress={onPress}>Click me</ActionButton>);
+      fireEvent.press(screen.getByText("Click me"));
+      expect(onPress).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not call onPress when disabled", () => {
+      const onPress = jest.fn();
+      render(<ActionButton onPress={onPress} disabled>Click me</ActionButton>);
+      fireEvent.press(screen.getByText("Click me"));
+      expect(onPress).not.toHaveBeenCalled();
+    });
+
+    it("does not call onPress when loading", () => {
+      const onPress = jest.fn();
+      render(<ActionButton onPress={onPress} loading>Click me</ActionButton>);
+      fireEvent.press(screen.getByTestId("action-button"));
+      expect(onPress).not.toHaveBeenCalled();
+    });
   });
 
-  it("shows loading indicator when loading", () => {
-    const { queryByText, getByTestId } = render(
-      <ActionButton onPress={() => {}} loading>
-        Click me
-      </ActionButton>
-    );
-    expect(queryByText("Click me")).toBeNull();
-    // ActivityIndicator should be present
+  describe("loading state", () => {
+    it("shows loading indicator when loading", () => {
+      render(<ActionButton onPress={() => {}} loading>Click me</ActionButton>);
+      expect(screen.getByTestId("loading-indicator")).toBeTruthy();
+    });
+
+    it("hides children text when loading", () => {
+      render(<ActionButton onPress={() => {}} loading>Click me</ActionButton>);
+      expect(screen.queryByText("Click me")).toBeNull();
+    });
   });
 
-  it("is disabled when disabled prop is true", () => {
-    const onPress = jest.fn();
-    const { getByText } = render(
-      <ActionButton onPress={onPress} disabled>
-        Click me
-      </ActionButton>
-    );
-    fireEvent.press(getByText("Click me"));
-    expect(onPress).not.toHaveBeenCalled();
+  describe("accessibility", () => {
+    it("has accessible role button", () => {
+      render(<ActionButton onPress={() => {}}>Click me</ActionButton>);
+      const button = screen.getByTestId("action-button");
+      expect(button.props.accessibilityRole).toBe("button");
+    });
+
+    it("has disabled state when disabled", () => {
+      render(<ActionButton onPress={() => {}} disabled>Click me</ActionButton>);
+      const button = screen.getByTestId("action-button");
+      expect(button.props.accessibilityState.disabled).toBe(true);
+    });
   });
 });
 ```
 
-### Manual Testing Checklist
+#### `src/__tests__/components/text-input-field.test.tsx`
 
+```typescript
+import React from "react";
+import { render, fireEvent, screen } from "@testing-library/react-native";
+import { TextInputField } from "@/components/text-input-field";
+
+describe("TextInputField", () => {
+  describe("rendering", () => {
+    it("renders with placeholder", () => {
+      render(<TextInputField placeholder="Enter text" value="" onChangeText={() => {}} />);
+      expect(screen.getByPlaceholderText("Enter text")).toBeTruthy();
+    });
+
+    it("renders with label", () => {
+      render(<TextInputField label="Email" value="" onChangeText={() => {}} />);
+      expect(screen.getByText("Email")).toBeTruthy();
+    });
+
+    it("renders error message", () => {
+      render(<TextInputField error="Invalid email" value="" onChangeText={() => {}} />);
+      expect(screen.getByText("Invalid email")).toBeTruthy();
+    });
+  });
+
+  describe("interaction", () => {
+    it("calls onChangeText when text changes", () => {
+      const onChangeText = jest.fn();
+      render(<TextInputField value="" onChangeText={onChangeText} />);
+      fireEvent.changeText(screen.getByTestId("text-input"), "new text");
+      expect(onChangeText).toHaveBeenCalledWith("new text");
+    });
+
+    it("displays current value", () => {
+      render(<TextInputField value="current value" onChangeText={() => {}} />);
+      expect(screen.getByDisplayValue("current value")).toBeTruthy();
+    });
+  });
+
+  describe("secure text", () => {
+    it("hides text when secureTextEntry is true", () => {
+      render(<TextInputField value="password" onChangeText={() => {}} secureTextEntry />);
+      const input = screen.getByTestId("text-input");
+      expect(input.props.secureTextEntry).toBe(true);
+    });
+  });
+
+  describe("accessibility", () => {
+    it("associates label with input", () => {
+      render(<TextInputField label="Email" value="" onChangeText={() => {}} />);
+      expect(screen.getByLabelText("Email")).toBeTruthy();
+    });
+  });
+});
+```
+
+#### `src/__tests__/components/header.test.tsx`
+
+```typescript
+import React from "react";
+import { render, fireEvent, screen } from "@testing-library/react-native";
+import { Header } from "@/components/header";
+
+// Mock safe area insets
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({ top: 47, bottom: 34, left: 0, right: 0 }),
+}));
+
+describe("Header", () => {
+  it("renders title", () => {
+    render(<Header title="My List" />);
+    expect(screen.getByText("My List")).toBeTruthy();
+  });
+
+  it("renders left action when provided", () => {
+    const onPress = jest.fn();
+    render(<Header title="Edit" leftAction={{ icon: "back", onPress }} />);
+    expect(screen.getByTestId("header-left-action")).toBeTruthy();
+  });
+
+  it("renders right action when provided", () => {
+    const onPress = jest.fn();
+    render(<Header title="List" rightAction={{ icon: "add", onPress }} />);
+    expect(screen.getByTestId("header-right-action")).toBeTruthy();
+  });
+
+  it("calls left action onPress", () => {
+    const onPress = jest.fn();
+    render(<Header title="Edit" leftAction={{ icon: "back", onPress }} />);
+    fireEvent.press(screen.getByTestId("header-left-action"));
+    expect(onPress).toHaveBeenCalled();
+  });
+
+  it("applies safe area padding", () => {
+    render(<Header title="Test" />);
+    const header = screen.getByTestId("header");
+    // Should have paddingTop that accounts for safe area
+    expect(header.props.style).toBeDefined();
+  });
+});
+```
+
+#### `src/__tests__/hooks/use-safe-padding.test.ts`
+
+```typescript
+import { renderHook } from "@testing-library/react-native";
+import { useSafePadding } from "@/hooks/use-safe-padding";
+
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({ top: 47, bottom: 34, left: 0, right: 0 }),
+}));
+
+describe("useSafePadding", () => {
+  it("returns correct top padding", () => {
+    const { result } = renderHook(() => useSafePadding());
+    expect(result.current.paddingTop).toBe(47);
+  });
+
+  it("returns correct bottom padding", () => {
+    const { result } = renderHook(() => useSafePadding());
+    expect(result.current.paddingBottom).toBe(34);
+  });
+
+  it("adds extra padding when specified", () => {
+    const { result } = renderHook(() => useSafePadding({ extraTop: 16, extraBottom: 20 }));
+    expect(result.current.paddingTop).toBe(63); // 47 + 16
+    expect(result.current.paddingBottom).toBe(54); // 34 + 20
+  });
+});
+```
+
+#### `src/__tests__/hooks/use-breakpoint.test.ts`
+
+```typescript
+import { renderHook } from "@testing-library/react-native";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
+
+jest.mock("react-native", () => ({
+  useWindowDimensions: () => ({ width: 390, height: 844 }),
+}));
+
+describe("useBreakpoint", () => {
+  it("returns mobile for small screens", () => {
+    const { result } = renderHook(() => useBreakpoint());
+    expect(result.current).toBe("mobile");
+  });
+
+  it("returns tablet for medium screens", () => {
+    jest.doMock("react-native", () => ({
+      useWindowDimensions: () => ({ width: 768, height: 1024 }),
+    }));
+    const { result } = renderHook(() => useBreakpoint());
+    // Will need to reset module and re-import
+  });
+});
+```
+
+### CI Requirements
+
+```yaml
+jobs:
+  phase-3-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+
+      - name: Run component tests
+        run: npm test -- --testPathPattern="components|hooks" --coverage
+
+      - name: Verify component coverage
+        run: |
+          npm test -- --testPathPattern="components" --coverageThreshold='{
+            "src/components/action-button.tsx": {"statements": 95, "branches": 90},
+            "src/components/text-input-field.tsx": {"statements": 90, "branches": 85},
+            "src/components/header.tsx": {"statements": 85, "branches": 80}
+          }'
+```
+
+### Coverage Requirements
+
+| File | Min Statements | Min Branches |
+|------|---------------|--------------|
+| `src/components/action-button.tsx` | 95% | 90% |
+| `src/components/text-input-field.tsx` | 90% | 85% |
+| `src/components/header.tsx` | 85% | 80% |
+| `src/components/spinner.tsx` | 90% | 85% |
+| `src/hooks/use-safe-padding.ts` | 100% | 100% |
+
+### Manual Verification (Optional)
+
+For extra confidence:
 - [ ] All text is visible (not cut off, correct colors)
 - [ ] Buttons respond to press with visual feedback
-- [ ] Images load with correct aspect ratio
-- [ ] Safe area insets respected on all screens
-- [ ] Scrolling works smoothly
-- [ ] Input fields show keyboard and accept text
+- [ ] Safe area insets respected on iPhone with notch
 - [ ] Dark background consistent throughout app
 
 ## Acceptance Criteria

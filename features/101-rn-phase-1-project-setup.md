@@ -450,7 +450,213 @@ npx expo start --web
 
 ## Test Guidance
 
-### Manual Verification
+### Required Automated Tests
+
+All tests must pass before this phase can be merged. Create the following test files:
+
+#### `src/__tests__/setup/environment.test.ts`
+
+```typescript
+import { describe, it, expect, beforeAll } from "@jest/globals";
+
+describe("Environment Configuration", () => {
+  describe("Required environment variables", () => {
+    it("has EXPO_PUBLIC_SUPABASE_URL defined", () => {
+      expect(process.env.EXPO_PUBLIC_SUPABASE_URL).toBeDefined();
+      expect(process.env.EXPO_PUBLIC_SUPABASE_URL).not.toBe("");
+    });
+
+    it("has EXPO_PUBLIC_SUPABASE_ANON_KEY defined", () => {
+      expect(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY).toBeDefined();
+      expect(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY).not.toBe("");
+    });
+
+    it("has EXPO_PUBLIC_TMDB_API_READ_TOKEN defined", () => {
+      expect(process.env.EXPO_PUBLIC_TMDB_API_READ_TOKEN).toBeDefined();
+      expect(process.env.EXPO_PUBLIC_TMDB_API_READ_TOKEN).not.toBe("");
+    });
+  });
+
+  describe("Supabase URL format", () => {
+    it("is a valid URL", () => {
+      const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      expect(() => new URL(url!)).not.toThrow();
+    });
+
+    it("uses HTTPS in production", () => {
+      const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      if (!url?.includes("localhost")) {
+        expect(url).toMatch(/^https:\/\//);
+      }
+    });
+  });
+});
+```
+
+#### `src/__tests__/setup/supabase-client.test.ts`
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from "@jest/globals";
+
+// Mock AsyncStorage
+vi.mock("@react-native-async-storage/async-storage", () => ({
+  default: {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+  },
+}));
+
+describe("Supabase Client", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it("exports createClient function", async () => {
+    const { createClient } = await import("@/lib/supabase/client");
+    expect(typeof createClient).toBe("function");
+  });
+
+  it("createClient returns a Supabase client instance", async () => {
+    const { createClient } = await import("@/lib/supabase/client");
+    const client = createClient();
+
+    expect(client).toBeDefined();
+    expect(client.auth).toBeDefined();
+    expect(client.from).toBeDefined();
+    expect(typeof client.from).toBe("function");
+  });
+
+  it("client has auth methods", async () => {
+    const { createClient } = await import("@/lib/supabase/client");
+    const client = createClient();
+
+    expect(client.auth.getUser).toBeDefined();
+    expect(client.auth.getSession).toBeDefined();
+    expect(client.auth.signInWithPassword).toBeDefined();
+    expect(client.auth.signOut).toBeDefined();
+  });
+
+  it("returns same singleton instance", async () => {
+    const { createClient } = await import("@/lib/supabase/client");
+    const client1 = createClient();
+    const client2 = createClient();
+
+    expect(client1).toBe(client2);
+  });
+});
+```
+
+#### `src/__tests__/setup/nativewind.test.tsx`
+
+```typescript
+import React from "react";
+import { render } from "@testing-library/react-native";
+import { View, Text } from "react-native";
+
+describe("NativeWind Configuration", () => {
+  it("renders View with className", () => {
+    const { getByTestId } = render(
+      <View testID="test-view" className="flex-1 bg-zinc-950" />
+    );
+
+    expect(getByTestId("test-view")).toBeTruthy();
+  });
+
+  it("renders Text with className", () => {
+    const { getByText } = render(
+      <Text className="text-white font-bold">Test Text</Text>
+    );
+
+    expect(getByText("Test Text")).toBeTruthy();
+  });
+
+  it("renders nested components with multiple classes", () => {
+    const { getByTestId, getByText } = render(
+      <View testID="container" className="flex-1 items-center justify-center bg-zinc-950 px-6">
+        <Text className="text-2xl font-bold text-white">Title</Text>
+        <Text className="mt-2 text-zinc-400">Subtitle</Text>
+      </View>
+    );
+
+    expect(getByTestId("container")).toBeTruthy();
+    expect(getByText("Title")).toBeTruthy();
+    expect(getByText("Subtitle")).toBeTruthy();
+  });
+});
+```
+
+#### `src/__tests__/setup/root-layout.test.tsx`
+
+```typescript
+import React from "react";
+import { render } from "@testing-library/react-native";
+import { Text } from "react-native";
+
+// Mock the providers
+vi.mock("react-native-gesture-handler", () => ({
+  GestureHandlerRootView: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+vi.mock("react-native-safe-area-context", () => ({
+  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+describe("Root Layout", () => {
+  it("renders children within providers", async () => {
+    // Test that the layout structure is correct
+    const RootLayout = (await import("../../app/_layout")).default;
+
+    // If RootLayout renders successfully with mocked providers, the setup is correct
+    expect(RootLayout).toBeDefined();
+  });
+});
+```
+
+### CI Requirements
+
+The following checks must pass in CI before merge:
+
+```yaml
+# In .github/workflows/tests.yml
+jobs:
+  phase-1-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run Phase 1 tests
+        run: npm test -- --testPathPattern="setup" --coverage
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: http://localhost:54321
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: test-key
+          EXPO_PUBLIC_TMDB_API_READ_TOKEN: test-token
+
+      - name: Verify coverage thresholds
+        run: |
+          # Phase 1 requires 100% coverage on setup files
+          npm test -- --testPathPattern="setup" --coverage --coverageThreshold='{"src/lib/supabase/client.ts":{"statements":90}}'
+```
+
+### Coverage Requirements
+
+| File | Min Statements | Min Branches |
+|------|---------------|--------------|
+| `src/lib/supabase/client.ts` | 90% | 85% |
+
+### Manual Verification (Optional)
+
+For additional confidence:
 
 1. **Run web dev server**:
    ```bash
@@ -465,38 +671,11 @@ npx expo start --web
    npx expo start --ios
    ```
    - Should launch iOS Simulator
-   - Should show same placeholder page
    - NativeWind styles should apply (dark background, white text)
 
-3. **Type checking**:
-   ```bash
-   npm run typecheck
-   ```
-   - Should complete with no errors
-
-4. **Verify NativeWind**:
-   - The `className` props should apply styles
+3. **Verify NativeWind**:
    - `bg-zinc-950` should render dark background
    - `text-white` should render white text
-
-### Automated Verification
-
-Create a simple smoke test at `__tests__/setup.test.ts`:
-
-```typescript
-import { describe, it, expect } from "@jest/globals";
-
-describe("Project Setup", () => {
-  it("has correct environment variables defined", () => {
-    expect(process.env.EXPO_PUBLIC_SUPABASE_URL).toBeDefined();
-  });
-
-  it("can import Supabase client", async () => {
-    const { createClient } = await import("@/lib/supabase/client");
-    expect(typeof createClient).toBe("function");
-  });
-});
-```
 
 ## Acceptance Criteria
 

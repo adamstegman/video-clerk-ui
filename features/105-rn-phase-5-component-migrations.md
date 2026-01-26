@@ -1605,33 +1605,428 @@ export default function WinnerRoute() {
 
 ## Test Guidance
 
-### Feature-by-Feature Testing
+### Required Automated Tests
 
-1. **TMDB Integration**:
-   - Search for "Matrix" → Should return results
-   - Posters should load with correct URLs
-   - Genre names should map correctly
+All tests must pass before this phase can be merged.
 
-2. **List Feature**:
-   - View list → Should show entries sorted by date
-   - Pull to refresh → Should reload data
-   - Tap entry → Should navigate to edit screen
+#### `src/__tests__/tmdb-api/tmdb-api.test.ts`
 
-3. **Add to List**:
-   - Search → Should show results
-   - Add entry → Should show checkmark
-   - Close modal → Added entry should appear in list
+```typescript
+import { TMDBAPI } from "@/tmdb-api/tmdb-api";
+import { mockTMDBConfiguration, mockSearchResults } from "@/test-utils/mocks/tmdb";
 
-4. **Edit Entry**:
-   - View details → Poster, title, year visible
-   - Mark watched → Should update and show checkmark
-   - Delete → Should remove and navigate back
+// Mock fetch
+global.fetch = jest.fn();
 
-5. **Watch Feature**:
-   - Swipe cards → Like/nope stamps appear
-   - Reach goal → Picker view shows
-   - Select winner → Winner screen shows
-   - Mark watched → Navigates to list
+describe("TMDBAPI", () => {
+  let api: TMDBAPI;
+
+  beforeEach(() => {
+    api = new TMDBAPI("test-token");
+    (fetch as jest.Mock).mockReset();
+  });
+
+  describe("fetchConfiguration", () => {
+    it("fetches configuration from correct endpoint", async () => {
+      (fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockTMDBConfiguration),
+      });
+
+      await api.fetchConfiguration();
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.themoviedb.org/3/configuration",
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: "Bearer test-token",
+          }),
+        })
+      );
+    });
+
+    it("returns configuration data", async () => {
+      (fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockTMDBConfiguration),
+      });
+
+      const result = await api.fetchConfiguration();
+      expect(result.images.base_url).toBeDefined();
+    });
+  });
+
+  describe("searchMulti", () => {
+    it("searches with encoded query", async () => {
+      (fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockSearchResults),
+      });
+
+      await api.searchMulti("The Matrix");
+
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("search/multi?query=The%20Matrix"),
+        expect.any(Object)
+      );
+    });
+
+    it("returns search results", async () => {
+      (fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockSearchResults),
+      });
+
+      const results = await api.searchMulti("Fight Club");
+      expect(results.results.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("error handling", () => {
+    it("throws on non-ok response", async () => {
+      (fetch as jest.Mock).mockResolvedValue({
+        ok: false,
+        status: 401,
+      });
+
+      await expect(api.fetchConfiguration()).rejects.toThrow("TMDB API error: 401");
+    });
+  });
+});
+```
+
+#### `src/__tests__/features/list/list-page-container.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen, waitFor, fireEvent } from "@/test-utils/render";
+import { ListPageContainer } from "@/features/list/list-page-container";
+import {
+  resetSupabaseMock,
+  setMockResponse,
+  setMockUser,
+  setMockSession,
+} from "@/test-utils/mocks/supabase";
+import { fightClubEntry, inceptionEntry } from "@/test-utils/fixtures/entries";
+import { testUser, testSession } from "@/test-utils/fixtures/users";
+
+describe("ListPageContainer", () => {
+  beforeEach(() => {
+    resetSupabaseMock();
+    setMockUser(testUser);
+    setMockSession(testSession);
+  });
+
+  describe("loading state", () => {
+    it("shows loading indicator initially", () => {
+      setMockResponse("entries:select", new Promise(() => {}));
+      render(<ListPageContainer />);
+      expect(screen.getByTestId("loading-indicator")).toBeTruthy();
+    });
+  });
+
+  describe("data fetching", () => {
+    it("displays entries after loading", async () => {
+      setMockResponse("entries:select", {
+        data: [fightClubEntry, inceptionEntry],
+        error: null,
+      });
+
+      render(<ListPageContainer />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fight Club")).toBeTruthy();
+        expect(screen.getByText("Inception")).toBeTruthy();
+      });
+    });
+  });
+
+  describe("error handling", () => {
+    it("displays error message on failure", async () => {
+      setMockResponse("entries:select", {
+        data: null,
+        error: { message: "Database error" },
+      });
+
+      render(<ListPageContainer />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/database error/i)).toBeTruthy();
+      });
+    });
+
+    it("shows retry button on error", async () => {
+      setMockResponse("entries:select", {
+        data: null,
+        error: { message: "Network error" },
+      });
+
+      render(<ListPageContainer />);
+
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /retry/i })).toBeTruthy();
+      });
+    });
+  });
+
+  describe("empty state", () => {
+    it("shows empty message when no entries", async () => {
+      setMockResponse("entries:select", { data: [], error: null });
+
+      render(<ListPageContainer />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/no entries/i)).toBeTruthy();
+      });
+    });
+  });
+});
+```
+
+#### `src/__tests__/features/list/add-to-list.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@/test-utils/render";
+import { AddToListScreen } from "@/features/list/add-to-list";
+import { setTMDBResponse, resetTMDBMock, mockSearchResults } from "@/test-utils/mocks/tmdb";
+import { resetSupabaseMock, setMockResponse } from "@/test-utils/mocks/supabase";
+
+describe("AddToListScreen", () => {
+  beforeEach(() => {
+    resetTMDBMock();
+    resetSupabaseMock();
+  });
+
+  describe("search", () => {
+    it("shows search results", async () => {
+      setTMDBResponse("/search/multi", mockSearchResults);
+
+      render(<AddToListScreen />);
+
+      fireEvent.changeText(screen.getByPlaceholderText(/search/i), "Fight Club");
+      fireEvent(screen.getByPlaceholderText(/search/i), "submitEditing");
+
+      await waitFor(() => {
+        expect(screen.getByText("Fight Club")).toBeTruthy();
+      });
+    });
+
+    it("shows no results message", async () => {
+      setTMDBResponse("/search/multi", { results: [], total_results: 0 });
+
+      render(<AddToListScreen />);
+
+      fireEvent.changeText(screen.getByPlaceholderText(/search/i), "nonexistent");
+      fireEvent(screen.getByPlaceholderText(/search/i), "submitEditing");
+
+      await waitFor(() => {
+        expect(screen.getByText(/no results/i)).toBeTruthy();
+      });
+    });
+  });
+
+  describe("saving entry", () => {
+    it("shows checkmark after saving", async () => {
+      setTMDBResponse("/search/multi", mockSearchResults);
+      setMockResponse("rpc:save_tmdb_result_to_list", { data: { id: 1 }, error: null });
+
+      render(<AddToListScreen />);
+
+      fireEvent.changeText(screen.getByPlaceholderText(/search/i), "Fight Club");
+      fireEvent(screen.getByPlaceholderText(/search/i), "submitEditing");
+
+      await waitFor(() => {
+        expect(screen.getByText("Fight Club")).toBeTruthy();
+      });
+
+      fireEvent.press(screen.getByTestId("add-button-550"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("saved-indicator-550")).toBeTruthy();
+      });
+    });
+  });
+});
+```
+
+#### `src/__tests__/features/list/edit-entry.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@/test-utils/render";
+import { EditEntryScreen } from "@/features/list/edit-entry";
+import { resetSupabaseMock, setMockResponse } from "@/test-utils/mocks/supabase";
+import { fightClubEntry } from "@/test-utils/fixtures/entries";
+
+jest.mock("expo-router", () => ({
+  useLocalSearchParams: () => ({ entryId: "1" }),
+  router: { back: jest.fn(), replace: jest.fn() },
+}));
+
+describe("EditEntryScreen", () => {
+  beforeEach(() => {
+    resetSupabaseMock();
+  });
+
+  describe("loading", () => {
+    it("shows loading indicator", () => {
+      setMockResponse("entries:select", new Promise(() => {}));
+      render(<EditEntryScreen />);
+      expect(screen.getByTestId("loading-indicator")).toBeTruthy();
+    });
+  });
+
+  describe("display", () => {
+    it("shows entry details", async () => {
+      setMockResponse("entries:select", { data: fightClubEntry, error: null });
+
+      render(<EditEntryScreen />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fight Club")).toBeTruthy();
+        expect(screen.getByText("1999")).toBeTruthy();
+      });
+    });
+  });
+
+  describe("mark as watched", () => {
+    it("toggles watched status", async () => {
+      setMockResponse("entries:select", { data: fightClubEntry, error: null });
+      setMockResponse("entries:update", { data: null, error: null });
+
+      render(<EditEntryScreen />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fight Club")).toBeTruthy();
+      });
+
+      fireEvent.press(screen.getByRole("button", { name: /mark as watched/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/mark as unwatched/i)).toBeTruthy();
+      });
+    });
+  });
+
+  describe("delete", () => {
+    it("shows confirmation dialog", async () => {
+      setMockResponse("entries:select", { data: fightClubEntry, error: null });
+
+      render(<EditEntryScreen />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fight Club")).toBeTruthy();
+      });
+
+      fireEvent.press(screen.getByRole("button", { name: /delete/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/are you sure/i)).toBeTruthy();
+      });
+    });
+  });
+});
+```
+
+#### `src/__tests__/features/watch/watch-page-container.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen, waitFor } from "@/test-utils/render";
+import { WatchPageContainer } from "@/features/watch/watch-page-container";
+import { resetSupabaseMock, setMockResponse, setMockUser, setMockSession } from "@/test-utils/mocks/supabase";
+import { fightClubEntry, inceptionEntry } from "@/test-utils/fixtures/entries";
+import { testUser, testSession } from "@/test-utils/fixtures/users";
+
+describe("WatchPageContainer", () => {
+  beforeEach(() => {
+    resetSupabaseMock();
+    setMockUser(testUser);
+    setMockSession(testSession);
+  });
+
+  describe("loading", () => {
+    it("shows loading indicator", () => {
+      setMockResponse("entries:select", new Promise(() => {}));
+      render(<WatchPageContainer />);
+      expect(screen.getByTestId("loading-indicator")).toBeTruthy();
+    });
+  });
+
+  describe("data", () => {
+    it("loads unwatched entries", async () => {
+      const unwatched = [
+        { ...fightClubEntry, watched_at: null },
+        { ...inceptionEntry, watched_at: null },
+      ];
+      setMockResponse("entries:select", { data: unwatched, error: null });
+
+      render(<WatchPageContainer />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Fight Club")).toBeTruthy();
+      });
+    });
+  });
+
+  describe("empty state", () => {
+    it("shows empty message when no entries", async () => {
+      setMockResponse("entries:select", { data: [], error: null });
+
+      render(<WatchPageContainer />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/nothing to watch/i)).toBeTruthy();
+      });
+    });
+  });
+});
+```
+
+### CI Requirements
+
+```yaml
+jobs:
+  phase-5-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+
+      - name: Run feature tests
+        run: npm test -- --testPathPattern="features/(list|watch)|tmdb-api" --coverage
+
+      - name: Verify coverage thresholds
+        run: |
+          npm test -- --coverageThreshold='{
+            "src/tmdb-api/tmdb-api.ts": {"statements": 90, "branches": 85},
+            "src/features/list/list-page-container.tsx": {"statements": 85, "branches": 80},
+            "src/features/list/add-to-list.tsx": {"statements": 85, "branches": 80},
+            "src/features/watch/watch-page-container.tsx": {"statements": 85, "branches": 80}
+          }'
+```
+
+### Coverage Requirements
+
+| File | Min Statements | Min Branches |
+|------|---------------|--------------|
+| `src/tmdb-api/tmdb-api.ts` | 90% | 85% |
+| `src/features/list/list-page-container.tsx` | 85% | 80% |
+| `src/features/list/list-page.tsx` | 85% | 80% |
+| `src/features/list/add-to-list.tsx` | 85% | 80% |
+| `src/features/list/edit-entry.tsx` | 85% | 80% |
+| `src/features/watch/watch-page-container.tsx` | 85% | 80% |
+
+### Manual Verification (Optional)
+
+For extra confidence:
+1. **TMDB Integration**: Search for "Matrix" → Returns results
+2. **List Feature**: View list, pull to refresh, tap entry
+3. **Watch Feature**: Swipe cards, reach goal, select winner
 
 ## Acceptance Criteria
 

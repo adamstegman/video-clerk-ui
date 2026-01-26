@@ -751,47 +751,287 @@ describe("getRedirectUrl", () => {
 
 ## Test Guidance
 
-### Manual Testing
+### Required Automated Tests
 
-1. **Email Sign Up**:
-   - Enter email and password → Tap Sign Up
-   - Should show "Check your email" message
-   - Click email link → Should confirm and redirect to app
+All tests must pass before this phase can be merged.
 
-2. **Email Sign In**:
-   - Enter existing credentials → Tap Sign In
-   - Should navigate to list screen
-   - Close and reopen app → Should still be signed in
+#### `src/__tests__/lib/supabase/auth-helpers.test.ts`
 
-3. **Password Reset**:
-   - Tap "Forgot password?" → Enter email
-   - Click email link → Should open update password screen
-   - Enter new password → Should redirect to app
+```typescript
+import { getRedirectUrl, signInWithEmail, signOut } from "@/lib/supabase/auth-helpers";
+import { resetSupabaseMock, setMockUser, setMockSession, assertAuthCalled } from "@/test-utils/mocks/supabase";
+import { testUser, testSession } from "@/test-utils/fixtures/users";
 
-4. **Session Persistence**:
-   - Sign in → Force close app completely
-   - Reopen app → Should still be signed in
-   - Works on both iOS and web
+describe("Auth Helpers", () => {
+  beforeEach(() => {
+    resetSupabaseMock();
+  });
 
-5. **Sign Out**:
-   - Go to Settings → Tap Sign Out
-   - Confirm → Should redirect to login
-   - Reopen app → Should show login screen
+  describe("getRedirectUrl", () => {
+    it("returns URL containing auth/callback", () => {
+      const url = getRedirectUrl();
+      expect(url).toContain("auth/callback");
+    });
+  });
 
-6. **Deep Link Handling (iOS)**:
-   - Test with: `npx uri-scheme open videoclerk://auth/callback?token_hash=xxx --ios`
-   - Should handle the callback appropriately
+  describe("signInWithEmail", () => {
+    it("calls signInWithPassword with credentials", async () => {
+      setMockUser(testUser);
+      setMockSession(testSession);
 
-### Integration Tests
+      await signInWithEmail("test@example.com", "password123");
 
-Create `__tests__/auth/auth-flow.integration.test.ts`:
+      assertAuthCalled("signInWithPassword");
+    });
+
+    it("returns user on success", async () => {
+      setMockUser(testUser);
+      setMockSession(testSession);
+
+      const { user, error } = await signInWithEmail("test@example.com", "password123");
+
+      expect(user).toEqual(testUser);
+      expect(error).toBeNull();
+    });
+
+    it("returns error on failure", async () => {
+      // Don't set mock user/session
+      const { user, error } = await signInWithEmail("wrong@example.com", "wrong");
+
+      expect(user).toBeNull();
+      expect(error).toBeDefined();
+    });
+  });
+
+  describe("signOut", () => {
+    it("calls auth.signOut", async () => {
+      setMockUser(testUser);
+      setMockSession(testSession);
+
+      await signOut();
+
+      assertAuthCalled("signOut");
+    });
+  });
+});
+```
+
+#### `src/__tests__/contexts/auth-context.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen, waitFor, act } from "@testing-library/react-native";
+import { Text } from "react-native";
+import { AuthProvider, useAuth } from "@/contexts/auth-context";
+import { resetSupabaseMock, setMockUser, setMockSession } from "@/test-utils/mocks/supabase";
+import { testUser, testSession } from "@/test-utils/fixtures/users";
+
+const TestComponent = () => {
+  const { user, loading } = useAuth();
+  if (loading) return <Text testID="loading">Loading</Text>;
+  return <Text testID="user">{user?.email ?? "No user"}</Text>;
+};
+
+describe("AuthContext", () => {
+  beforeEach(() => {
+    resetSupabaseMock();
+  });
+
+  describe("initialization", () => {
+    it("shows loading initially", () => {
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      );
+
+      expect(screen.getByTestId("loading")).toBeTruthy();
+    });
+
+    it("provides user after auth check", async () => {
+      setMockUser(testUser);
+      setMockSession(testSession);
+
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(testUser.email)).toBeTruthy();
+      });
+    });
+
+    it("shows no user when not authenticated", async () => {
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("No user")).toBeTruthy();
+      });
+    });
+  });
+
+  describe("signIn", () => {
+    it("updates user state after sign in", async () => {
+      const SignInTest = () => {
+        const { user, signIn } = useAuth();
+        return (
+          <>
+            <Text testID="user">{user?.email ?? "No user"}</Text>
+            <Text testID="signIn" onPress={() => signIn("test@example.com", "password")}>
+              Sign In
+            </Text>
+          </>
+        );
+      };
+
+      setMockUser(testUser);
+      setMockSession(testSession);
+
+      render(
+        <AuthProvider>
+          <SignInTest />
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(testUser.email)).toBeTruthy();
+      });
+    });
+  });
+
+  describe("signOut", () => {
+    it("clears user state after sign out", async () => {
+      setMockUser(testUser);
+      setMockSession(testSession);
+
+      const SignOutTest = () => {
+        const { user, signOut } = useAuth();
+        return (
+          <>
+            <Text testID="user">{user?.email ?? "No user"}</Text>
+            <Text testID="signOut" onPress={signOut}>Sign Out</Text>
+          </>
+        );
+      };
+
+      render(
+        <AuthProvider>
+          <SignOutTest />
+        </AuthProvider>
+      );
+
+      // Initially signed in
+      await waitFor(() => {
+        expect(screen.getByText(testUser.email)).toBeTruthy();
+      });
+
+      // Sign out
+      act(() => {
+        screen.getByTestId("signOut").props.onPress();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText("No user")).toBeTruthy();
+      });
+    });
+  });
+});
+```
+
+#### `src/__tests__/auth/login-screen.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@/test-utils/render";
+import LoginScreen from "@/app/login";
+import { resetSupabaseMock, setMockUser, setMockSession, assertAuthCalled } from "@/test-utils/mocks/supabase";
+import { testUser, testSession } from "@/test-utils/fixtures/users";
+import { assertNavigatedTo } from "@/test-utils/render";
+
+describe("LoginScreen", () => {
+  beforeEach(() => {
+    resetSupabaseMock();
+  });
+
+  describe("validation", () => {
+    it("shows error for empty email", async () => {
+      render(<LoginScreen />);
+
+      fireEvent.press(screen.getByRole("button", { name: /sign in/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/fill in all fields/i)).toBeTruthy();
+      });
+    });
+
+    it("shows error for short password", async () => {
+      render(<LoginScreen />);
+
+      fireEvent.changeText(screen.getByPlaceholderText(/email/i), "test@example.com");
+      fireEvent.changeText(screen.getByPlaceholderText(/password/i), "123");
+      fireEvent.press(screen.getByRole("button", { name: /sign in/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/at least 6 characters/i)).toBeTruthy();
+      });
+    });
+  });
+
+  describe("sign in", () => {
+    it("navigates on successful sign in", async () => {
+      setMockUser(testUser);
+      setMockSession(testSession);
+
+      render(<LoginScreen />);
+
+      fireEvent.changeText(screen.getByPlaceholderText(/email/i), "test@example.com");
+      fireEvent.changeText(screen.getByPlaceholderText(/password/i), "password123");
+      fireEvent.press(screen.getByRole("button", { name: /sign in/i }));
+
+      await waitFor(() => {
+        assertNavigatedTo("/(app)/(tabs)/list");
+      });
+    });
+
+    it("shows error on failed sign in", async () => {
+      render(<LoginScreen />);
+
+      fireEvent.changeText(screen.getByPlaceholderText(/email/i), "test@example.com");
+      fireEvent.changeText(screen.getByPlaceholderText(/password/i), "wrongpassword");
+      fireEvent.press(screen.getByRole("button", { name: /sign in/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/invalid credentials/i)).toBeTruthy();
+      });
+    });
+  });
+
+  describe("sign up mode", () => {
+    it("switches to sign up mode", () => {
+      render(<LoginScreen />);
+
+      fireEvent.press(screen.getByText(/sign up/i));
+
+      expect(screen.getByText(/create account/i)).toBeTruthy();
+    });
+  });
+});
+```
+
+#### `src/__tests__/auth/auth-flow.integration.test.ts`
 
 ```typescript
 // @vitest-environment node
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { createAdminClient, createTestUser, cleanupTestUser } from "~/test-utils/supabase";
+import { createAdminClient, createTestUser, cleanupTestUser } from "@/test-utils/supabase";
 
-describe("Auth Flow", () => {
+describe("Integration: Auth Flow", () => {
   let adminClient: ReturnType<typeof createAdminClient>;
 
   beforeEach(() => {
@@ -802,7 +1042,6 @@ describe("Auth Flow", () => {
     const email = `test-${Date.now()}@example.com`;
     const password = "testpassword123";
 
-    // Create user via admin
     const { data: user, error: createError } =
       await adminClient.auth.admin.createUser({
         email,
@@ -813,13 +1052,71 @@ describe("Auth Flow", () => {
     expect(createError).toBeNull();
     expect(user.user).toBeDefined();
 
-    // Clean up
     if (user.user) {
       await adminClient.auth.admin.deleteUser(user.user.id);
     }
   });
+
+  it("can sign out a user", async () => {
+    const testUser = await createTestUser(adminClient);
+
+    const { error } = await testUser.client.auth.signOut();
+    expect(error).toBeNull();
+
+    await cleanupTestUser(adminClient, testUser.userId);
+  });
 });
 ```
+
+### CI Requirements
+
+```yaml
+jobs:
+  phase-6-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:15.1.0.117
+        env:
+          POSTGRES_PASSWORD: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+
+      - name: Run auth tests
+        run: npm test -- --testPathPattern="auth|contexts/auth" --coverage
+
+      - name: Run auth integration tests
+        run: npm test -- --testPathPattern="auth-flow.integration"
+
+      - name: Verify coverage
+        run: |
+          npm test -- --coverageThreshold='{
+            "src/lib/supabase/auth-helpers.ts": {"statements": 90, "branches": 85},
+            "src/contexts/auth-context.tsx": {"statements": 90, "branches": 85},
+            "app/login.tsx": {"statements": 85, "branches": 80}
+          }'
+```
+
+### Coverage Requirements
+
+| File | Min Statements | Min Branches |
+|------|---------------|--------------|
+| `src/lib/supabase/auth-helpers.ts` | 90% | 85% |
+| `src/contexts/auth-context.tsx` | 90% | 85% |
+| `app/login.tsx` | 85% | 80% |
+| `app/forgot-password.tsx` | 80% | 75% |
+
+### Manual Verification (Optional)
+
+For extra confidence:
+1. **Email Sign In**: Enter credentials → navigates to list
+2. **Session Persistence**: Close app, reopen → still signed in
+3. **Sign Out**: Tap sign out → redirects to login
 
 ## Acceptance Criteria
 

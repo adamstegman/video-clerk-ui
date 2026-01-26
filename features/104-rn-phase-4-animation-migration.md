@@ -741,63 +741,420 @@ const likeOpacity = useDerivedValue(() => {
 
 ## Test Guidance
 
-### Manual Testing
+### Required Automated Tests
 
-1. **Swipe gestures**:
-   - Drag card right past threshold → Card should fly off, "LIKE" shown
-   - Drag card left past threshold → Card should fly off, "NOPE" shown
-   - Drag and release before threshold → Card should snap back smoothly
+All tests must pass before this phase can be merged.
 
-2. **Button swipes**:
-   - Tap heart button → Card should animate right and off screen
-   - Tap X button → Card should animate left and off screen
-
-3. **Visual feedback**:
-   - While dragging right → "LIKE" stamp opacity increases
-   - While dragging left → "NOPE" stamp opacity increases
-   - Card rotates based on horizontal drag
-
-4. **Stack behavior**:
-   - Should see 4 cards stacked
-   - Background cards slightly smaller and offset
-   - When top card removed, next card becomes swipeable
-
-5. **Performance**:
-   - Animations should be smooth (60fps)
-   - No jank or stuttering during drag
-   - Test on older devices if possible
-
-### Automated Testing
-
-Create `__tests__/features/watch/use-card-swipe.test.ts`:
+#### `src/__tests__/features/watch/hooks/use-card-swipe.test.ts`
 
 ```typescript
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act, waitFor } from "@testing-library/react-native";
 import { useCardSwipe } from "@/features/watch/hooks/use-card-swipe";
 
+// Mock Reanimated
+jest.mock("react-native-reanimated", () => {
+  const Reanimated = require("react-native-reanimated/mock");
+  Reanimated.default.call = () => {};
+  return Reanimated;
+});
+
 describe("useCardSwipe", () => {
-  it("initializes with zero translation", () => {
-    const onSwipe = jest.fn();
-    const { result } = renderHook(() => useCardSwipe({ onSwipe }));
-
-    expect(result.current.translateX.value).toBe(0);
-  });
-
-  it("calls onSwipe when swipeLeft is called", async () => {
-    const onSwipe = jest.fn();
-    const { result } = renderHook(() => useCardSwipe({ onSwipe }));
-
-    act(() => {
-      result.current.swipeLeft();
+  describe("initialization", () => {
+    it("initializes translateX to zero", () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+      expect(result.current.translateX.value).toBe(0);
     });
 
-    // Wait for animation
-    await new Promise((r) => setTimeout(r, 300));
+    it("initializes translateY to zero", () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+      expect(result.current.translateY.value).toBe(0);
+    });
 
-    expect(onSwipe).toHaveBeenCalledWith("left");
+    it("initializes isActive to false", () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+      expect(result.current.isActive.value).toBe(false);
+    });
+  });
+
+  describe("swipeLeft", () => {
+    it("calls onSwipe with left direction", async () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+
+      act(() => {
+        result.current.swipeLeft();
+      });
+
+      await waitFor(() => {
+        expect(onSwipe).toHaveBeenCalledWith("left");
+      });
+    });
+
+    it("animates translateX to negative value", async () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+
+      act(() => {
+        result.current.swipeLeft();
+      });
+
+      // Animation target should be negative (off-screen left)
+      expect(result.current.translateX.value).toBeLessThan(0);
+    });
+  });
+
+  describe("swipeRight", () => {
+    it("calls onSwipe with right direction", async () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+
+      act(() => {
+        result.current.swipeRight();
+      });
+
+      await waitFor(() => {
+        expect(onSwipe).toHaveBeenCalledWith("right");
+      });
+    });
+
+    it("animates translateX to positive value", async () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+
+      act(() => {
+        result.current.swipeRight();
+      });
+
+      expect(result.current.translateX.value).toBeGreaterThan(0);
+    });
+  });
+
+  describe("reset", () => {
+    it("resets translateX to zero", () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+
+      // Simulate some movement
+      act(() => {
+        result.current.translateX.value = 100;
+        result.current.reset();
+      });
+
+      expect(result.current.translateX.value).toBe(0);
+    });
+
+    it("resets translateY to zero", () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe }));
+
+      act(() => {
+        result.current.translateY.value = 50;
+        result.current.reset();
+      });
+
+      expect(result.current.translateY.value).toBe(0);
+    });
+  });
+
+  describe("enabled prop", () => {
+    it("respects enabled false", () => {
+      const onSwipe = jest.fn();
+      const { result } = renderHook(() => useCardSwipe({ onSwipe, enabled: false }));
+
+      // Gesture should be disabled
+      expect(result.current.panGesture.config.enabled).toBe(false);
+    });
   });
 });
 ```
+
+#### `src/__tests__/features/watch/components/watch-card.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen } from "@testing-library/react-native";
+import { WatchCard } from "@/features/watch/components/watch-card";
+import { fightClubEntry } from "@/test-utils/fixtures/entries";
+
+describe("WatchCard", () => {
+  describe("rendering", () => {
+    it("renders entry title", () => {
+      render(<WatchCard entry={fightClubEntry} />);
+      expect(screen.getByText("Fight Club")).toBeTruthy();
+    });
+
+    it("renders release year", () => {
+      render(<WatchCard entry={fightClubEntry} />);
+      expect(screen.getByText("1999")).toBeTruthy();
+    });
+
+    it("renders poster image", () => {
+      render(<WatchCard entry={fightClubEntry} />);
+      const poster = screen.getByTestId("watch-card-poster");
+      expect(poster.props.source.uri).toContain("pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK");
+    });
+
+    it("renders genres", () => {
+      render(<WatchCard entry={{ ...fightClubEntry, genres: ["Drama", "Thriller"] }} />);
+      expect(screen.getByText("Drama")).toBeTruthy();
+      expect(screen.getByText("Thriller")).toBeTruthy();
+    });
+
+    it("renders runtime formatted", () => {
+      render(<WatchCard entry={{ ...fightClubEntry, runtime: 139 }} />);
+      expect(screen.getByText(/2h 19m/)).toBeTruthy();
+    });
+  });
+
+  describe("missing data handling", () => {
+    it("renders placeholder when no poster", () => {
+      render(<WatchCard entry={{ ...fightClubEntry, posterUrl: undefined }} />);
+      expect(screen.getByTestId("poster-placeholder")).toBeTruthy();
+    });
+
+    it("handles missing release year", () => {
+      render(<WatchCard entry={{ ...fightClubEntry, releaseYear: undefined }} />);
+      expect(screen.queryByText("1999")).toBeNull();
+    });
+
+    it("handles missing genres", () => {
+      render(<WatchCard entry={{ ...fightClubEntry, genres: [] }} />);
+      // Should render without crashing
+      expect(screen.getByText("Fight Club")).toBeTruthy();
+    });
+  });
+
+  describe("truncation", () => {
+    it("truncates long titles", () => {
+      const longTitle = "This Is A Very Long Movie Title That Should Be Truncated";
+      render(<WatchCard entry={{ ...fightClubEntry, title: longTitle }} />);
+      const title = screen.getByTestId("watch-card-title");
+      expect(title.props.numberOfLines).toBe(2);
+    });
+  });
+});
+```
+
+#### `src/__tests__/features/watch/components/swipeable-card.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react-native";
+import { Text } from "react-native";
+import { SwipeableCard } from "@/features/watch/components/swipeable-card";
+
+describe("SwipeableCard", () => {
+  describe("rendering", () => {
+    it("renders children", () => {
+      render(
+        <SwipeableCard onSwipe={() => {}}>
+          <Text>Card Content</Text>
+        </SwipeableCard>
+      );
+      expect(screen.getByText("Card Content")).toBeTruthy();
+    });
+
+    it("renders like stamp hidden initially", () => {
+      render(
+        <SwipeableCard onSwipe={() => {}}>
+          <Text>Content</Text>
+        </SwipeableCard>
+      );
+      const likeStamp = screen.getByTestId("like-indicator");
+      expect(likeStamp.props.style.opacity).toBe(0);
+    });
+
+    it("renders nope stamp hidden initially", () => {
+      render(
+        <SwipeableCard onSwipe={() => {}}>
+          <Text>Content</Text>
+        </SwipeableCard>
+      );
+      const nopeStamp = screen.getByTestId("skip-indicator");
+      expect(nopeStamp.props.style.opacity).toBe(0);
+    });
+  });
+
+  describe("gesture handling", () => {
+    it("responds to gesture events", () => {
+      const onSwipe = jest.fn();
+      render(
+        <SwipeableCard onSwipe={onSwipe}>
+          <Text>Content</Text>
+        </SwipeableCard>
+      );
+
+      const card = screen.getByTestId("swipeable-card");
+      expect(card).toBeTruthy();
+    });
+  });
+});
+```
+
+#### `src/__tests__/features/watch/components/card-stack.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen } from "@testing-library/react-native";
+import { CardStack } from "@/features/watch/components/card-stack";
+import { fightClubEntry, inceptionEntry, gameOfThronesEntry } from "@/test-utils/fixtures/entries";
+
+describe("CardStack", () => {
+  const mockEntries = [fightClubEntry, inceptionEntry, gameOfThronesEntry];
+
+  describe("rendering", () => {
+    it("renders visible cards", () => {
+      render(<CardStack entries={mockEntries} onSwipe={() => {}} />);
+      expect(screen.getByText("Fight Club")).toBeTruthy();
+    });
+
+    it("limits visible cards to MAX_VISIBLE_CARDS", () => {
+      const manyEntries = [...mockEntries, ...mockEntries]; // 6 entries
+      render(<CardStack entries={manyEntries} onSwipe={() => {}} />);
+
+      // Should only render MAX_VISIBLE_CARDS (4) cards
+      const cards = screen.getAllByTestId(/watch-card/);
+      expect(cards.length).toBeLessThanOrEqual(4);
+    });
+
+    it("renders top card as swipeable", () => {
+      render(<CardStack entries={mockEntries} onSwipe={() => {}} />);
+      expect(screen.getByTestId("swipeable-card")).toBeTruthy();
+    });
+  });
+
+  describe("empty state", () => {
+    it("renders nothing when entries empty", () => {
+      render(<CardStack entries={[]} onSwipe={() => {}} />);
+      expect(screen.queryByTestId("watch-card")).toBeNull();
+    });
+  });
+
+  describe("swipe callback", () => {
+    it("calls onSwipe with direction and entry", () => {
+      const onSwipe = jest.fn();
+      render(<CardStack entries={mockEntries} onSwipe={onSwipe} />);
+
+      // Trigger swipe (simulated through card)
+      const card = screen.getByTestId("swipeable-card");
+      fireEvent(card, "onSwipe", "right");
+
+      expect(onSwipe).toHaveBeenCalledWith("right", expect.objectContaining({ id: fightClubEntry.id }));
+    });
+  });
+});
+```
+
+#### `src/__tests__/features/watch/components/swipe-buttons.test.tsx`
+
+```typescript
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react-native";
+import { SwipeButtons } from "@/features/watch/components/swipe-buttons";
+
+describe("SwipeButtons", () => {
+  describe("rendering", () => {
+    it("renders nope button", () => {
+      render(<SwipeButtons onNope={() => {}} onLike={() => {}} />);
+      expect(screen.getByTestId("nope-button")).toBeTruthy();
+    });
+
+    it("renders like button", () => {
+      render(<SwipeButtons onNope={() => {}} onLike={() => {}} />);
+      expect(screen.getByTestId("like-button")).toBeTruthy();
+    });
+  });
+
+  describe("interaction", () => {
+    it("calls onNope when nope button pressed", () => {
+      const onNope = jest.fn();
+      render(<SwipeButtons onNope={onNope} onLike={() => {}} />);
+
+      fireEvent.press(screen.getByTestId("nope-button"));
+      expect(onNope).toHaveBeenCalledTimes(1);
+    });
+
+    it("calls onLike when like button pressed", () => {
+      const onLike = jest.fn();
+      render(<SwipeButtons onNope={() => {}} onLike={onLike} />);
+
+      fireEvent.press(screen.getByTestId("like-button"));
+      expect(onLike).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not call callbacks when disabled", () => {
+      const onNope = jest.fn();
+      const onLike = jest.fn();
+      render(<SwipeButtons onNope={onNope} onLike={onLike} disabled />);
+
+      fireEvent.press(screen.getByTestId("nope-button"));
+      fireEvent.press(screen.getByTestId("like-button"));
+
+      expect(onNope).not.toHaveBeenCalled();
+      expect(onLike).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("accessibility", () => {
+    it("nope button has accessible label", () => {
+      render(<SwipeButtons onNope={() => {}} onLike={() => {}} />);
+      const button = screen.getByTestId("nope-button");
+      expect(button.props.accessibilityLabel).toContain("skip");
+    });
+
+    it("like button has accessible label", () => {
+      render(<SwipeButtons onNope={() => {}} onLike={() => {}} />);
+      const button = screen.getByTestId("like-button");
+      expect(button.props.accessibilityLabel).toContain("like");
+    });
+  });
+});
+```
+
+### CI Requirements
+
+```yaml
+jobs:
+  phase-4-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+
+      - name: Run animation tests
+        run: npm test -- --testPathPattern="features/watch" --coverage
+
+      - name: Verify animation coverage
+        run: |
+          npm test -- --testPathPattern="features/watch" --coverageThreshold='{
+            "src/features/watch/hooks/use-card-swipe.ts": {"statements": 90, "branches": 85},
+            "src/features/watch/components/watch-card.tsx": {"statements": 95, "branches": 90},
+            "src/features/watch/components/swipe-buttons.tsx": {"statements": 100, "branches": 95}
+          }'
+```
+
+### Coverage Requirements
+
+| File | Min Statements | Min Branches |
+|------|---------------|--------------|
+| `src/features/watch/hooks/use-card-swipe.ts` | 90% | 85% |
+| `src/features/watch/components/watch-card.tsx` | 95% | 90% |
+| `src/features/watch/components/swipeable-card.tsx` | 85% | 80% |
+| `src/features/watch/components/card-stack.tsx` | 85% | 80% |
+| `src/features/watch/components/swipe-buttons.tsx` | 100% | 95% |
+
+### Manual Verification (Optional)
+
+For extra confidence:
+1. **Swipe gestures**: Drag card right → Card flies off, "LIKE" shown
+2. **Button swipes**: Tap heart → Card animates right
+3. **Performance**: Animations should be smooth (60fps)
 
 ## Acceptance Criteria
 

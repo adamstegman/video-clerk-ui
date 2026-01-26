@@ -1207,64 +1207,281 @@ export function TMDBGenresProvider({ children }: { children: ReactNode }) {
 
 ## Test Guidance
 
-### Manual Navigation Tests
+### Required Automated Tests
 
-1. **Landing page**:
-   - Open app → Should show landing page with "Get Started" button
-   - Click "Get Started" → Should navigate to login
+All tests must pass before this phase can be merged.
 
-2. **Authentication flow**:
-   - On login page, enter credentials → Should redirect to list
-   - Click "Sign Up" toggle → Form should switch modes
-   - Click "Forgot password?" → Should go to reset page
+#### `src/__tests__/navigation/tab-navigation.test.tsx`
 
-3. **Protected routes**:
-   - Try to access `/app/list` directly when logged out → Should redirect to login
-   - Log in → Should access list page
-   - Check all tabs work (List, Watch, Settings)
-
-4. **Tab navigation**:
-   - Click each tab → Should navigate to correct screen
-   - Tab bar should show active state
-
-5. **Modal navigation**:
-   - From list, tap + button → Should open add modal from bottom
-   - Tap X → Should close modal
-
-6. **Dynamic routes**:
-   - Navigate to `/app/list/123` → Should show entry ID
-   - Back button should work
-
-### Automated Tests
-
-Create `__tests__/navigation.test.tsx`:
-
-```tsx
-import { describe, it, expect, beforeEach, jest } from "@jest/globals";
+```typescript
+import React from "react";
+import { Text, View, Pressable } from "react-native";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
+import { Link } from "expo-router";
 
-// Mock auth context
-jest.mock("@/contexts/auth-context", () => ({
-  useAuth: () => ({
-    user: null,
-    loading: false,
-    signIn: jest.fn(),
-    signOut: jest.fn(),
-  }),
-  AuthProvider: ({ children }) => children,
-}));
+describe("Tab Navigation", () => {
+  describe("Tab bar rendering", () => {
+    it("renders all three tabs", async () => {
+      renderRouter({
+        index: () => <></>,
+        "(app)/(tabs)/list/index": () => <Text>List</Text>,
+        "(app)/(tabs)/watch/index": () => <Text>Watch</Text>,
+        "(app)/(tabs)/settings": () => <Text>Settings</Text>,
+      });
 
-describe("Navigation", () => {
-  it("redirects to login when not authenticated", async () => {
-    const { getByText } = renderRouter({
-      initialUrl: "/(app)/(tabs)/list",
+      await waitFor(() => {
+        expect(screen.getByText(/list/i)).toBeTruthy();
+        expect(screen.getByText(/watch/i)).toBeTruthy();
+        expect(screen.getByText(/settings/i)).toBeTruthy();
+      });
     });
 
-    // Should redirect to login
-    expect(getByText("Welcome Back")).toBeTruthy();
+    it("highlights active tab", async () => {
+      renderRouter({
+        "(app)/(tabs)/list/index": () => <Text>List Screen</Text>,
+      }, { initialUrl: "/(app)/(tabs)/list" });
+
+      const listTab = screen.getByTestId("tab-list");
+      expect(listTab).toHaveAccessibilityState({ selected: true });
+    });
+  });
+
+  describe("Tab switching", () => {
+    it("navigates to watch tab when pressed", async () => {
+      renderRouter({
+        "(app)/(tabs)/list/index": () => <Text>List Screen</Text>,
+        "(app)/(tabs)/watch/index": () => <Text>Watch Screen</Text>,
+      });
+
+      fireEvent.press(screen.getByText(/watch/i));
+
+      await waitFor(() => {
+        expect(screen.getByText("Watch Screen")).toBeTruthy();
+      });
+    });
+
+    it("navigates to settings tab when pressed", async () => {
+      renderRouter({
+        "(app)/(tabs)/list/index": () => <Text>List Screen</Text>,
+        "(app)/(tabs)/settings": () => <Text>Settings Screen</Text>,
+      });
+
+      fireEvent.press(screen.getByText(/settings/i));
+
+      await waitFor(() => {
+        expect(screen.getByText("Settings Screen")).toBeTruthy();
+      });
+    });
   });
 });
 ```
+
+#### `src/__tests__/navigation/auth-guard.test.tsx`
+
+```typescript
+import React from "react";
+import { Text } from "react-native";
+import { render, screen, waitFor } from "@testing-library/react-native";
+import { renderRouter } from "expo-router/testing-library";
+
+// Mock auth context
+const mockUseAuth = vi.fn();
+vi.mock("@/contexts/auth-context", () => ({
+  useAuth: () => mockUseAuth(),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+describe("Auth Guard", () => {
+  beforeEach(() => {
+    mockUseAuth.mockReset();
+  });
+
+  describe("Unauthenticated user", () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+        session: null,
+        loading: false,
+      });
+    });
+
+    it("redirects to login when accessing protected route", async () => {
+      renderRouter({
+        "login": () => <Text>Login Screen</Text>,
+        "(app)/(tabs)/list/index": () => <Text>List Screen</Text>,
+      }, { initialUrl: "/(app)/(tabs)/list" });
+
+      await waitFor(() => {
+        expect(screen.getByText("Login Screen")).toBeTruthy();
+      });
+    });
+
+    it("preserves returnTo URL when redirecting", async () => {
+      renderRouter({
+        "login": ({ searchParams }: any) => <Text>Return: {searchParams?.returnTo}</Text>,
+        "(app)/(tabs)/watch/index": () => <Text>Watch</Text>,
+      }, { initialUrl: "/(app)/(tabs)/watch" });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Return:.*watch/i)).toBeTruthy();
+      });
+    });
+  });
+
+  describe("Authenticated user", () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        user: { id: "user-1", email: "test@example.com" },
+        session: { access_token: "token" },
+        loading: false,
+      });
+    });
+
+    it("allows access to protected routes", async () => {
+      renderRouter({
+        "login": () => <Text>Login Screen</Text>,
+        "(app)/(tabs)/list/index": () => <Text>List Screen</Text>,
+      }, { initialUrl: "/(app)/(tabs)/list" });
+
+      await waitFor(() => {
+        expect(screen.getByText("List Screen")).toBeTruthy();
+      });
+    });
+  });
+
+  describe("Loading state", () => {
+    it("shows loading indicator while checking auth", () => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+        session: null,
+        loading: true,
+      });
+
+      renderRouter({
+        "(app)/_layout": () => <Text testID="loading">Loading...</Text>,
+      });
+
+      expect(screen.getByTestId("loading")).toBeTruthy();
+    });
+  });
+});
+```
+
+#### `src/__tests__/navigation/nested-routes.test.tsx`
+
+```typescript
+import React from "react";
+import { Text, Pressable } from "react-native";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
+import { renderRouter } from "expo-router/testing-library";
+import { Link } from "expo-router";
+
+describe("Nested Routes", () => {
+  describe("List entry navigation", () => {
+    it("navigates to entry detail with correct ID", async () => {
+      renderRouter({
+        "(app)/(tabs)/list/index": () => (
+          <Link href="/(app)/(tabs)/list/123" asChild>
+            <Pressable testID="entry-link"><Text>Entry</Text></Pressable>
+          </Link>
+        ),
+        "(app)/(tabs)/list/[entryId]": ({ params }: any) => (
+          <Text>Entry ID: {params.entryId}</Text>
+        ),
+      });
+
+      fireEvent.press(screen.getByTestId("entry-link"));
+
+      await waitFor(() => {
+        expect(screen.getByText("Entry ID: 123")).toBeTruthy();
+      });
+    });
+  });
+
+  describe("Add modal", () => {
+    it("opens add modal from list screen", async () => {
+      renderRouter({
+        "(app)/(tabs)/list/index": () => (
+          <Link href="/(app)/add" asChild>
+            <Pressable testID="add-button"><Text>Add</Text></Pressable>
+          </Link>
+        ),
+        "(app)/add": () => <Text>Add Entry Modal</Text>,
+      });
+
+      fireEvent.press(screen.getByTestId("add-button"));
+
+      await waitFor(() => {
+        expect(screen.getByText("Add Entry Modal")).toBeTruthy();
+      });
+    });
+  });
+});
+```
+
+#### `src/__tests__/navigation/deep-linking.test.tsx`
+
+```typescript
+import * as Linking from "expo-linking";
+
+describe("Deep Linking", () => {
+  it("generates correct list URL", () => {
+    const url = Linking.createURL("/(app)/(tabs)/list");
+    expect(url).toContain("list");
+  });
+
+  it("generates correct entry detail URL", () => {
+    const url = Linking.createURL("/(app)/(tabs)/list/123");
+    expect(url).toContain("list/123");
+  });
+
+  it("generates correct auth callback URL", () => {
+    const url = Linking.createURL("/auth/callback");
+    expect(url).toContain("auth/callback");
+  });
+});
+```
+
+### CI Requirements
+
+```yaml
+jobs:
+  phase-2-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+
+      - name: Run navigation tests
+        run: npm test -- --testPathPattern="navigation" --coverage
+
+      - name: Verify coverage thresholds
+        run: |
+          npm test -- --testPathPattern="navigation" --coverageThreshold='{
+            "app/(app)/_layout.tsx": {"statements": 85, "branches": 80},
+            "app/(app)/(tabs)/_layout.tsx": {"statements": 90, "branches": 85}
+          }'
+```
+
+### Coverage Requirements
+
+| File | Min Statements | Min Branches |
+|------|---------------|--------------|
+| `app/(app)/_layout.tsx` | 85% | 80% |
+| `app/(app)/(tabs)/_layout.tsx` | 90% | 85% |
+| `app/login.tsx` | 80% | 75% |
+
+### Manual Verification (Optional)
+
+For extra confidence:
+
+1. **Tab navigation**: Tap each tab → correct screen shows
+2. **Auth guard**: Access protected route when logged out → redirects to login
+3. **Modal navigation**: Tap + button → modal slides up from bottom
 
 ## Acceptance Criteria
 

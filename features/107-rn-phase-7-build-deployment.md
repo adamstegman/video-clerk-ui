@@ -593,55 +593,311 @@ android/
 
 ## Test Guidance
 
-### Local Build Testing
+### Required Automated Tests
 
-1. **Web build**:
-   ```bash
-   npm run build:web
-   npx serve dist
-   # Open http://localhost:3000
-   ```
+All tests must pass before this phase can be merged.
 
-2. **iOS simulator build** (macOS only):
-   ```bash
-   eas build --platform ios --profile development --local
-   # Opens in simulator
-   ```
+#### `scripts/__tests__/build-web.test.ts`
 
-3. **Preview build**:
-   ```bash
-   eas build --platform ios --profile preview
-   # Downloads .ipa file for device testing
-   ```
+```typescript
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
 
-### CI/CD Verification
+describe("Web Build Script", () => {
+  const distPath = path.join(process.cwd(), "dist");
 
-1. **Push to main**:
-   - Web should deploy to GitHub Pages
-   - iOS build should start on EAS
+  afterEach(() => {
+    // Cleanup dist directory after tests
+    if (fs.existsSync(distPath)) {
+      fs.rmSync(distPath, { recursive: true });
+    }
+  });
 
-2. **Create PR**:
-   - Tests should run
-   - Type check should pass
-   - Preview build should complete
+  describe("build output", () => {
+    it("creates dist directory", () => {
+      execSync("npm run build:web", { stdio: "pipe" });
+      expect(fs.existsSync(distPath)).toBe(true);
+    });
 
-3. **Check deployment**:
-   - Visit GitHub Pages URL
-   - Verify app loads correctly
-   - Check auth flow works
+    it("creates index.html", () => {
+      execSync("npm run build:web", { stdio: "pipe" });
+      expect(fs.existsSync(path.join(distPath, "index.html"))).toBe(true);
+    });
 
-### EAS Build Verification
+    it("creates 404.html for SPA routing", () => {
+      execSync("./scripts/build-web.sh", { stdio: "pipe" });
+      expect(fs.existsSync(path.join(distPath, "404.html"))).toBe(true);
+    });
+
+    it("index.html and 404.html have same content", () => {
+      execSync("./scripts/build-web.sh", { stdio: "pipe" });
+
+      const index = fs.readFileSync(path.join(distPath, "index.html"), "utf-8");
+      const notFound = fs.readFileSync(path.join(distPath, "404.html"), "utf-8");
+
+      expect(index).toBe(notFound);
+    });
+  });
+
+  describe("CNAME file", () => {
+    it("creates CNAME when PAGES_DOMAIN is set", () => {
+      execSync("PAGES_DOMAIN=example.com ./scripts/build-web.sh", { stdio: "pipe" });
+      expect(fs.existsSync(path.join(distPath, "CNAME"))).toBe(true);
+      expect(fs.readFileSync(path.join(distPath, "CNAME"), "utf-8").trim()).toBe("example.com");
+    });
+
+    it("does not create CNAME when PAGES_DOMAIN is not set", () => {
+      execSync("./scripts/build-web.sh", { stdio: "pipe" });
+      expect(fs.existsSync(path.join(distPath, "CNAME"))).toBe(false);
+    });
+  });
+});
+```
+
+#### `__tests__/config/eas-config.test.ts`
+
+```typescript
+import * as fs from "fs";
+import * as path from "path";
+
+describe("EAS Configuration", () => {
+  const easConfigPath = path.join(process.cwd(), "eas.json");
+  let easConfig: any;
+
+  beforeAll(() => {
+    const content = fs.readFileSync(easConfigPath, "utf-8");
+    easConfig = JSON.parse(content);
+  });
+
+  describe("build profiles", () => {
+    it("has development profile", () => {
+      expect(easConfig.build.development).toBeDefined();
+    });
+
+    it("has preview profile", () => {
+      expect(easConfig.build.preview).toBeDefined();
+    });
+
+    it("has production profile", () => {
+      expect(easConfig.build.production).toBeDefined();
+    });
+  });
+
+  describe("environment variables", () => {
+    it("preview profile includes required env vars", () => {
+      const env = easConfig.build.preview.env;
+      expect(env.EXPO_PUBLIC_SUPABASE_URL).toBeDefined();
+      expect(env.EXPO_PUBLIC_SUPABASE_ANON_KEY).toBeDefined();
+      expect(env.EXPO_PUBLIC_TMDB_API_READ_TOKEN).toBeDefined();
+    });
+
+    it("production profile includes required env vars", () => {
+      const env = easConfig.build.production.env;
+      expect(env.EXPO_PUBLIC_SUPABASE_URL).toBeDefined();
+      expect(env.EXPO_PUBLIC_SUPABASE_ANON_KEY).toBeDefined();
+      expect(env.EXPO_PUBLIC_TMDB_API_READ_TOKEN).toBeDefined();
+    });
+  });
+
+  describe("iOS configuration", () => {
+    it("uses M1 resource class for faster builds", () => {
+      expect(easConfig.build.preview.ios.resourceClass).toBe("m1-medium");
+      expect(easConfig.build.production.ios.resourceClass).toBe("m1-medium");
+    });
+  });
+});
+```
+
+#### `__tests__/config/app-config.test.ts`
+
+```typescript
+import * as fs from "fs";
+import * as path from "path";
+
+describe("App Configuration", () => {
+  const appConfigPath = path.join(process.cwd(), "app.json");
+  let appConfig: any;
+
+  beforeAll(() => {
+    const content = fs.readFileSync(appConfigPath, "utf-8");
+    appConfig = JSON.parse(content);
+  });
+
+  describe("expo config", () => {
+    it("has name", () => {
+      expect(appConfig.expo.name).toBe("Video Clerk");
+    });
+
+    it("has scheme for deep linking", () => {
+      expect(appConfig.expo.scheme).toBe("videoclerk");
+    });
+  });
+
+  describe("iOS config", () => {
+    it("has bundle identifier", () => {
+      expect(appConfig.expo.ios.bundleIdentifier).toBeDefined();
+    });
+
+    it("has URL scheme for deep linking", () => {
+      const schemes = appConfig.expo.ios.infoPlist.CFBundleURLTypes[0].CFBundleURLSchemes;
+      expect(schemes).toContain("videoclerk");
+    });
+  });
+
+  describe("web config", () => {
+    it("uses static output", () => {
+      expect(appConfig.expo.web.output).toBe("static");
+    });
+
+    it("uses metro bundler", () => {
+      expect(appConfig.expo.web.bundler).toBe("metro");
+    });
+  });
+
+  describe("EAS config", () => {
+    it("has project ID", () => {
+      expect(appConfig.expo.extra.eas.projectId).toBeDefined();
+    });
+  });
+});
+```
+
+#### GitHub Actions Workflow Tests
+
+```typescript
+// __tests__/ci/workflows.test.ts
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "js-yaml";
+
+describe("GitHub Actions Workflows", () => {
+  const workflowsDir = path.join(process.cwd(), ".github/workflows");
+
+  describe("deploy-web.yml", () => {
+    let workflow: any;
+
+    beforeAll(() => {
+      const content = fs.readFileSync(path.join(workflowsDir, "deploy-web.yml"), "utf-8");
+      workflow = yaml.load(content);
+    });
+
+    it("triggers on push to main", () => {
+      expect(workflow.on.push.branches).toContain("main");
+    });
+
+    it("has build job", () => {
+      expect(workflow.jobs.build).toBeDefined();
+    });
+
+    it("has deploy job", () => {
+      expect(workflow.jobs.deploy).toBeDefined();
+    });
+
+    it("runs typecheck", () => {
+      const buildSteps = workflow.jobs.build.steps;
+      const typecheckStep = buildSteps.find((s: any) => s.name?.includes("Type check"));
+      expect(typecheckStep).toBeDefined();
+    });
+
+    it("runs tests", () => {
+      const buildSteps = workflow.jobs.build.steps;
+      const testStep = buildSteps.find((s: any) => s.name?.includes("test"));
+      expect(testStep).toBeDefined();
+    });
+  });
+
+  describe("build-ios.yml", () => {
+    let workflow: any;
+
+    beforeAll(() => {
+      const content = fs.readFileSync(path.join(workflowsDir, "build-ios.yml"), "utf-8");
+      workflow = yaml.load(content);
+    });
+
+    it("triggers on push to main", () => {
+      expect(workflow.on.push.branches).toContain("main");
+    });
+
+    it("triggers on pull request", () => {
+      expect(workflow.on.pull_request).toBeDefined();
+    });
+
+    it("uses expo github action", () => {
+      const steps = workflow.jobs.build.steps;
+      const expoStep = steps.find((s: any) => s.uses?.includes("expo/expo-github-action"));
+      expect(expoStep).toBeDefined();
+    });
+  });
+});
+```
+
+### CI Requirements
+
+```yaml
+jobs:
+  phase-7-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+
+      - name: Run config tests
+        run: npm test -- --testPathPattern="config|ci/workflows" --coverage
+
+      - name: Validate eas.json
+        run: |
+          if ! npx ajv validate -s node_modules/eas-cli/schema/eas.schema.json -d eas.json; then
+            echo "eas.json is invalid"
+            exit 1
+          fi
+
+      - name: Validate app.json
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('app.json'))"
+
+      - name: Test web build
+        run: npm run build:web
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: http://localhost
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: test
+          EXPO_PUBLIC_TMDB_API_READ_TOKEN: test
+
+      - name: Verify build output
+        run: |
+          test -f dist/index.html || exit 1
+          echo "Web build successful"
+```
+
+### Coverage Requirements
+
+| File | Min Statements | Min Branches |
+|------|---------------|--------------|
+| `scripts/build-web.sh` | N/A (shell script) | N/A |
+| `eas.json` | N/A (config) | N/A |
+| `app.json` | N/A (config) | N/A |
+
+### Local Verification
 
 ```bash
-# Check build status
-eas build:list
+# Test web build locally
+npm run build:web
+npx serve dist
+# Open http://localhost:3000
 
-# View build logs
-eas build:view
-
-# Download build artifact
-eas build:run
+# Test EAS config
+eas build:configure --platform ios
 ```
+
+### Manual Verification (Optional)
+
+For extra confidence:
+1. **Push to main**: Web deploys to GitHub Pages
+2. **Create PR**: Tests run, build completes
+3. **Visit deployed URL**: App loads correctly
 
 ## Acceptance Criteria
 
