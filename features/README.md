@@ -74,6 +74,62 @@ These specifications serve multiple purposes:
    - Touch-friendly interactions
    - Responsive design
 
+### Migration & Conversion
+
+100. **[React Native Conversion Overview](100-react-native-conversion-overview.md)** - Plan to convert to React Native
+    - Executive summary and framework decisions
+    - Phase overview and estimated effort
+    - What transfers directly vs requires changes
+    - Target architecture and dependencies
+
+101. **[Phase 1: Project Setup](101-rn-phase-1-project-setup.md)** - Expo project initialization
+    - Dependencies and configuration
+    - NativeWind setup
+    - Environment variables
+    - Root layout structure
+
+102. **[Phase 2: Routing Migration](102-rn-phase-2-routing-migration.md)** - React Router to Expo Router
+    - Route mapping and structure
+    - Auth guard implementation
+    - Tab and stack navigators
+    - Deep linking setup
+
+103. **[Phase 3: Styling Migration](103-rn-phase-3-styling-migration.md)** - Tailwind CSS to NativeWind
+    - Style utility updates
+    - Safe area handling patterns
+    - Component conversion patterns
+    - Responsive layout approaches
+
+104. **[Phase 4: Animation Migration](104-rn-phase-4-animation-migration.md)** - motion to Reanimated
+    - Card swipe gesture handling
+    - Spring animations
+    - Like/nope stamp animations
+    - Performance optimization
+
+105. **[Phase 5: Component Migrations](105-rn-phase-5-component-migrations.md)** - UI component conversions
+    - TMDB API migration
+    - List feature components
+    - Watch feature completion
+    - Edit entry screen
+
+106. **[Phase 6: Supabase & Auth](106-rn-phase-6-supabase-auth.md)** - Backend and authentication
+    - AsyncStorage session persistence
+    - Deep link handling for OAuth
+    - Auth context updates
+    - Platform-specific configuration
+
+107. **[Phase 7: Build & Deployment](107-rn-phase-7-build-deployment.md)** - CI/CD configuration
+    - EAS Build setup
+    - GitHub Pages deployment
+    - GitHub Actions workflows
+    - Environment management
+
+108. **[Phase 8: Testing](108-rn-phase-8-testing.md)** - Testing infrastructure
+    - Jest configuration
+    - React Native Testing Library
+    - Mocking strategies
+    - Example tests
+
 ## Document Structure
 
 Each feature specification follows a consistent structure:
@@ -115,6 +171,13 @@ To understand system architecture:
 1. Authentication (007) - Auth flow and protected routes
 2. Group Sharing (006) - Data model and multi-user architecture
 3. Mobile-First & PWA (008) - Platform and UX considerations
+
+### For React Native Conversion
+To convert the app to React Native (web + iOS):
+1. Start with the Overview (100) to understand the full plan
+2. Execute phases 1-8 in order, verifying acceptance criteria
+3. Each phase includes context, implementation steps, and tests
+4. Phase documents are designed for AI agent execution
 
 ### For API Integration
 For external API integration patterns:
@@ -213,4 +276,4 @@ If you're looking for information not covered here:
 
 ---
 
-**Last Updated**: 2026-01-25
+**Last Updated**: 2026-01-26
