@@ -30,31 +30,29 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build:web
         env:
-          # Base path set to root for custom domain
-          VITE_BASE_PATH: /
           # Required environment variables (set these as GitHub Secrets)
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
-          VITE_TMDB_API_READ_TOKEN: ${{ secrets.VITE_TMDB_API_READ_TOKEN }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_TMDB_API_READ_TOKEN: ${{ secrets.EXPO_PUBLIC_TMDB_API_READ_TOKEN }}
 
       - name: Add .nojekyll (allow _* assets)
-        run: touch build/client/.nojekyll
+        run: touch dist/.nojekyll
 
       - name: Create 404.html for SPA routing (supports staging previews)
-        run: cp public/404.html build/client/404.html
+        run: cp public/404.html dist/404.html
 
       - name: Create CNAME file
-        run: echo "${{ vars.PAGES_DOMAIN }}" > build/client/CNAME
+        run: echo "${{ vars.PAGES_DOMAIN }}" > dist/CNAME
 
       # Deploy GitHub Pages from the `gh-pages` branch, while preserving `staging/`
-      # so PR preview folders aren’t deleted by production deployments.
+      # so PR preview folders aren't deleted by production deployments.
       - name: Deploy to GitHub Pages (gh-pages branch)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: build/client
+          folder: dist
           clean: true
           clean-exclude: staging/
           force: false

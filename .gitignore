@@ -5,3 +5,28 @@
 # React Router
 /.react-router/
 /build/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native builds
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# EAS
+.eas/
+
+# Metro
+.metro-health-check*
+
+# Temporary files
+*.tsbuildinfo
