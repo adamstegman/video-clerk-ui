@@ -54,6 +54,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Set base URL for staging
+        run: node scripts/set-base-url.js /staging/pr-${{ github.event.number }}
+
       - name: Build (staging base path)
         run: npm run build:web
         env:
