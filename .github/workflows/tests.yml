@@ -68,6 +68,7 @@ jobs:
           npx supabase status -o env
           --override-name api.url=EXPO_PUBLIC_SUPABASE_URL
           --override-name auth.publishable_key=EXPO_PUBLIC_SUPABASE_ANON_KEY
+          --override-name auth.secret_key=EXPO_PUBLIC_SUPABASE_SECRET_KEY
           > .env
 
       - name: Add TMDB token to .env
