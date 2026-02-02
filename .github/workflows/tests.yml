@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - main
   pull_request:
 
 permissions:
@@ -29,6 +30,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run type check
+        run: npm run typecheck
 
       - name: Run unit tests (exclude integration)
         run: npm test -- --exclude "**/*.integration.test.*"
@@ -62,9 +66,9 @@ jobs:
       - name: Write Supabase env to .env
         run: >
           npx supabase status -o env
-          --override-name api.url=VITE_SUPABASE_URL
-          --override-name auth.publishable_key=VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
-          --override-name auth.secret_key=VITE_SUPABASE_SECRET_KEY
+          --override-name api.url=EXPO_PUBLIC_SUPABASE_URL
+          --override-name auth.publishable_key=EXPO_PUBLIC_SUPABASE_ANON_KEY
+          --override-name auth.secret_key=EXPO_PUBLIC_SUPABASE_SECRET_KEY
           > .env
 
       - name: Run integration tests
