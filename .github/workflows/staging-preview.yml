@@ -54,24 +54,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (staging base path)
-        run: npm run build
+      - name: Configure baseUrl for staging preview
+        run: |
+          node -e "
+          const fs = require('fs');
+          const config = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          config.expo.experiments = config.expo.experiments || {};
+          config.expo.experiments.baseUrl = '/staging/pr-${{ github.event.number }}';
+          fs.writeFileSync('app.json', JSON.stringify(config, null, 2));
+          console.log('Updated baseUrl to /staging/pr-${{ github.event.number }}');
+          "
+
+      - name: Export Expo web (staging base path)
+        run: npx expo export --platform web
         env:
-          VITE_BASE_PATH: /staging/pr-${{ github.event.number }}/
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
-          VITE_TMDB_API_READ_TOKEN: ${{ secrets.VITE_TMDB_API_READ_TOKEN }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+          EXPO_PUBLIC_TMDB_API_READ_TOKEN: ${{ secrets.VITE_TMDB_API_READ_TOKEN }}
 
       # GitHub Pages (branch deploy) runs Jekyll unless disabled.
-      # Our asset filenames can start with "_" (e.g. "_index-...js"), which Jekyll will exclude.
+      # Our asset filenames can start with "_" (e.g. "_expo/..."), which Jekyll will exclude.
       - name: Add .nojekyll (allow _* assets)
-        run: touch build/client/.nojekyll
+        run: touch dist/.nojekyll
 
       - name: Deploy to staging folder on gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: build/client
+          folder: dist
           target-folder: staging/pr-${{ github.event.number }}
           clean: true
 
@@ -97,4 +107,3 @@ jobs:
           git add -A
           git commit -m "Remove staging preview for PR #${{ github.event.number }}"
           git push
-
