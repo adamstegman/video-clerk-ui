@@ -1,18 +1,41 @@
 # Video Clerk
 
-A mobile-first web application that solves the "what do we watch?" conundrum. It separates the **Discovery Phase** (adding things to the list when you hear about them) from the **Decision Phase** (filtering that list based on current mood to find a winner).
+A universal React Native application for deciding what to watch together. Built with Expo for web and iOS from a single codebase.
+
+## Features
+
+- **Discover**: Save movies and TV shows when you hear about them
+- **Decide**: Swipe through your list with filters to pick a winner
+- **Share**: Collaborate with groups to build shared watch lists
+- **Cross-platform**: Works on web (GitHub Pages) and iOS (App Store)
+
+## Tech Stack
+
+- **Framework**: Expo SDK 54 (React Native + Web)
+- **Routing**: Expo Router v4 (file-based routing)
+- **Backend**: Supabase (Postgres + Auth + RLS)
+- **API**: TMDB API for movie/TV metadata
+- **Styling**: React Native StyleSheet
+- **Testing**: Vitest + React Testing Library
+- **Deployment**: GitHub Pages (web), EAS Build (iOS)
 
 ## Development
 
+### Prerequisites
+
+- Node.js 20+
+- Docker (for local Supabase)
+- iOS Simulator or physical device (optional, for iOS development)
+
 ### Installation
 
-Install the dependencies:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-### Development
+### Local Supabase Setup
 
 Start a local Supabase instance:
 
@@ -20,139 +43,278 @@ Start a local Supabase instance:
 npx supabase start
 ```
 
-Create a `.env` file with the "Authentication Keys" output by this command.
-Set `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` and `VITE_SUPABASE_SECRET_KEY`.
-Make sure to include `VITE_TMDB_API_READ_TOKEN`, obtained from TMDB.
-
-Start the development server with HMR:
+Create a `.env` file with the authentication keys from the command output:
 
 ```bash
-npm run dev
+EXPO_PUBLIC_SUPABASE_URL=http://localhost:54321
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+EXPO_PUBLIC_SUPABASE_SECRET_KEY=your-secret-key-here
+EXPO_PUBLIC_TMDB_API_READ_TOKEN=your-tmdb-token-here
 ```
 
-Your application will be available at `http://localhost:5173`.
+Get your TMDB API Read Token from [TMDB](https://www.themoviedb.org/settings/api).
 
-## Building for Production
+### Development Server
 
-Create a production build:
+Start the Expo development server:
 
 ```bash
-npm run build
+npm start
 ```
 
-## Tests
+Then choose your platform:
+- Press `w` to open in web browser
+- Press `i` to open in iOS simulator
+- Press `a` to open in Android emulator
+- Scan QR code with Expo Go app on physical device
+
+Or start directly for a specific platform:
+
+```bash
+npm run web      # Web only
+npm run ios      # iOS only
+npm run android  # Android only
+```
+
+Your web application will be available at `http://localhost:8081`.
+
+## Building
+
+### Web Production Build
+
+Create a static web build for deployment:
+
+```bash
+npm run build:web
+```
+
+Output will be in the `dist/` directory.
+
+### iOS Build
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete iOS deployment guide using EAS Build.
+
+```bash
+# Install EAS CLI globally
+npm install -g eas-cli
+
+# Login to Expo
+eas login
+
+# Build for iOS
+eas build --platform ios --profile production
+```
+
+## Testing
+
+Run tests:
 
 ```bash
 npm test
 ```
 
-Unit tests run without external dependencies.
+**Unit tests** run without external dependencies (fast).
 
-Integration tests run against a local Supabase instance (Docker). Locally, this uses the `.env` file you created above. In CI, no GitHub secrets are required for them.
+**Integration tests** run against a local Supabase instance (Docker). The `.env` file is used locally. In CI, no GitHub secrets are required.
 
-## Deployment
+Run tests in watch mode:
 
-### Supabase
-
-Generate migrations and types from any schema updates, and push them to production.
-
+```bash
+npm test -- --watch
 ```
+
+Run type checking:
+
+```bash
+npm run typecheck
+```
+
+## Database Management
+
+### Generating Migrations
+
+After making schema changes in `supabase/schemas/*.sql`:
+
+```bash
+# Stop and generate migration
 npx supabase stop
 npx supabase db diff -f <update_description>
+
+# Apply locally
 npx supabase start
 npx supabase db reset
-npx supabase gen types typescript --local > app/lib/supabase/database.generated.types.ts
+
+# Regenerate TypeScript types
+npx supabase gen types typescript --local > lib/supabase/database.generated.types.ts
+
+# Push to production
 npx supabase db push
 ```
 
-### GitHub Pages
+### Database Schema
 
-This project is configured for automatic deployment to GitHub Pages using GitHub Actions.
+Schema files are organized in `supabase/schemas/`:
+- `00_groups.sql` - Groups and memberships
+- `01_tags.sql` - Tags for entries
+- `02_tmdb_details.sql` - TMDB metadata cache
+- `03_entries.sql` - Watch list entries
+- `04_entry_tags.sql` - Entry-tag relationships
+- `05_save_tmdb_result_rpc.sql` - RPC functions
+- `06_group_invites.sql` - Group invitation system
+
+## Deployment
+
+### GitHub Pages (Web)
+
+Automatic deployment on push to `main` branch.
 
 **Setup Instructions:**
 
 1. **Configure GitHub Variables and Secrets:**
-   - Go to your repository settings on GitHub
-   - Navigate to **Secrets and variables** → **Actions**
-   - Add the following **Variables** (under the "Variables" tab):
-     - `PAGES_DOMAIN` - Your custom domain name (e.g., `example.com` or `www.example.com`)
-   - Add the following **Secrets** (under the "Secrets" tab):
-     - `VITE_SUPABASE_URL` - Your Supabase project URL
-     - `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` - Your Supabase anon/public key
-     - `VITE_TMDB_API_READ_TOKEN` - Your TMDB API read token
+   - Go to **Settings** → **Secrets and variables** → **Actions**
+   - Add **Variables**:
+     - `PAGES_DOMAIN` - Your custom domain (e.g., `videoclerk.app`)
+   - Add **Secrets**:
+     - `VITE_SUPABASE_URL` - Your production Supabase URL
+     - `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` - Your Supabase anon key
+     - `VITE_TMDB_API_READ_TOKEN` - Your TMDB API token
 
-2. **Enable GitHub Pages (deploy from branch):**
+   *Note: Secret names use `VITE_` prefix for backward compatibility, but are mapped to `EXPO_PUBLIC_` in workflows.*
+
+2. **Enable GitHub Pages:**
    - Go to **Settings** → **Pages**
-   - Under **Source**, select **Deploy from a branch**
-   - Select branch **`gh-pages`** and folder **`/ (root)`**
-   - The workflow will automatically deploy when you push to the `main` branch
+   - Source: **Deploy from a branch**
+   - Branch: **`gh-pages`** / **`/ (root)`**
 
-3. **Configure Custom Domain (if using):**
-   - After the first deployment, go to **Settings** → **Pages**
-   - Enter your custom domain in the "Custom domain" field
-   - GitHub will automatically configure DNS settings
-   - The CNAME file is automatically generated by the workflow
-
-4. **Allow workflows to write to the repo (required for deploys + previews):**
+3. **Enable Workflow Permissions:**
    - Go to **Settings** → **Actions** → **General**
-   - Under **Workflow permissions**, choose **Read and write permissions**
+   - Workflow permissions: **Read and write permissions**
 
-**Important Notes:**
+4. **Configure Custom Domain (optional):**
+   - After first deployment: **Settings** → **Pages** → Enter domain
+   - DNS will be configured automatically
 
-- The base path is set to `/` for custom domain support
-- The deployment creates a `404.html` file automatically to handle client-side routing (including staging previews)
-- The deployment creates a `CNAME` file automatically using the `PAGES_DOMAIN` variable
-- Make sure all required variables and secrets are configured before deploying
+**Deployment happens automatically on push to `main`.**
 
-### PR Staging Previews (GitHub Pages)
+Manual deployment:
+1. Go to **Actions** tab
+2. Select **Deploy to GitHub Pages**
+3. Click **Run workflow**
 
-Pull requests automatically deploy a preview to:
+### PR Staging Previews
 
-- `/staging/pr-<PR_NUMBER>/`
+Pull requests automatically deploy previews to:
 
-When the PR is closed, the preview folder is removed automatically.
+```
+https://your-domain.com/staging/pr-<NUMBER>/
+```
 
-**Manual Deployment:**
+Previews are automatically cleaned up when the PR closes.
 
-You can also trigger a manual deployment by:
-1. Going to the **Actions** tab in your repository
-2. Selecting **Deploy to GitHub Pages** workflow
-3. Clicking **Run workflow**
+### iOS App Store
 
-### Docker Deployment
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for:
+- App icons and splash screens
+- EAS Build configuration
+- TestFlight submission
+- App Store submission
+- Privacy labels
 
-To build and run using Docker:
+Quick start:
 
 ```bash
-docker build -t my-app .
+# Build for TestFlight
+eas build --platform ios --profile production
 
-# Run the container
-docker run -p 3000:3000 my-app
+# Submit to TestFlight
+eas submit --platform ios --profile production
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
+## Project Structure
 
 ```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
+video-clerk/
+├── app/                          # Expo Router routes
+│   ├── (app)/                    # Protected routes (requires auth)
+│   │   ├── _layout.tsx           # Tab navigator
+│   │   ├── list/                 # List feature
+│   │   ├── watch/                # Watch feature
+│   │   └── settings.tsx          # Settings
+│   ├── invite/                   # Group invites
+│   ├── login.tsx                 # Authentication
+│   └── _layout.tsx               # Root layout
+├── lib/                          # Shared libraries
+│   ├── supabase/                 # Supabase client + types
+│   ├── tmdb-api/                 # TMDB API wrapper
+│   └── utils/                    # Utilities
+├── assets/                       # Images and icons
+├── supabase/                     # Database schema
+│   ├── schemas/                  # Schema definitions
+│   └── migrations/               # Migration history
+├── .github/workflows/            # CI/CD
+│   ├── deploy.yml                # Production deployment
+│   ├── staging-preview.yml       # PR previews
+│   └── tests.yml                 # Tests
+├── app.json                      # Expo configuration
+├── eas.json                      # EAS Build configuration
+└── DEPLOYMENT.md                 # iOS deployment guide
 ```
 
-## Styling
+## Architecture
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+### Universal Platform
+
+Single codebase serves:
+- **Web**: Static export deployed to GitHub Pages
+- **iOS**: Native app distributed via App Store
+- **Future**: Android (v2)
+
+### Routing
+
+File-based routing with Expo Router:
+- `app/index.tsx` → `/`
+- `app/login.tsx` → `/login`
+- `app/(app)/list/index.tsx` → `/app/list`
+- `app/(app)/watch/[entryId].tsx` → `/app/watch/:entryId`
+
+Parentheses `()` create route groups without adding path segments.
+
+### State Management
+
+- **Global**: React Context (user, TMDB config)
+- **Local**: Component state with hooks
+- **Server**: Direct Supabase queries (no caching layer)
+
+### Authentication
+
+- Supabase Auth with magic links
+- Universal Links for iOS deep linking (`/auth/*`, `/invite/*`)
+- Expo SecureStore for tokens on iOS
+- Web uses browser localStorage
+
+### Styling
+
+React Native StyleSheet API:
+- Cross-platform styling
+- Type-safe style objects
+- No CSS-in-JS runtime
+- Web compiled to CSS via react-native-web
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+## Documentation
+
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - iOS deployment guide
+- [CLAUDE.md](./CLAUDE.md) - AI assistant guide
+- [docs/architecture.md](./docs/architecture.md) - Architecture deep dive
+- [docs/plans/](./docs/plans/) - Migration plans and decisions
+
+## License
+
+MIT
+
+## Legal
+
+This application uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.
