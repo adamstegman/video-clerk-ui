@@ -63,9 +63,6 @@ export default function AppLayout() {
               color: '#fff',
               fontWeight: '700',
             },
-            contentStyle: {
-              backgroundColor: '#f4f4f5',
-            },
             tabBarActiveTintColor: '#4f46e5',
             tabBarInactiveTintColor: '#9ca3af',
             tabBarLabelPosition: 'below-icon',
