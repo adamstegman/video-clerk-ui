@@ -1,12 +1,11 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TMDBAPI, type TMDBConfig, type TMDBSearchResults } from '../tmdb-api';
 
-const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
+const mockFetch = jest.fn();
+global.fetch = mockFetch as any;
 
 describe('TMDBAPI', () => {
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   const api = new TMDBAPI('test-token');

@@ -5,8 +5,6 @@
  * More comprehensive tests will be added as the Expo migration is validated.
  */
 
-import { describe, it, expect } from 'vitest';
-
 describe('App smoke tests', () => {
   it('should pass', () => {
     expect(true).toBe(true);

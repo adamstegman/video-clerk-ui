@@ -1,29 +1,30 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react-native';
 import { ListPageContainer } from '../components/list-page-container';
 import { TMDBConfigurationContext, type TMDBConfigurationState } from '../../../../lib/tmdb-api/tmdb-configuration';
 
-// Mock expo-router
-const mockRouter = vi.hoisted(() => ({
-  push: vi.fn(),
-  replace: vi.fn(),
-  back: vi.fn(),
-}));
+// Mock functions
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
+const mockBack = jest.fn();
+const mockOrder = jest.fn();
+const mockSelect = jest.fn(() => ({ order: mockOrder }));
+const mockFrom = jest.fn(() => ({ select: mockSelect }));
 
-vi.mock('expo-router', () => ({
-  useRouter: () => mockRouter,
-  useFocusEffect: vi.fn(), // no-op — don't execute callback
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    back: mockBack,
+  }),
+  useFocusEffect: jest.fn(), // no-op — don't execute callback
 }));
 
 // Mock supabase client (relative path matching component import)
-const mockOrder = vi.hoisted(() => vi.fn());
-const mockSelect = vi.hoisted(() => vi.fn(() => ({ order: mockOrder })));
-const mockFrom = vi.hoisted(() => vi.fn(() => ({ select: mockSelect })));
-
-vi.mock('../../../../lib/supabase/client', () => ({
+jest.mock('../../../../lib/supabase/client', () => ({
   supabase: {
-    from: mockFrom,
+    from: (...args: any[]) => mockFrom(...args),
   },
 }));
 
@@ -51,16 +52,14 @@ function renderWithProviders() {
 
 describe('ListPageContainer', () => {
   beforeEach(() => {
-    mockFrom.mockClear();
-    mockSelect.mockClear();
-    mockOrder.mockReset();
+    jest.clearAllMocks();
   });
 
   it('shows a loading state while fetching', async () => {
     mockOrder.mockReturnValue(new Promise(() => {}));
     renderWithProviders();
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeTruthy();
   });
 
   it('renders saved entries', async () => {
@@ -84,9 +83,9 @@ describe('ListPageContainer', () => {
     renderWithProviders();
 
     await waitFor(() => {
-      expect(screen.getByText('Fight Club')).toBeInTheDocument();
-      expect(screen.getByText('1999')).toBeInTheDocument();
-      expect(screen.getByText('Drama')).toBeInTheDocument();
+      expect(screen.getByText('Fight Club')).toBeTruthy();
+      expect(screen.getByText('1999')).toBeTruthy();
+      expect(screen.getByText('Drama')).toBeTruthy();
     });
   });
 
@@ -127,7 +126,7 @@ describe('ListPageContainer', () => {
     renderWithProviders();
 
     await waitFor(() => {
-      expect(screen.getByText('Your list is empty.')).toBeInTheDocument();
+      expect(screen.getByText('Your list is empty.')).toBeTruthy();
     });
   });
 
@@ -136,7 +135,7 @@ describe('ListPageContainer', () => {
     renderWithProviders();
 
     await waitFor(() => {
-      expect(screen.getByText('Boom')).toBeInTheDocument();
+      expect(screen.getByText('Boom')).toBeTruthy();
     });
   });
 });

@@ -1,50 +1,44 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import AddToListPage from '../add/index';
 import { TMDBAPIContext } from '../../../../lib/tmdb-api/tmdb-api-provider';
 import { TMDBConfigurationContext, type TMDBConfigurationState } from '../../../../lib/tmdb-api/tmdb-configuration';
 import { TMDBGenresContext, type TMDBGenresState } from '../../../../lib/tmdb-api/tmdb-genres';
 import { TMDBAPI, type TMDBSearchResults, type TMDBGenre } from '../../../../lib/tmdb-api/tmdb-api';
 
-// Mock expo-router
-const mockRouter = vi.hoisted(() => ({
-  push: vi.fn(),
-  replace: vi.fn(),
-  back: vi.fn(),
-}));
+// Mock functions
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
+const mockBack = jest.fn();
+const mockRpc = jest.fn();
+const mockSelect = jest.fn();
+const mockFrom = jest.fn();
 
-vi.mock('expo-router', () => ({
-  useRouter: () => mockRouter,
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    back: mockBack,
+  }),
 }));
 
 // Mock Alert
-vi.mock('react-native', async () => {
-  const actual = await vi.importActual('react-native');
-  return {
-    ...actual,
-    Alert: {
-      alert: vi.fn(),
-    },
-  };
-});
+jest.mock('react-native/Libraries/Alert/Alert', () => ({
+  alert: jest.fn(),
+}));
 
 // Mock supabase client
-const mockRpc = vi.hoisted(() => vi.fn());
-const mockSelect = vi.hoisted(() => vi.fn());
-const mockFrom = vi.hoisted(() => vi.fn());
-
-vi.mock('../../../../lib/supabase/client', () => ({
+jest.mock('../../../../lib/supabase/client', () => ({
   supabase: {
-    from: mockFrom,
-    rpc: mockRpc,
+    from: (...args: any[]) => mockFrom(...args),
+    rpc: (...args: any[]) => mockRpc(...args),
   },
 }));
 
 describe('AddToListPage', () => {
   let mockAPI: TMDBAPI;
-  let mockMultiSearch: ReturnType<typeof vi.fn>;
+  let mockMultiSearch: ReturnType<typeof jest.fn>;
 
   const mockConfig: TMDBConfigurationState = {
     images: {
@@ -77,15 +71,12 @@ describe('AddToListPage', () => {
   };
 
   beforeEach(() => {
-    mockMultiSearch = vi.fn();
+    mockMultiSearch = jest.fn();
     mockAPI = {
       multiSearch: mockMultiSearch,
     } as unknown as TMDBAPI;
 
-    mockRpc.mockReset();
-    mockFrom.mockReset();
-    mockSelect.mockReset();
-    mockRouter.push.mockClear();
+    jest.clearAllMocks();
 
     // Default: no saved items
     mockSelect.mockResolvedValue({ data: [], error: null });
@@ -107,7 +98,6 @@ describe('AddToListPage', () => {
   it(
     'displays search results after typing and waiting for debounce',
     async () => {
-      const user = userEvent.setup();
     const mockResults: TMDBSearchResults = {
       page: 1,
       results: [
@@ -135,7 +125,7 @@ describe('AddToListPage', () => {
     renderWithProviders();
 
       const searchInput = screen.getByPlaceholderText('Search movies and TV shows...');
-      await user.type(searchInput, 'test query');
+      fireEvent.changeText(searchInput, 'test query');
 
       // Wait for debounce (500ms) and API call
       await waitFor(
@@ -146,9 +136,9 @@ describe('AddToListPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Test Movie')).toBeInTheDocument();
-        expect(screen.getByText('2023')).toBeInTheDocument();
-        expect(screen.getByText('Action, Adventure')).toBeInTheDocument();
+        expect(screen.getByText('Test Movie')).toBeTruthy();
+        expect(screen.getByText('2023')).toBeTruthy();
+        expect(screen.getByText('Action, Adventure')).toBeTruthy();
       });
     },
     { timeout: 10000 }
@@ -157,7 +147,6 @@ describe('AddToListPage', () => {
   it(
     'shows saved button for already-saved items',
     async () => {
-      const user = userEvent.setup();
     const mockResults: TMDBSearchResults = {
       page: 1,
       results: [
@@ -196,11 +185,11 @@ describe('AddToListPage', () => {
     });
 
       const searchInput = screen.getByPlaceholderText('Search movies and TV shows...');
-      await user.type(searchInput, 'saved');
+      fireEvent.changeText(searchInput, 'saved');
 
       await waitFor(
         () => {
-          expect(screen.getByText('Saved Movie')).toBeInTheDocument();
+          expect(screen.getByText('Saved Movie')).toBeTruthy();
         },
         { timeout: 2000 }
       );
@@ -215,7 +204,6 @@ describe('AddToListPage', () => {
   it(
     'filters out unsupported media types',
     async () => {
-      const user = userEvent.setup();
     const mockResults: TMDBSearchResults = {
       page: 1,
       results: [
@@ -256,17 +244,17 @@ describe('AddToListPage', () => {
     renderWithProviders();
 
       const searchInput = screen.getByPlaceholderText('Search movies and TV shows...');
-      await user.type(searchInput, 'test');
+      fireEvent.changeText(searchInput, 'test');
 
       await waitFor(
         () => {
-          expect(screen.getByText('Movie Result')).toBeInTheDocument();
+          expect(screen.getByText('Movie Result')).toBeTruthy();
         },
         { timeout: 2000 }
       );
 
       // Person result should not appear
-      expect(screen.queryByText('A person')).not.toBeInTheDocument();
+      expect(screen.queryByText('A person')).not.toBeTruthy();
     },
     { timeout: 10000 }
   );
@@ -274,14 +262,12 @@ describe('AddToListPage', () => {
   it(
     'displays loading indicator during search',
     async () => {
-      const user = userEvent.setup();
-
       // Make the search hang
       mockMultiSearch.mockImplementation(() => new Promise(() => {}));
       renderWithProviders();
 
       const searchInput = screen.getByPlaceholderText('Search movies and TV shows...');
-      await user.type(searchInput, 'test');
+      fireEvent.changeText(searchInput, 'test');
 
       await waitFor(
         () => {
@@ -291,7 +277,7 @@ describe('AddToListPage', () => {
       );
 
       // Should show loading indicator
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeTruthy();
     },
     { timeout: 10000 }
   );
@@ -299,7 +285,6 @@ describe('AddToListPage', () => {
   it(
     'allows saving a search result',
     async () => {
-      const user = userEvent.setup();
     const mockResults: TMDBSearchResults = {
       page: 1,
       results: [
@@ -329,17 +314,17 @@ describe('AddToListPage', () => {
     renderWithProviders();
 
       const searchInput = screen.getByPlaceholderText('Search movies and TV shows...');
-      await user.type(searchInput, 'new');
+      fireEvent.changeText(searchInput, 'new');
 
       await waitFor(
         () => {
-          expect(screen.getByText('New Movie')).toBeInTheDocument();
+          expect(screen.getByText('New Movie')).toBeTruthy();
         },
         { timeout: 2000 }
       );
 
-      const saveButton = screen.getByRole('button', { name: /^Save$/i });
-      await user.click(saveButton);
+      const saveButton = screen.getByText(/^Save$/i);
+      fireEvent.press(saveButton);
 
       await waitFor(() => {
         expect(mockRpc).toHaveBeenCalledWith(

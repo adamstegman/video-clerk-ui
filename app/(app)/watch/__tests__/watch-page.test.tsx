@@ -1,6 +1,5 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react-native';
 import { WatchPage } from '../components/watch-page';
 import type { WatchCardEntry } from '../components/watch-card';
 import { TMDBConfigurationContext, type TMDBConfigurationState } from '../../../../lib/tmdb-api/tmdb-configuration';
@@ -43,13 +42,13 @@ function renderWithProviders(children: React.ReactElement) {
 
 describe('WatchPage', () => {
   const mockCallbacks = {
-    onFiltersChange: vi.fn(),
-    onStartQuestionnaire: vi.fn(),
-    onSwipeLeft: vi.fn(),
-    onSwipeRight: vi.fn(),
-    onChooseWinner: vi.fn(),
-    onMarkWatched: vi.fn(async () => {}),
-    onStartOver: vi.fn(),
+    onFiltersChange: jest.fn(),
+    onStartQuestionnaire: jest.fn(),
+    onSwipeLeft: jest.fn(),
+    onSwipeRight: jest.fn(),
+    onChooseWinner: jest.fn(),
+    onMarkWatched: jest.fn(async () => {}),
+    onStartOver: jest.fn(),
   };
 
   it('shows loading state', () => {
@@ -71,7 +70,7 @@ describe('WatchPage', () => {
       />
     );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeTruthy();
   });
 
   it('shows error state', () => {
@@ -93,7 +92,7 @@ describe('WatchPage', () => {
       />
     );
 
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.getByText('Something went wrong')).toBeTruthy();
   });
 
   it('shows empty state when no entries', () => {
@@ -115,8 +114,8 @@ describe('WatchPage', () => {
       />
     );
 
-    expect(screen.getByText('No unwatched entries.')).toBeInTheDocument();
-    expect(screen.getByText('Add some movies or shows to your list!')).toBeInTheDocument();
+    expect(screen.getByText('No unwatched entries.')).toBeTruthy();
+    expect(screen.getByText('Add some movies or shows to your list!')).toBeTruthy();
   });
 
   it('shows questionnaire when showQuestionnaire is true', () => {
@@ -139,7 +138,7 @@ describe('WatchPage', () => {
     );
 
     // Questionnaire should render (exact text depends on component implementation)
-    expect(screen.getByText(/Start Swiping/i)).toBeInTheDocument();
+    expect(screen.getByText(/Start Swiping/i)).toBeTruthy();
   });
 
   it('shows winner view when chosenWinner is set', () => {
@@ -162,8 +161,8 @@ describe('WatchPage', () => {
       />
     );
 
-    expect(screen.getByText('Winner')).toBeInTheDocument();
-    expect(screen.getByText(/Mark as Watched/i)).toBeInTheDocument();
+    expect(screen.getByText('Winner')).toBeTruthy();
+    expect(screen.getByText(/Mark as Watched/i)).toBeTruthy();
   });
 
   it('shows no matches state when deck is empty and no likes', () => {
@@ -185,8 +184,8 @@ describe('WatchPage', () => {
       />
     );
 
-    expect(screen.getByText('No entries match your filters.')).toBeInTheDocument();
-    expect(screen.getByText(/Change Filters/i)).toBeInTheDocument();
+    expect(screen.getByText('No entries match your filters.')).toBeTruthy();
+    expect(screen.getByText(/Change Filters/i)).toBeTruthy();
   });
 
   it('shows cards view with swipe instructions', () => {
@@ -209,12 +208,12 @@ describe('WatchPage', () => {
       />
     );
 
-    expect(screen.getByText('Test Entry')).toBeInTheDocument();
-    expect(screen.getByText(/Swipe left to skip • Swipe right to like \(0\/3\)/)).toBeInTheDocument();
+    expect(screen.getByText('Test Entry')).toBeTruthy();
+    expect(screen.getByText(/Swipe left to skip • Swipe right to like \(0\/3\)/)).toBeTruthy();
   });
 
   it('auto-selects winner when liked has only 1 entry and in pick mode', () => {
-    const onChooseWinner = vi.fn();
+    const onChooseWinner = jest.fn();
     const entry = makeEntry(1, 'Solo');
     renderWithProviders(
       <WatchPage
@@ -258,8 +257,8 @@ describe('WatchPage', () => {
       />
     );
 
-    expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
-    expect(screen.getByText(/You liked 3\. Choose your winner:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Pick one to watch/i)).toBeTruthy();
+    expect(screen.getByText(/You liked 3\. Choose your winner:/i)).toBeTruthy();
   });
 
   it('shows picker when deck exhausted with 2 likes', () => {
@@ -282,6 +281,6 @@ describe('WatchPage', () => {
       />
     );
 
-    expect(screen.getByText(/Pick one to watch/i)).toBeInTheDocument();
+    expect(screen.getByText(/Pick one to watch/i)).toBeTruthy();
   });
 });
