@@ -1,3 +1,6 @@
+// Load environment variables from .env file for tests
+require('dotenv').config();
+
 // Mock expo winter runtime to prevent import errors
 jest.mock('expo/src/winter/runtime.native.ts', () => ({}), { virtual: true });
 jest.mock('expo/src/winter/installGlobal.ts', () => ({}), { virtual: true });
