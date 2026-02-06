@@ -1,5 +1,4 @@
-// @vitest-environment node
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+// @jest-environment node
 import { createAdminClient, createTestUser, cleanupTestUser } from '../test-utils/supabase';
 
 describe('Supabase Integration', () => {

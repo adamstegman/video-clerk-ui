@@ -1,42 +1,38 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import SettingsPage from '../../settings';
 
-// Mock expo-router
-const mockRouter = vi.hoisted(() => ({
-  push: vi.fn(),
-  replace: vi.fn(),
-  back: vi.fn(),
-}));
+// Mock functions
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
+const mockBack = jest.fn();
+const mockSignOut = jest.fn();
+const mockGetUser = jest.fn();
+const mockRpc = jest.fn();
 
-vi.mock('expo-router', () => ({
-  router: mockRouter,
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  router: {
+    push: mockPush,
+    replace: mockReplace,
+    back: mockBack,
+  },
 }));
 
 // Mock supabase client
-const mockSignOut = vi.hoisted(() => vi.fn());
-const mockGetUser = vi.hoisted(() => vi.fn());
-const mockRpc = vi.hoisted(() => vi.fn());
-
-vi.mock('../../../../lib/supabase/client', () => ({
+jest.mock('../../../../lib/supabase/client', () => ({
   supabase: {
     auth: {
-      getUser: mockGetUser,
-      signOut: mockSignOut,
+      getUser: (...args: any[]) => mockGetUser(...args),
+      signOut: (...args: any[]) => mockSignOut(...args),
     },
-    rpc: mockRpc,
+    rpc: (...args: any[]) => mockRpc(...args),
   },
 }));
 
 describe('SettingsPage', () => {
   beforeEach(() => {
-    mockRouter.push.mockClear();
-    mockRouter.replace.mockClear();
-    mockSignOut.mockReset();
-    mockGetUser.mockReset();
-    mockRpc.mockReset();
+    jest.clearAllMocks();
 
     // Default: user logged in
     mockGetUser.mockResolvedValue({
@@ -60,7 +56,7 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('test@example.com')).toBeInTheDocument();
+      expect(screen.getByText('test@example.com')).toBeTruthy();
     });
   });
 
@@ -69,7 +65,7 @@ describe('SettingsPage', () => {
 
     expect(
       screen.getByText(/This application uses TMDB and the TMDB APIs/i)
-    ).toBeInTheDocument();
+    ).toBeTruthy();
   });
 
   it('displays group members section', async () => {
@@ -92,12 +88,12 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('test@example.com')).toBeInTheDocument();
-      expect(screen.getByText('friend@example.com')).toBeInTheDocument();
+      expect(screen.getByText('test@example.com')).toBeTruthy();
+      expect(screen.getByText('friend@example.com')).toBeTruthy();
     });
 
     // Should show "You" badge for current user
-    expect(screen.getByText('You')).toBeInTheDocument();
+    expect(screen.getByText('You')).toBeTruthy();
   });
 
   it('displays pending invitations', async () => {
@@ -119,13 +115,11 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('pending@example.com')).toBeInTheDocument();
+      expect(screen.getByText('pending@example.com')).toBeTruthy();
     });
   });
 
   it('creates invitation and shows link', async () => {
-    const user = userEvent.setup();
-
     mockRpc.mockImplementation((fn: string, params?: any) => {
       if (fn === 'get_group_members') {
         return Promise.resolve({ data: [], error: null });
@@ -142,10 +136,10 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     const emailInput = await screen.findByPlaceholderText('friend@example.com');
-    await user.type(emailInput, 'newuser@example.com');
+    fireEvent.changeText(emailInput, 'newuser@example.com');
 
     const createButton = screen.getByText('Create Invite');
-    await user.click(createButton);
+    fireEvent.press(createButton);
 
     await waitFor(() => {
       expect(mockRpc).toHaveBeenCalledWith('create_group_invite', {
@@ -154,12 +148,10 @@ describe('SettingsPage', () => {
     });
 
     // Should show invite link
-    expect(await screen.findByText(/Invite Link:/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Invite Link:/i)).toBeTruthy();
   });
 
   it('copies invite link to clipboard', async () => {
-    const user = userEvent.setup();
-
     mockRpc.mockImplementation((fn: string) => {
       if (fn === 'get_group_members') {
         return Promise.resolve({ data: [], error: null });
@@ -176,23 +168,21 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     const emailInput = await screen.findByPlaceholderText('friend@example.com');
-    await user.type(emailInput, 'newuser@example.com');
+    fireEvent.changeText(emailInput, 'newuser@example.com');
 
     const createButton = screen.getByText('Create Invite');
-    await user.click(createButton);
+    fireEvent.press(createButton);
 
     await screen.findByText(/Invite Link:/i);
 
     const copyButton = screen.getByText('Copy');
-    await user.click(copyButton);
+    fireEvent.press(copyButton);
 
     // Should show "Copied!" feedback
-    expect(await screen.findByText('Copied!')).toBeInTheDocument();
+    expect(await screen.findByText('Copied!')).toBeTruthy();
   });
 
   it('clears invite link when email changes', async () => {
-    const user = userEvent.setup();
-
     mockRpc.mockImplementation((fn: string) => {
       if (fn === 'get_group_members') {
         return Promise.resolve({ data: [], error: null });
@@ -210,36 +200,33 @@ describe('SettingsPage', () => {
 
     // Create an invite
     const emailInput = await screen.findByPlaceholderText('friend@example.com');
-    await user.type(emailInput, 'user1@example.com');
+    fireEvent.changeText(emailInput, 'user1@example.com');
 
     const createButton = screen.getByText('Create Invite');
-    await user.click(createButton);
+    fireEvent.press(createButton);
 
     await screen.findByText(/Invite Link:/i);
 
     // Change the email
-    await user.clear(emailInput);
-    await user.type(emailInput, 'user2@example.com');
+    fireEvent.changeText(emailInput, 'user2@example.com');
 
     // Link should disappear
     await waitFor(() => {
-      expect(screen.queryByText(/Invite Link:/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Invite Link:/i)).not.toBeTruthy();
     });
   });
 
   it('sign out button calls signOut and redirects', async () => {
-    const user = userEvent.setup();
-
     mockSignOut.mockResolvedValue({ error: null });
 
     render(<SettingsPage />);
 
     const signOutButton = await screen.findByText('Sign Out');
-    await user.click(signOutButton);
+    fireEvent.press(signOutButton);
 
     await waitFor(() => {
       expect(mockSignOut).toHaveBeenCalled();
-      expect(mockRouter.replace).toHaveBeenCalledWith('/');
+      expect(mockReplace).toHaveBeenCalledWith('/');
     });
   });
 });
