@@ -40,6 +40,23 @@ jest.mock('expo-clipboard', () => ({
   getStringAsync: jest.fn().mockResolvedValue(''),
 }));
 
+// Mock expo-haptics
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn().mockResolvedValue(undefined),
+  notificationAsync: jest.fn().mockResolvedValue(undefined),
+  selectionAsync: jest.fn().mockResolvedValue(undefined),
+  ImpactFeedbackStyle: {
+    Light: 'light',
+    Medium: 'medium',
+    Heavy: 'heavy',
+  },
+  NotificationFeedbackType: {
+    Success: 'success',
+    Warning: 'warning',
+    Error: 'error',
+  },
+}));
+
 // Mock expo-image
 jest.mock('expo-image', () => ({
   Image: ({ source, style }) => null,
@@ -50,12 +67,18 @@ jest.mock('react-native-worklets', () => ({}));
 
 // Mock react-native-reanimated (must be before react-native-gesture-handler)
 jest.mock('react-native-reanimated', () => {
-  const View = ({ children, style }) => children;
+  const React = require('react');
+  const { View: RNView, Text: RNText, ScrollView: RNScrollView } = require('react-native');
+
+  const AnimatedView = React.forwardRef((props, ref) => React.createElement(RNView, { ...props, ref }));
+  const AnimatedText = React.forwardRef((props, ref) => React.createElement(RNText, { ...props, ref }));
+  const AnimatedScrollView = React.forwardRef((props, ref) => React.createElement(RNScrollView, { ...props, ref }));
+
   return {
     default: {
-      View,
-      Text: View,
-      ScrollView: View,
+      View: AnimatedView,
+      Text: AnimatedText,
+      ScrollView: AnimatedScrollView,
       createAnimatedComponent: (component) => component,
     },
     useSharedValue: (initial) => ({ value: initial }),

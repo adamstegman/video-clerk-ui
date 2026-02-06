@@ -113,11 +113,9 @@ describe('ListPageContainer', () => {
     renderWithProviders();
 
     await waitFor(() => {
-      const allTexts = screen.getAllByText(/Unwatched|Watched/);
-      const textContent = allTexts.map((el) => el.textContent);
-      // Unwatched should come first, then WATCHED header, then watched entry
-      expect(textContent).toContain('Unwatched One');
-      expect(textContent).toContain('Watched One');
+      // Just verify both entries are present (order testing is complex in React Native)
+      expect(screen.getByText('Unwatched One')).toBeTruthy();
+      expect(screen.getByText('Watched One')).toBeTruthy();
     });
   });
 

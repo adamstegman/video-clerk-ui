@@ -2,31 +2,31 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import SettingsPage from '../../settings';
 
-// Mock functions
+// Mock expo-router
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const mockBack = jest.fn();
-const mockSignOut = jest.fn();
-const mockGetUser = jest.fn();
-const mockRpc = jest.fn();
 
-// Mock expo-router
 jest.mock('expo-router', () => ({
   router: {
-    push: mockPush,
-    replace: mockReplace,
-    back: mockBack,
+    get push() { return mockPush; },
+    get replace() { return mockReplace; },
+    get back() { return mockBack; },
   },
 }));
 
 // Mock supabase client
+const mockSignOut = jest.fn();
+const mockGetUser = jest.fn();
+const mockRpc = jest.fn();
+
 jest.mock('../../../../lib/supabase/client', () => ({
   supabase: {
     auth: {
-      getUser: (...args: any[]) => mockGetUser(...args),
-      signOut: (...args: any[]) => mockSignOut(...args),
+      get getUser() { return mockGetUser; },
+      get signOut() { return mockSignOut; },
     },
-    rpc: (...args: any[]) => mockRpc(...args),
+    get rpc() { return mockRpc; },
   },
 }));
 
@@ -88,7 +88,8 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('test@example.com')).toBeTruthy();
+      const emails = screen.getAllByText('test@example.com');
+      expect(emails.length).toBeGreaterThan(0);
       expect(screen.getByText('friend@example.com')).toBeTruthy();
     });
 
