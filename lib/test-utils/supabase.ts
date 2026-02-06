@@ -6,23 +6,26 @@ export function createAdminClient() {
   return createClient(url, key);
 }
 
-export async function createTestUser(admin: ReturnType<typeof createAdminClient>) {
-  const email = `test-${crypto.randomUUID()}@test.local`;
+export async function createTestUser(
+  admin: ReturnType<typeof createAdminClient>,
+  email?: string
+) {
+  const userEmail = email || `test-${crypto.randomUUID()}@test.local`;
   const { data, error } = await admin.auth.admin.createUser({
-    email,
+    email: userEmail,
     password: 'test-password-123',
     email_confirm: true,
   });
   if (error) throw error;
 
   const { data: session } = await admin.auth.signInWithPassword({
-    email,
+    email: userEmail,
     password: 'test-password-123',
   });
 
   return {
     userId: data.user.id,
-    email,
+    email: userEmail,
     client: createClient(
       process.env.EXPO_PUBLIC_SUPABASE_URL!,
       process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
