@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 
@@ -19,12 +19,10 @@ interface WatchCardProps {
   entry: WatchCardEntry;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-// Constrain card width with margins, max 600px
-const CARD_WIDTH = Math.min(SCREEN_WIDTH - 48, 600);
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.7;
-
 export function WatchCard({ entry }: WatchCardProps) {
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const cardWidth = Math.min(screenWidth - 48, 600);
+  const cardHeight = screenHeight * 0.7;
   const config = useContext(TMDBConfigurationContext);
 
   const backdropSizeIndex = config.images.backdrop_sizes.length > 1 ? 1 : 0;
@@ -46,7 +44,7 @@ export function WatchCard({ entry }: WatchCardProps) {
   const tagLabel = entry.tags && entry.tags.length > 0 ? ` | ${entry.tags.join(', ')}` : '';
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { width: cardWidth, height: cardHeight }]}>
       {/* Backdrop area - 62% of card height */}
       <View style={styles.backdropContainer}>
         {imageUrl ? (
@@ -88,8 +86,6 @@ export function WatchCard({ entry }: WatchCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
     borderRadius: 16,
     backgroundColor: '#fff',
     overflow: 'hidden',
