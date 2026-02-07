@@ -140,16 +140,16 @@ export function WatchPage({
     return null;
   }
 
-  // Show up to 3 cards in the stack (bottom cards rendered first, top card last)
-  const visibleDeck = deck.slice(0, 3);
+  // Show up to 4 cards in the stack (bottom cards rendered first, top card last)
+  const visibleDeck = deck.slice(0, 4);
 
   return (
     <View style={styles.container}>
       <View style={styles.cardContainer}>
         {visibleDeck.map((entry, index) => {
           const reverseIndex = visibleDeck.length - 1 - index;
-          const offset = reverseIndex * 12;
-          const scale = 1 - reverseIndex * 0.04;
+          const offset = reverseIndex * 20;
+          const scale = 1 - reverseIndex * 0.03;
 
           if (index === 0) {
             return (
