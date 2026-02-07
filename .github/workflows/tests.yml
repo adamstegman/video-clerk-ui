@@ -72,7 +72,7 @@ jobs:
           > .env
 
       - name: Run integration tests
-        run: npx dotenvx run -- npm test -- integration.test
+        run: npx dotenvx run -- npm run test:integration
 
       - name: Stop Supabase
         if: always()
