@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { supabase } from '../../../../lib/supabase/client';
-import { normalizeDetails, normalizeTagName, getReleaseYear } from '../../../../lib/utils/normalize';
+import { supabase } from '../supabase/client';
+import { normalizeDetails, normalizeTagName, getReleaseYear } from '../utils/normalize';
 import { ListPage } from './list-page';
 import type { SavedEntryRowData } from './saved-entry-row';
 

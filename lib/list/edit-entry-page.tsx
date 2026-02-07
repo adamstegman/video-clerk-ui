@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { X } from 'lucide-react-native';
-import { TMDBConfigurationContext } from '../../../../lib/tmdb-api/tmdb-configuration';
+import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 
 export interface EditEntryData {
   id: number;

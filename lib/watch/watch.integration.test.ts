@@ -1,6 +1,6 @@
 // @jest-environment node
 import { describe, it, expect } from '@jest/globals';
-import { createAdminClient, createTestUser, cleanupTestUser, getGroupId } from '../../../../lib/test-utils/supabase';
+import { createAdminClient, createTestUser, cleanupTestUser, getGroupId } from '../test-utils/supabase';
 
 describe('Application-level: Watch Flow', () => {
   it('loads only unwatched entries', async () => {

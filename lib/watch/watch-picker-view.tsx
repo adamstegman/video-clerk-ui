@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useContext, useState } from 'react';
-import { TMDBConfigurationContext } from '../../../../lib/tmdb-api/tmdb-configuration';
+import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import type { WatchCardEntry } from './watch-card';
 
 interface WatchPickerViewProps {

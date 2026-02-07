@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Platform } from 'react-native';
-import { supabase } from '../../../../lib/supabase/client';
-import { normalizeDetails, getReleaseYear, normalizeTagKey } from '../../../../lib/utils/normalize';
+import { supabase } from '../supabase/client';
+import { normalizeDetails, getReleaseYear, normalizeTagKey } from '../utils/normalize';
 import { EditEntryPage, type EditEntryData, type EditEntryTag } from './edit-entry-page';
 
 function normalizeInputTagName(name: string) {

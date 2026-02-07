@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { TMDBConfigurationContext } from '../../../../lib/tmdb-api/tmdb-configuration';
+import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 
 export interface SavedEntryRowData {
   id: number;

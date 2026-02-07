@@ -1,6 +1,6 @@
 // @jest-environment node
 import { describe, it, expect } from '@jest/globals';
-import { createAdminClient, createTestUser, cleanupTestUser, getGroupId } from '../../../../lib/test-utils/supabase';
+import { createAdminClient, createTestUser, cleanupTestUser, getGroupId } from '../test-utils/supabase';
 
 describe('Application-level: Edit Entry Page', () => {
   it('updates entry tags when saving', async () => {

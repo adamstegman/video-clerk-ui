@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { supabase } from '../../../../lib/supabase/client';
-import { normalizeDetails, normalizeTagName, getReleaseYear } from '../../../../lib/utils/normalize';
+import { supabase } from '../supabase/client';
+import { normalizeDetails, normalizeTagName, getReleaseYear } from '../utils/normalize';
 import { WatchPage } from './watch-page';
 import type { WatchCardEntry } from './watch-card';
 import type { QuestionnaireFilters } from './watch-questionnaire';

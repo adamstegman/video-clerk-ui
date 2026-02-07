@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
-import { TMDBConfigurationContext } from '../../../../lib/tmdb-api/tmdb-configuration';
+import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 
 export interface WatchCardEntry {
   id: number;
