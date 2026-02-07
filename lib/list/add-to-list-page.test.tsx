@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
-import AddToListPage from '../add/index';
-import { TMDBAPIContext } from '../../../../lib/tmdb-api/tmdb-api-provider';
-import { TMDBConfigurationContext, type TMDBConfigurationState } from '../../../../lib/tmdb-api/tmdb-configuration';
-import { TMDBGenresContext, type TMDBGenresState } from '../../../../lib/tmdb-api/tmdb-genres';
-import { TMDBAPI, type TMDBSearchResults, type TMDBGenre } from '../../../../lib/tmdb-api/tmdb-api';
+import AddToListPage from '../../app/(app)/list/add/index';
+import { TMDBAPIContext } from '../tmdb-api/tmdb-api-provider';
+import { TMDBConfigurationContext, type TMDBConfigurationState } from '../tmdb-api/tmdb-configuration';
+import { TMDBGenresContext, type TMDBGenresState } from '../tmdb-api/tmdb-genres';
+import { TMDBAPI, type TMDBSearchResults, type TMDBGenre } from '../tmdb-api/tmdb-api';
 
 // Mock functions
 const mockPush = jest.fn();
@@ -29,7 +29,7 @@ jest.mock('react-native/Libraries/Alert/Alert', () => ({
 }));
 
 // Mock supabase client
-jest.mock('../../../../lib/supabase/client', () => ({
+jest.mock('../supabase/client', () => ({
   supabase: {
     from: (...args: any[]) => mockFrom(...args),
     rpc: (...args: any[]) => mockRpc(...args),

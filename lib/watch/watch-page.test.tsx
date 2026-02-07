@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
-import { WatchPage } from '../_components/watch-page';
-import type { WatchCardEntry } from '../_components/watch-card';
-import { TMDBConfigurationContext, type TMDBConfigurationState } from '../../../../lib/tmdb-api/tmdb-configuration';
+import { WatchPage } from './watch-page';
+import type { WatchCardEntry } from './watch-card';
+import { TMDBConfigurationContext, type TMDBConfigurationState } from '../tmdb-api/tmdb-configuration';
 
 const mockConfig: TMDBConfigurationState = {
   images: {

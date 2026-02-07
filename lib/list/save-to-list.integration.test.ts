@@ -1,6 +1,6 @@
 // @jest-environment node
 import { describe, it, expect} from '@jest/globals';
-import { createAdminClient, createTestUser, cleanupTestUser, getGroupId } from '../../../../lib/test-utils/supabase';
+import { createAdminClient, createTestUser, cleanupTestUser, getGroupId } from '../test-utils/supabase';
 
 describe('Application-level: Save to List', () => {
   it('saves a TMDB result and creates all related database entries', async () => {

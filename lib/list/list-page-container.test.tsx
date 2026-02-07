@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react-native';
-import { ListPageContainer } from '../_components/list-page-container';
-import { TMDBConfigurationContext, type TMDBConfigurationState } from '../../../../lib/tmdb-api/tmdb-configuration';
+import { ListPageContainer } from './list-page-container';
+import { TMDBConfigurationContext, type TMDBConfigurationState } from '../tmdb-api/tmdb-configuration';
 
 // Mock functions
 const mockPush = jest.fn();
@@ -22,7 +22,7 @@ jest.mock('expo-router', () => ({
 }));
 
 // Mock supabase client (relative path matching component import)
-jest.mock('../../../../lib/supabase/client', () => ({
+jest.mock('../supabase/client', () => ({
   supabase: {
     from: (...args: unknown[]) => mockFrom(...(args as unknown as Parameters<typeof mockFrom>)),
   },

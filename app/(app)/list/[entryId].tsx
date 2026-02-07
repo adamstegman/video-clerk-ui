@@ -1,4 +1,4 @@
-import { EditEntryPageContainer } from './_components/edit-entry-page-container';
+import { EditEntryPageContainer } from '../../../lib/list/edit-entry-page-container';
 
 export default function EditEntryRoute() {
   return <EditEntryPageContainer />;

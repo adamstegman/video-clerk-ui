@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useContext, useState } from 'react';
 import { Check, RotateCcw } from 'lucide-react-native';
-import { TMDBConfigurationContext } from '../../../../lib/tmdb-api/tmdb-configuration';
+import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import type { WatchCardEntry } from './watch-card';
 
 interface WatchWinnerViewProps {
