@@ -24,7 +24,7 @@ jest.mock('expo-router', () => ({
 // Mock supabase client (relative path matching component import)
 jest.mock('../../../../lib/supabase/client', () => ({
   supabase: {
-    from: (...args: any[]) => mockFrom(...args),
+    from: (...args: unknown[]) => mockFrom(...(args as unknown as Parameters<typeof mockFrom>)),
   },
 }));
 

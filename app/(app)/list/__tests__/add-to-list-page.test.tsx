@@ -38,7 +38,7 @@ jest.mock('../../../../lib/supabase/client', () => ({
 
 describe('AddToListPage', () => {
   let mockAPI: TMDBAPI;
-  let mockMultiSearch: ReturnType<typeof jest.fn>;
+  let mockMultiSearch: jest.Mock;
 
   const mockConfig: TMDBConfigurationState = {
     images: {

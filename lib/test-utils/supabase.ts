@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 export function createAdminClient() {
   const url = process.env.EXPO_PUBLIC_SUPABASE_URL!;
@@ -7,7 +7,7 @@ export function createAdminClient() {
 }
 
 export async function createTestUser(
-  admin: ReturnType<typeof createAdminClient>,
+  admin: SupabaseClient,
   email?: string
 ) {
   const userEmail = email || `test-${crypto.randomUUID()}@test.local`;
@@ -35,13 +35,13 @@ export async function createTestUser(
 }
 
 export async function cleanupTestUser(
-  admin: ReturnType<typeof createAdminClient>,
+  admin: SupabaseClient,
   userId: string
 ) {
   await admin.auth.admin.deleteUser(userId);
 }
 
-export async function getGroupId(client: ReturnType<typeof createClient>) {
+export async function getGroupId(client: SupabaseClient) {
   const { data } = await client.from('group_memberships').select('group_id').single();
-  return data?.group_id;
+  return (data as { group_id: unknown } | null)?.group_id;
 }
