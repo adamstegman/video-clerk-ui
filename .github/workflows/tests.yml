@@ -35,7 +35,7 @@ jobs:
         run: npm run typecheck
 
       - name: Run unit tests (exclude integration)
-        run: npm test -- --exclude "**/*.integration.test.*"
+        run: npm test
 
   integration:
     name: Integration tests (Supabase)
