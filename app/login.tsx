@@ -29,7 +29,7 @@ export default function LoginPage() {
       setError(authError.message);
       setLoading(false);
     } else {
-      router.replace('/(app)/list');
+      router.replace('/(app)/watch');
     }
   }
 
