@@ -5,7 +5,7 @@
     "paths": {
       "~/*": ["./app/*"]
     },
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "jest"]
   },
   "include": [
     "**/*.ts",

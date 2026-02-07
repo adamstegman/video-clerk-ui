@@ -36,7 +36,7 @@ export default function AddToListPage() {
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [savedTmdbIds, setSavedTmdbIds] = useState<Set<number>>(new Set());
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch saved tmdb_ids on mount
   useEffect(() => {
