@@ -1,149 +1,103 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { TvMinimalPlay } from 'lucide-react-native';
 import { supabase } from '../lib/supabase/client';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'signin' | 'signup' | 'magic'>('signin');
 
-  async function handleSignIn() {
+  async function handleSubmit() {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
+      setError('Please enter email and password');
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    setError(null);
+
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    setLoading(false);
 
-    if (error) {
-      Alert.alert('Error', error.message);
+    if (authError) {
+      setError(authError.message);
+      setLoading(false);
     } else {
       router.replace('/(app)/list');
     }
   }
 
-  async function handleSignUp() {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
-      return;
-    }
-
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    setLoading(false);
-
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
-      Alert.alert('Success', 'Check your email to confirm your account');
-    }
-  }
-
-  async function handleMagicLink() {
-    if (!email) {
-      Alert.alert('Error', 'Please enter your email');
-      return;
-    }
-
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-    });
-    setLoading(false);
-
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
-      Alert.alert('Success', 'Check your email for the magic link');
-    }
-  }
-
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>
-          {mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Sign Up' : 'Magic Link'}
-        </Text>
+      {/* Logo */}
+      <Link href="/" asChild>
+        <Pressable style={styles.logo}>
+          <TvMinimalPlay size={22} color="#6366f1" strokeWidth={1.5} />
+          <Text style={styles.logoText}>Video Clerk</Text>
+        </Pressable>
+      </Link>
 
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoComplete="email"
-          />
+      {/* Centered form */}
+      <View style={styles.formWrapper}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Login</Text>
+          <Text style={styles.description}>
+            Enter your email below to login to your account
+          </Text>
 
-          {mode !== 'magic' && (
+          {/* Email */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder="me@example.com"
+              placeholderTextColor="#9ca3af"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoComplete="email"
+            />
+          </View>
+
+          {/* Password */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder=""
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               autoComplete="password"
             />
+          </View>
+
+          {/* Error */}
+          {error && (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
           )}
 
+          {/* Submit */}
           <Pressable
             style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={
-              mode === 'signin'
-                ? handleSignIn
-                : mode === 'signup'
-                  ? handleSignUp
-                  : handleMagicLink
-            }
+            onPress={handleSubmit}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>
-                {mode === 'signin'
-                  ? 'Sign In'
-                  : mode === 'signup'
-                    ? 'Sign Up'
-                    : 'Send Magic Link'}
-              </Text>
+              <Text style={styles.buttonText}>Login</Text>
             )}
           </Pressable>
-        </View>
-
-        <View style={styles.links}>
-          {mode === 'signin' && (
-            <>
-              <Pressable onPress={() => setMode('signup')}>
-                <Text style={styles.link}>Don't have an account? Sign up</Text>
-              </Pressable>
-              <Pressable onPress={() => setMode('magic')}>
-                <Text style={styles.link}>Sign in with magic link</Text>
-              </Pressable>
-            </>
-          )}
-          {mode === 'signup' && (
-            <Pressable onPress={() => setMode('signin')}>
-              <Text style={styles.link}>Already have an account? Sign in</Text>
-            </Pressable>
-          )}
-          {mode === 'magic' && (
-            <Pressable onPress={() => setMode('signin')}>
-              <Text style={styles.link}>Sign in with password</Text>
-            </Pressable>
-          )}
         </View>
       </View>
     </SafeAreaView>
@@ -155,51 +109,91 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  content: {
+  logo: {
+    position: 'absolute',
+    top: 48,
+    left: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    zIndex: 1,
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  formWrapper: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 24,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 384,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    padding: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     color: '#1f2937',
-    textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 8,
   },
-  form: {
-    gap: 16,
+  description: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 24,
+  },
+  fieldGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
   },
   input: {
-    backgroundColor: '#f3f4f6',
-    paddingVertical: 16,
+    width: '100%',
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    backgroundColor: '#fff',
     fontSize: 16,
     color: '#1f2937',
   },
+  errorBox: {
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 6,
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fecaca',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#dc2626',
+  },
   button: {
-    backgroundColor: '#4f46e5',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: '#6366f1',
+    paddingVertical: 12,
+    borderRadius: 6,
     alignItems: 'center',
-    marginTop: 8,
+    width: '100%',
   },
   buttonDisabled: {
-    opacity: 0.7,
+    backgroundColor: '#a5b4fc',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-  },
-  links: {
-    marginTop: 24,
-    gap: 12,
-    alignItems: 'center',
-  },
-  link: {
-    color: '#4f46e5',
-    fontSize: 14,
   },
 });
