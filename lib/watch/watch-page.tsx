@@ -140,16 +140,44 @@ export function WatchPage({
     return null;
   }
 
+  // Show up to 3 cards in the stack (bottom cards rendered first, top card last)
+  const visibleDeck = deck.slice(0, 3);
+
   return (
     <View style={styles.container}>
       <View style={styles.cardContainer}>
-        <SwipeableCard
-          key={currentEntry.id}
-          onSwipeLeft={() => onSwipeLeft(currentEntry)}
-          onSwipeRight={() => onSwipeRight(currentEntry)}
-        >
-          <WatchCard entry={currentEntry} />
-        </SwipeableCard>
+        {visibleDeck.map((entry, index) => {
+          const reverseIndex = visibleDeck.length - 1 - index;
+          const offset = reverseIndex * 12;
+          const scale = 1 - reverseIndex * 0.04;
+
+          if (index === 0) {
+            return (
+              <SwipeableCard
+                key={entry.id}
+                onSwipeLeft={() => onSwipeLeft(entry)}
+                onSwipeRight={() => onSwipeRight(entry)}
+              >
+                <WatchCard entry={entry} />
+              </SwipeableCard>
+            );
+          }
+
+          return (
+            <View
+              key={entry.id}
+              style={[
+                styles.stackedCard,
+                {
+                  transform: [{ translateY: offset }, { scale }],
+                  zIndex: -index,
+                },
+              ]}
+            >
+              <WatchCard entry={entry} />
+            </View>
+          );
+        }).reverse()}
       </View>
       <View style={styles.instructions}>
         <Text style={styles.instructionsText}>
@@ -176,6 +204,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  stackedCard: {
+    position: 'absolute',
   },
   loadingText: {
     marginTop: 16,
