@@ -85,24 +85,22 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    backgroundColor: '#fff',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: '#fff',
   },
   listContent: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
     paddingBottom: 24,
   },
   separator: {
-    height: 16,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e5e7eb',
+    marginLeft: 76,
   },
   sectionHeader: {
     paddingTop: 8,

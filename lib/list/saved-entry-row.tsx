@@ -51,19 +51,19 @@ export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: 8,
-    marginHorizontal: -8,
-    borderRadius: 12,
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
   },
   containerWatched: {
     opacity: 0.7,
   },
   poster: {
-    width: 64,
-    height: 96,
-    borderRadius: 8,
-    marginRight: 16,
+    width: 48,
+    height: 72,
+    borderRadius: 6,
+    marginRight: 12,
   },
   content: {
     flex: 1,
