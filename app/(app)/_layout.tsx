@@ -81,7 +81,7 @@ export default function AppLayout() {
           }}
         >
           <Tabs.Screen
-            name="watch/index"
+            name="watch"
             options={{
               title: 'Watch',
               headerTitle: 'Watch',
@@ -89,7 +89,7 @@ export default function AppLayout() {
             }}
           />
           <Tabs.Screen
-            name="list/index"
+            name="list"
             options={{
               title: 'List',
               headerTitle: 'List of Saved Items',
@@ -106,7 +106,7 @@ export default function AppLayout() {
           />
           {/* Hide nested routes from tab bar */}
           <Tabs.Screen
-            name="list/add/index"
+            name="list/add"
             options={{
               href: null,
               headerTitle: 'Add to List',
