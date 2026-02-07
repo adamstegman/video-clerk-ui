@@ -1,9 +1,36 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { SwipeableCard } from './swipeable-card';
 import { WatchCard, type WatchCardEntry } from './watch-card';
 import { WatchPickerView } from './watch-picker-view';
 import { WatchWinnerView } from './watch-winner-view';
 import { WatchQuestionnaire, type QuestionnaireFilters } from './watch-questionnaire';
+
+const STACK_OFFSET = 20;
+const STACK_SCALE_STEP = 0.03;
+const SPRING_CONFIG = { damping: 20, stiffness: 200 };
+
+function StackedCard({ entry, index }: { entry: WatchCardEntry; index: number }) {
+  const translateY = useSharedValue(index * STACK_OFFSET);
+  const scale = useSharedValue(1 - index * STACK_SCALE_STEP);
+
+  useEffect(() => {
+    translateY.value = withSpring(index * STACK_OFFSET, SPRING_CONFIG);
+    scale.value = withSpring(1 - index * STACK_SCALE_STEP, SPRING_CONFIG);
+  }, [index]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }, { scale: scale.value }],
+    zIndex: -index,
+  }));
+
+  return (
+    <Animated.View style={[styles.stackedCard, animatedStyle]}>
+      <WatchCard entry={entry} />
+    </Animated.View>
+  );
+}
 
 interface WatchPageProps {
   allEntries: WatchCardEntry[];
@@ -146,12 +173,11 @@ export function WatchPage({
   return (
     <View style={styles.container}>
       <View style={styles.cardContainer}>
-        {visibleDeck.map((entry, index) => {
-          const reverseIndex = visibleDeck.length - 1 - index;
-          const offset = reverseIndex * 20;
-          const scale = 1 - reverseIndex * 0.03;
+        {/* Render bottom-to-top so the top card is last (on top in z-order) */}
+        {[...visibleDeck].reverse().map((entry, renderIndex) => {
+          const deckIndex = visibleDeck.length - 1 - renderIndex;
 
-          if (index === 0) {
+          if (deckIndex === 0) {
             return (
               <SwipeableCard
                 key={entry.id}
@@ -164,20 +190,9 @@ export function WatchPage({
           }
 
           return (
-            <View
-              key={entry.id}
-              style={[
-                styles.stackedCard,
-                {
-                  transform: [{ translateY: offset }, { scale }],
-                  zIndex: -index,
-                },
-              ]}
-            >
-              <WatchCard entry={entry} />
-            </View>
+            <StackedCard key={entry.id} entry={entry} index={deckIndex} />
           );
-        }).reverse()}
+        })}
       </View>
       <View style={styles.instructions}>
         <Text style={styles.instructionsText}>
