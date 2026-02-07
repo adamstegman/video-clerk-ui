@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react-native';
-import { ListPageContainer } from '../components/list-page-container';
+import { ListPageContainer } from '../_components/list-page-container';
 import { TMDBConfigurationContext, type TMDBConfigurationState } from '../../../../lib/tmdb-api/tmdb-configuration';
 
 // Mock functions
