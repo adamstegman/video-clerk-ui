@@ -29,5 +29,5 @@ export function getReleaseYear(releaseDate: string | null | undefined): string {
  * Normalizes a tag key for comparison (lowercase, trimmed)
  */
 export function normalizeTagKey(name: string): string {
-  return name.toLowerCase().trim();
+  return name.trim().toLowerCase().replace(/\s+/g, ' ');
 }

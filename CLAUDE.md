@@ -174,7 +174,7 @@ npx supabase start
 
 # Create .env file with output from supabase start
 # Set EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY,
-# EXPO_PUBLIC_SUPABASE_SECRET_KEY, and EXPO_PUBLIC_TMDB_API_READ_TOKEN
+# SUPABASE_SECRET_KEY, and EXPO_PUBLIC_TMDB_API_READ_TOKEN
 ```
 
 ### Development Commands
@@ -236,7 +236,7 @@ npx supabase db push
 ```bash
 EXPO_PUBLIC_SUPABASE_URL=http://localhost:54321
 EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-EXPO_PUBLIC_SUPABASE_SECRET_KEY=eyJ...
+SUPABASE_SECRET_KEY=eyJ...
 EXPO_PUBLIC_TMDB_API_READ_TOKEN=eyJh...
 ```
 

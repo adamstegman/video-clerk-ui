@@ -5,36 +5,6 @@ import { normalizeDetails, normalizeTagName, getReleaseYear } from '../../../../
 import { ListPage } from './list-page';
 import type { SavedEntryRowData } from './saved-entry-row';
 
-type EntriesQueryRow = {
-  id: number;
-  added_at: string;
-  watched_at: string | null;
-  tmdb_details:
-    | {
-        poster_path: string | null;
-        name: string | null;
-        release_date: string | null;
-      }
-    | Array<{
-        poster_path: string | null;
-        name: string | null;
-        release_date: string | null;
-      }>
-    | null;
-  entry_tags:
-    | Array<{
-        tags:
-          | {
-              name: string | null;
-            }
-          | Array<{
-              name: string | null;
-            }>
-          | null;
-      }>
-    | null;
-};
-
 export function ListPageContainer() {
   const [entries, setEntries] = useState<SavedEntryRowData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +36,7 @@ export function ListPageContainer() {
 
       if (error) throw error;
 
-      const normalized = ((data ?? []) as unknown as EntriesQueryRow[]).map((row) => {
+      const normalized = (data ?? []).map((row) => {
         const details = normalizeDetails(row.tmdb_details);
         const title = details?.name || 'Untitled';
         const tags =

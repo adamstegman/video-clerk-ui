@@ -6,39 +6,6 @@ import { WatchPage } from './watch-page';
 import type { WatchCardEntry } from './watch-card';
 import type { QuestionnaireFilters } from './watch-questionnaire';
 
-type EntriesQueryRow = {
-  id: number;
-  added_at: string;
-  media_type: string;
-  watched_at: string | null;
-  tmdb_details:
-    | {
-        poster_path: string | null;
-        backdrop_path: string | null;
-        overview: string | null;
-        name: string | null;
-        release_date: string | null;
-        runtime: number | null;
-      }
-    | Array<{
-        poster_path: string | null;
-        backdrop_path: string | null;
-        overview: string | null;
-        name: string | null;
-        release_date: string | null;
-        runtime: number | null;
-      }>
-    | null;
-  entry_tags:
-    | Array<{
-        tags:
-          | { name: string | null }
-          | Array<{ name: string | null }>
-          | null;
-      }>
-    | null;
-};
-
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -125,7 +92,7 @@ export function WatchPageContainer() {
 
       if (error) throw error;
 
-      const normalized = ((data ?? []) as unknown as EntriesQueryRow[]).map((row) => {
+      const normalized = (data ?? []).map((row) => {
         const details = normalizeDetails(row.tmdb_details);
         const title = details?.name || 'Untitled';
         const tags =
