@@ -11,14 +11,18 @@ const STACK_OFFSET = 20;
 const STACK_SCALE_STEP = 0.03;
 const SPRING_CONFIG = { damping: 20, stiffness: 200 };
 
+const MAX_VISIBLE_INDEX = 2;
+
 function StackedCard({ entry, index }: { entry: WatchCardEntry; index: number }) {
-  const translateY = useSharedValue(index * STACK_OFFSET);
-  const scale = useSharedValue(1 - index * STACK_SCALE_STEP);
+  // Cards beyond index 2 are hidden behind the last visible card
+  const clampedIndex = Math.min(index, MAX_VISIBLE_INDEX);
+  const translateY = useSharedValue(clampedIndex * STACK_OFFSET);
+  const scale = useSharedValue(1 - clampedIndex * STACK_SCALE_STEP);
 
   useEffect(() => {
-    translateY.value = withSpring(index * STACK_OFFSET, SPRING_CONFIG);
-    scale.value = withSpring(1 - index * STACK_SCALE_STEP, SPRING_CONFIG);
-  }, [index]);
+    translateY.value = withSpring(clampedIndex * STACK_OFFSET, SPRING_CONFIG);
+    scale.value = withSpring(1 - clampedIndex * STACK_SCALE_STEP, SPRING_CONFIG);
+  }, [clampedIndex]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }, { scale: scale.value }],
