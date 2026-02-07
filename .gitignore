@@ -32,10 +32,24 @@ yarn-error.*
 
 # local env files
 .env
-.env*.local
+.env*
+!.env.example
+
+# editor swap files
+*.swp
+*.swo
 
 # typescript
 *.tsbuildinfo
+
+# build output
+build/
+
+# react-router generated types
+.react-router/
+
+# AI assistant plans
+docs/plans/
 
 # generated native folders
 /ios
