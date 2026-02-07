@@ -48,7 +48,7 @@ Create a `.env` file with the authentication keys from the command output:
 ```bash
 EXPO_PUBLIC_SUPABASE_URL=http://localhost:54321
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-EXPO_PUBLIC_SUPABASE_SECRET_KEY=your-secret-key-here
+SUPABASE_SECRET_KEY=your-secret-key-here
 EXPO_PUBLIC_TMDB_API_READ_TOKEN=your-tmdb-token-here
 ```
 

@@ -2,67 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Platform } from 'react-native';
 import { supabase } from '../../../../lib/supabase/client';
+import { normalizeDetails, getReleaseYear, normalizeTagKey } from '../../../../lib/utils/normalize';
 import { EditEntryPage, type EditEntryData, type EditEntryTag } from './edit-entry-page';
 
-type EntryTagRow = {
-  tags:
-    | {
-        id: number;
-        name: string | null;
-        is_custom: boolean | null;
-      }
-    | Array<{
-        id: number;
-        name: string | null;
-        is_custom: boolean | null;
-      }>
-    | null;
-};
-
-type EntriesQueryRow = {
-  id: number;
-  added_at: string;
-  watched_at: string | null;
-  tmdb_details:
-    | {
-        poster_path: string | null;
-        name: string | null;
-        release_date: string | null;
-      }
-    | Array<{
-        poster_path: string | null;
-        name: string | null;
-        release_date: string | null;
-      }>
-    | null;
-  entry_tags: EntryTagRow[] | null;
-};
-
-function getReleaseYear(releaseDate: string | null | undefined) {
-  if (!releaseDate) return '';
-  const year = releaseDate.split('-')[0];
-  return year || '';
-}
-
-function normalizeDetails(
-  details: EntriesQueryRow['tmdb_details']
-): { poster_path: string | null; name: string | null; release_date: string | null } | null {
-  if (!details) return null;
-  return Array.isArray(details) ? details[0] ?? null : details;
-}
-
-function normalizeTag(
-  tags: EntryTagRow['tags']
-): { id: number; name: string | null; is_custom: boolean | null } | null {
-  if (!tags) return null;
-  return Array.isArray(tags) ? tags[0] ?? null : tags;
-}
-
-function normalizeTagKey(name: string) {
-  return name.trim().toLowerCase().replace(/\s+/g, ' ');
-}
-
-function normalizeTagName(name: string) {
+function normalizeInputTagName(name: string) {
   return name.trim().replace(/\s+/g, ' ');
 }
 
@@ -142,11 +85,11 @@ export function EditEntryPageContainer() {
         setAvailableTags(normalizedTags);
       }
 
-      const row = entryResponse.data as unknown as EntriesQueryRow;
+      const row = entryResponse.data;
       const details = normalizeDetails(row.tmdb_details);
       const tags =
         row.entry_tags
-          ?.map((et) => normalizeTag(et.tags))
+          ?.map((et) => normalizeDetails(et.tags))
           .filter(
             (tag): tag is { id: number; name: string; is_custom: boolean } =>
               !!tag && typeof tag.id === 'number' && !!tag.name
@@ -190,7 +133,7 @@ export function EditEntryPageContainer() {
 
   const ensureTagExists = useCallback(
     async (rawName: string): Promise<EditEntryTag | null> => {
-      const normalizedName = normalizeTagName(rawName);
+      const normalizedName = normalizeInputTagName(rawName);
       if (!normalizedName) return null;
       const key = normalizeTagKey(normalizedName);
       const existing = availableTags.find((tag) => normalizeTagKey(tag.name) === key);
@@ -257,7 +200,7 @@ export function EditEntryPageContainer() {
 
   const handleCreateTag = useCallback(
     async (value: string) => {
-      const normalizedName = normalizeTagName(value);
+      const normalizedName = normalizeInputTagName(value);
       if (!normalizedName) return;
       try {
         const tag = await ensureTagExists(normalizedName);

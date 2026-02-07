@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 export function createAdminClient() {
   const url = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-  const key = process.env.EXPO_PUBLIC_SUPABASE_SECRET_KEY!;
+  const key = process.env.SUPABASE_SECRET_KEY!;
   return createClient(url, key);
 }
 
