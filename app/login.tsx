@@ -88,6 +88,7 @@ export default function LoginPage() {
 
           {/* Submit */}
           <Pressable
+            testID="login-button"
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleSubmit}
             disabled={loading}
