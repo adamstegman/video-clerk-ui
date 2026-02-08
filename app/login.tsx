@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, router } from 'expo-router';
-import { TvMinimalPlay } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { supabase } from '../lib/supabase/client';
 
 export default function LoginPage() {
@@ -38,7 +38,7 @@ export default function LoginPage() {
       {/* Logo */}
       <Link href="/" asChild>
         <Pressable style={styles.logo}>
-          <TvMinimalPlay size={22} color="#6366f1" strokeWidth={1.5} />
+          <Ionicons name="tv-outline" size={22} color="#6366f1" />
           <Text style={styles.logoText}>Video Clerk</Text>
         </Pressable>
       </Link>

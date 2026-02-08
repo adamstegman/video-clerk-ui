@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useContext, useState } from 'react';
-import { Check, RotateCcw } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import type { WatchCardEntry } from './watch-card';
 
@@ -104,7 +104,7 @@ export function WatchWinnerView({
           onPress={onStartOver}
           disabled={markingWatched}
         >
-          <RotateCcw size={20} color="#18181b" />
+          <Ionicons name="refresh" size={20} color="#18181b" />
           <Text style={styles.secondaryButtonText}>Start Over</Text>
         </Pressable>
         <Pressable
@@ -116,7 +116,7 @@ export function WatchWinnerView({
             <ActivityIndicator size="small" color="#fff" />
           ) : (
             <>
-              <Check size={20} color="#fff" />
+              <Ionicons name="checkmark" size={20} color="#fff" />
               <Text style={styles.primaryButtonText}>Mark as Watched</Text>
             </>
           )}

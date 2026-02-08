@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { X } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 
 export interface EditEntryData {
@@ -136,7 +136,7 @@ export function EditEntryPage({
                   onPress={() => onToggleTag(tag)}
                 >
                   <Text style={styles.selectedTagText}>{tag.name}</Text>
-                  <X size={14} color="#fff" />
+                  <Ionicons name="close" size={14} color="#fff" />
                 </Pressable>
               ))}
             </View>

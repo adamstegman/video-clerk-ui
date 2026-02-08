@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { Trash2 } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SavedEntryRow, type SavedEntryRowData } from './saved-entry-row';
 
 interface SwipeableEntryRowProps {
@@ -34,7 +34,7 @@ export function SwipeableEntryRow({ entry, onDelete }: SwipeableEntryRowProps) {
   const renderRightActions = () => (
     <View style={styles.rightActionContainer}>
       <Pressable style={styles.deleteButton} onPress={handleDelete}>
-        <Trash2 size={24} color="#fff" />
+        <Ionicons name="trash-outline" size={24} color="#fff" />
         <Text style={styles.deleteText}>Delete</Text>
       </Pressable>
     </View>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Tabs, router } from 'expo-router';
 import { ActivityIndicator, View, StyleSheet, Pressable } from 'react-native';
-import { Play, List, Settings, Check, ChevronLeft } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { supabase } from '../../lib/supabase/client';
 import { TMDBAPIProvider } from '../../lib/tmdb-api/tmdb-api-provider';
 import { TMDBConfiguration } from '../../lib/tmdb-api/tmdb-configuration';
@@ -85,7 +85,7 @@ export default function AppLayout() {
             options={{
               title: 'Watch',
               headerTitle: 'Watch',
-              tabBarIcon: ({ color, size }) => <Play size={size} color={color} />,
+              tabBarIcon: ({ color, size }) => <Ionicons name="play" size={size} color={color} />,
             }}
           />
           <Tabs.Screen
@@ -93,7 +93,7 @@ export default function AppLayout() {
             options={{
               title: 'List',
               headerTitle: 'List of Saved Items',
-              tabBarIcon: ({ color, size }) => <List size={size} color={color} />,
+              tabBarIcon: ({ color, size }) => <Ionicons name="list" size={size} color={color} />,
             }}
           />
           <Tabs.Screen
@@ -101,7 +101,7 @@ export default function AppLayout() {
             options={{
               title: 'Settings',
               headerTitle: 'Settings',
-              tabBarIcon: ({ color, size }) => <Settings size={size} color={color} />,
+              tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
             }}
           />
           {/* Hide nested routes from tab bar */}
@@ -112,7 +112,7 @@ export default function AppLayout() {
               headerTitle: 'Add to List',
               headerRight: () => (
                 <Pressable onPress={() => router.replace('/(app)/list')}>
-                  <Check size={24} color="#fff" style={{ marginRight: 16 }} />
+                  <Ionicons name="checkmark" size={24} color="#fff" style={{ marginRight: 16 }} />
                 </Pressable>
               ),
             }}
@@ -127,7 +127,7 @@ export default function AppLayout() {
                   onPress={() => router.replace('/(app)/list')}
                   style={{ padding: 12, marginLeft: 4 }}
                 >
-                  <ChevronLeft size={24} color="#fff" />
+                  <Ionicons name="chevron-back" size={24} color="#fff" />
                 </Pressable>
               ),
             }}

@@ -27,14 +27,8 @@ jest.mock('expo-router', () => {
   };
 });
 
-// Mock lucide-react-native
-jest.mock('lucide-react-native', () => ({
-  Play: () => null,
-  List: () => null,
-  Settings: () => null,
-  Check: () => null,
-  ChevronLeft: () => null,
-}));
+// Mock @expo/vector-icons
+jest.mock('@expo/vector-icons/Ionicons', () => 'Ionicons');
 
 // Mock supabase client - simulate authenticated user
 const mockUnsubscribe = jest.fn();

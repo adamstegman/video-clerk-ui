@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Check } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export interface QuestionnaireFilters {
   timeTypes: ('short-show' | 'long-show' | 'movie')[];
@@ -123,7 +123,7 @@ export function WatchQuestionnaire({
           <Text style={[styles.startButtonText, !canStart && styles.startButtonTextDisabled]}>
             Start Swiping
           </Text>
-          <Check size={20} color={canStart ? '#fff' : '#a1a1aa'} />
+          <Ionicons name="checkmark" size={20} color={canStart ? '#fff' : '#a1a1aa'} />
         </Pressable>
       </View>
     </SafeAreaView>
@@ -149,7 +149,7 @@ function TimeOption({
       <View
         style={[styles.timeOptionCheckbox, isSelected && styles.timeOptionCheckboxSelected]}
       >
-        {isSelected && <Check size={16} color="#fff" />}
+        {isSelected && <Ionicons name="checkmark" size={16} color="#fff" />}
       </View>
       <View style={styles.timeOptionContent}>
         <Text style={styles.timeOptionLabel}>{label}</Text>
