@@ -12,10 +12,8 @@ jest.mock('expo-router', () => ({
   Link: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-// Mock lucide-react-native
-jest.mock('lucide-react-native', () => ({
-  TvMinimalPlay: () => null,
-}));
+// Mock @expo/vector-icons
+jest.mock('@expo/vector-icons/Ionicons', () => 'Ionicons');
 
 // Mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => ({

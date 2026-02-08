@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
-import { Check, X } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { supabase } from '../../lib/supabase/client';
 
 export default function InviteAcceptPage() {
@@ -47,7 +47,7 @@ export default function InviteAcceptPage() {
       <SafeAreaView style={styles.container}>
         <View style={styles.centerContainer}>
           <View style={styles.successIcon}>
-            <Check size={48} color="#fff" />
+            <Ionicons name="checkmark" size={48} color="#fff" />
           </View>
           <Text style={styles.title}>Invitation Accepted!</Text>
           <Text style={styles.subtitle}>You've joined the group.</Text>
@@ -86,7 +86,7 @@ export default function InviteAcceptPage() {
             onPress={handleDecline}
             disabled={accepting}
           >
-            <X size={20} color="#374151" />
+            <Ionicons name="close" size={20} color="#374151" />
             <Text style={styles.secondaryButtonText}>Decline</Text>
           </Pressable>
           <Pressable
@@ -101,7 +101,7 @@ export default function InviteAcceptPage() {
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <>
-                <Check size={20} color="#fff" />
+                <Ionicons name="checkmark" size={20} color="#fff" />
                 <Text style={styles.primaryButtonText}>Accept</Text>
               </>
             )}

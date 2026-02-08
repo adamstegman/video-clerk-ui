@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { View, Text, StyleSheet, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TvMinimalPlay, Lightbulb, ListPlus, Filter } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
 
 interface FeatureCardProps {
@@ -33,10 +33,10 @@ export default function LandingPage() {
         <View style={styles.content}>
           {/* Hero Section */}
           <View style={[styles.hero, isWide && styles.heroWide]}>
-            <TvMinimalPlay
+            <Ionicons
+              name="tv-outline"
               size={isWide ? 192 : 128}
               color="#6366f1"
-              strokeWidth={1.5}
             />
             <View style={[styles.heroText, isWide && styles.heroTextWide]}>
               <Text style={[styles.title, isWide && styles.titleWide]}>
@@ -58,19 +58,19 @@ export default function LandingPage() {
           {/* Feature Cards */}
           <View style={[styles.cardsContainer, isWide && styles.cardsContainerWide]}>
             <FeatureCard
-              icon={<Lightbulb size={isWide ? 32 : 24} color="#a16207" />}
+              icon={<Ionicons name="bulb-outline" size={isWide ? 32 : 24} color="#a16207" />}
               iconBgColor="#fef08a"
               title='Solve the "what do we watch?" conundrum'
               description="Never waste time deciding what to watch again. Video Clerk helps you make quick, satisfying choices."
             />
             <FeatureCard
-              icon={<ListPlus size={isWide ? 32 : 24} color="#1d4ed8" />}
+              icon={<Ionicons name="list" size={isWide ? 32 : 24} color="#1d4ed8" />}
               iconBgColor="#93c5fd"
               title="Add things to watch to your list when you hear about them"
               description="Build your watchlist over time. When someone recommends a show or movie, add it instantly—no decision needed."
             />
             <FeatureCard
-              icon={<Filter size={isWide ? 32 : 24} color="#7e22ce" />}
+              icon={<Ionicons name="filter" size={isWide ? 32 : 24} color="#7e22ce" />}
               iconBgColor="#c084fc"
               title="Filter that list based on your mood to find a winner"
               description="When it's time to watch, filter your list by mood, genre, or length. Find the perfect match for right now."

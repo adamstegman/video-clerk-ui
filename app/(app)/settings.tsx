@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert, ScrollView, Share, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Users, UserPlus, Copy, Check } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { supabase } from '../../lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
@@ -222,7 +222,7 @@ export default function SettingsPage() {
             onPress={handleInvite}
             disabled={inviting || !!inviteLink}
           >
-            <UserPlus size={20} color="#fff" />
+            <Ionicons name="person-add-outline" size={20} color="#fff" />
             <Text style={styles.inviteButtonText}>
               {inviting ? 'Creating...' : 'Create Invite'}
             </Text>
@@ -248,12 +248,12 @@ export default function SettingsPage() {
                 >
                   {copySuccess ? (
                     <>
-                      <Check size={18} color="#22c55e" />
+                      <Ionicons name="checkmark" size={18} color="#22c55e" />
                       <Text style={styles.linkButtonTextSuccess}>Copied!</Text>
                     </>
                   ) : (
                     <>
-                      <Copy size={18} color="#4f46e5" />
+                      <Ionicons name="copy-outline" size={18} color="#4f46e5" />
                       <Text style={styles.linkButtonText}>Copy</Text>
                     </>
                   )}
@@ -265,7 +265,7 @@ export default function SettingsPage() {
                   ]}
                   onPress={handleShareInvite}
                 >
-                  <UserPlus size={18} color="#fff" />
+                  <Ionicons name="person-add-outline" size={18} color="#fff" />
                   <Text style={styles.shareButtonText}>Share</Text>
                 </Pressable>
               </View>

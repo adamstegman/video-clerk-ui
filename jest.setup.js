@@ -20,22 +20,8 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
 
-// Mock lucide-react-native (used by 8+ components)
-jest.mock('lucide-react-native', () => ({
-  Users: () => null,
-  UserPlus: () => null,
-  Copy: () => null,
-  Check: () => null,
-  Search: () => null,
-  Plus: () => null,
-  X: () => null,
-  ChevronRight: () => null,
-  Trash2: () => null,
-  Eye: () => null,
-  Film: () => null,
-  Tv: () => null,
-  RotateCcw: () => null,
-}));
+// Mock @expo/vector-icons (used by 10+ components)
+jest.mock('@expo/vector-icons/Ionicons', () => 'Ionicons');
 
 // Mock expo-clipboard
 jest.mock('expo-clipboard', () => ({

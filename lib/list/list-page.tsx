@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SwipeableEntryRow } from './swipeable-entry-row';
 import type { SavedEntryRowData } from './saved-entry-row';
@@ -76,7 +76,7 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
         }
       />
       <Pressable style={styles.fab} onPress={() => router.push('/(app)/list/add')}>
-        <Plus color="#fff" size={24} />
+        <Ionicons name="add" color="#fff" size={24} />
       </Pressable>
     </GestureHandlerRootView>
   );
