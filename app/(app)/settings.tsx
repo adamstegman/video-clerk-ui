@@ -83,7 +83,7 @@ export default function SettingsPage() {
       // For web, use window.location.origin, for native use a placeholder or configured URL
       const baseUrl = typeof window !== 'undefined' && window.location
         ? window.location.origin
-        : 'https://videoclerk.app'; // Replace with your actual domain
+        : 'https://video-clerk.adamstegman.com';
       const link = `${baseUrl}/invite/${inviteId}`;
 
       setInviteLink(link);

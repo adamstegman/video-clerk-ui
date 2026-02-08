@@ -187,7 +187,7 @@ Take screenshots of:
 - Resubmit with fixes
 
 ### Universal Links Not Working
-- Verify `apple-app-site-association` file is hosted at `https://videoclerk.app/.well-known/apple-app-site-association`
+- Verify `apple-app-site-association` file is hosted at `https://video-clerk.adamstegman.com/.well-known/apple-app-site-association`
 - Check Team ID matches in both app.json and AASA file
 - Test with `https://branch.io/resources/aasa-validator/`
 

@@ -659,7 +659,8 @@ Unit tests run on every push. Integration tests run after unit tests pass.
        ▼
 ┌──────────────────┐
 │ GitHub Pages     │
-│ videoclerk.app   │
+│ video-clerk.     │
+│ adamstegman.com  │
 └──────────────────┘
 ```
 
@@ -674,7 +675,7 @@ Unit tests run on every push. Integration tests run after unit tests pass.
 Each pull request gets a preview deployment:
 
 ```
-PR #123 → https://videoclerk.app/staging/pr-123/
+PR #123 → https://video-clerk.adamstegman.com/staging/pr-123/
 ```
 
 **Implementation**:

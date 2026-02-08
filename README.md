@@ -173,7 +173,7 @@ Automatic deployment on push to `main` branch.
 1. **Configure GitHub Variables and Secrets:**
    - Go to **Settings** → **Secrets and variables** → **Actions**
    - Add **Variables**:
-     - `PAGES_DOMAIN` - Your custom domain (e.g., `videoclerk.app`)
+     - `PAGES_DOMAIN` - Your custom domain (`video-clerk.adamstegman.com`)
    - Add **Secrets**:
      - `VITE_SUPABASE_URL` - Your production Supabase URL
      - `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` - Your Supabase anon key

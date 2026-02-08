@@ -244,7 +244,7 @@ EXPO_PUBLIC_TMDB_API_READ_TOKEN=eyJh...
 - `VITE_SUPABASE_URL` - Production Supabase URL (mapped to `EXPO_PUBLIC_SUPABASE_URL` in workflows)
 - `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` - Production anon key (mapped to `EXPO_PUBLIC_SUPABASE_ANON_KEY`)
 - `VITE_TMDB_API_READ_TOKEN` - TMDB API read token (mapped to `EXPO_PUBLIC_TMDB_API_READ_TOKEN`)
-- `PAGES_DOMAIN` (Variable) - Custom domain for GitHub Pages
+- `PAGES_DOMAIN` (Variable) - Custom domain for GitHub Pages (`video-clerk.adamstegman.com`)
 
 *Note: Secret names use `VITE_` prefix for backward compatibility, but are mapped to `EXPO_PUBLIC_` in workflows.*
 
@@ -853,7 +853,7 @@ async myNewMethod(param: string): Promise<MyResponse> {
 - `VITE_TMDB_API_READ_TOKEN` - TMDB API token
 
 **Required Variables**:
-- `PAGES_DOMAIN` - Custom domain (e.g., `videoclerk.app`)
+- `PAGES_DOMAIN` - Custom domain (`video-clerk.adamstegman.com`)
 
 *Note: Secret names use `VITE_` prefix for backward compatibility, but are mapped to `EXPO_PUBLIC_` in workflows.*
 
