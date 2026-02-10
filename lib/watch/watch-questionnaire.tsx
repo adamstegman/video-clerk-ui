@@ -36,8 +36,8 @@ export function WatchQuestionnaire({
     onFiltersChange({ ...filters, selectedTags: newTags });
   };
 
-  const hasSelections = filters.timeTypes.length > 0 || filters.selectedTags.length > 0;
-  const canStart = hasSelections && matchingCount > 0;
+  const hasFilters = filters.timeTypes.length > 0 || filters.selectedTags.length > 0;
+  const canStart = matchingCount > 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -88,25 +88,26 @@ export function WatchQuestionnaire({
         )}
 
         {/* Matching Count Badge */}
-        {hasSelections && (
-          <View
-            style={[
-              styles.matchingBadge,
-              matchingCount > 0 ? styles.matchingBadgeSuccess : styles.matchingBadgeWarning,
-            ]}
-          >
-            <Text style={styles.matchingCount}>{matchingCount}</Text>
-            <Text style={styles.matchingText}>
-              {matchingCount === 1 ? 'entry matches' : 'entries match'} your filters
-            </Text>
-          </View>
-        )}
+        <View
+          style={[
+            styles.matchingBadge,
+            matchingCount > 0 ? styles.matchingBadgeSuccess : styles.matchingBadgeWarning,
+          ]}
+        >
+          <Text style={styles.matchingCount}>{matchingCount}</Text>
+          <Text style={styles.matchingText}>
+            {hasFilters
+              ? matchingCount === 1
+                ? 'entry matches your filters'
+                : 'entries match your filters'
+              : matchingCount === 1
+                ? 'entry in your list'
+                : 'entries in your list'}
+          </Text>
+        </View>
 
         {/* Helper Text */}
-        {!hasSelections && (
-          <Text style={styles.helperText}>Select at least one option to start</Text>
-        )}
-        {hasSelections && matchingCount === 0 && (
+        {hasFilters && matchingCount === 0 && (
           <Text style={styles.warningText}>
             No entries match these filters. Try different options.
           </Text>
@@ -293,11 +294,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#71717a',
     marginTop: 4,
-  },
-  helperText: {
-    fontSize: 12,
-    color: '#71717a',
-    textAlign: 'center',
   },
   warningText: {
     fontSize: 12,
