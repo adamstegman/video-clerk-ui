@@ -88,16 +88,16 @@ export function WatchQuestionnaire({
         </div>
       )}
 
-      {hasSelections && <MatchingCountBadge matchingCount={matchingCount} />}
+      <MatchingCountBadge matchingCount={matchingCount} hasFilters={hasSelections} />
 
       {/* Start Button */}
       <button
         onClick={onStart}
-        disabled={!hasSelections || matchingCount === 0}
+        disabled={matchingCount === 0}
         className={cn(
           "w-full py-3 px-4 rounded-lg font-semibold transition-colors",
           "flex items-center justify-center gap-2",
-          hasSelections && matchingCount > 0
+          matchingCount > 0
             ? "bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800"
             : "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
         )}
@@ -106,13 +106,7 @@ export function WatchQuestionnaire({
         <Check className="w-5 h-5" />
       </button>
 
-      {!hasSelections && (
-        <p className={cn("text-xs text-center", secondaryTextClasses)}>
-          Select at least one option to start
-        </p>
-      )}
-
-      {hasSelections && matchingCount === 0 && (
+      {matchingCount === 0 && (
         <p className={cn("text-xs text-center text-amber-600 dark:text-amber-400")}>
           No entries match these filters. Try different options.
         </p>
@@ -184,7 +178,7 @@ function TagChip({
   );
 }
 
-function MatchingCountBadge({ matchingCount }: { matchingCount: number }) {
+function MatchingCountBadge({ matchingCount, hasFilters }: { matchingCount: number; hasFilters: boolean }) {
   return (
     <div
       className={cn(
@@ -198,7 +192,10 @@ function MatchingCountBadge({ matchingCount }: { matchingCount: number }) {
         {matchingCount}
       </div>
       <div className={cn("text-sm mt-1", secondaryTextClasses)}>
-        {matchingCount === 1 ? "entry matches" : "entries match"} your filters
+        {hasFilters
+          ? matchingCount === 1 ? "entry matches your filters" : "entries match your filters"
+          : matchingCount === 1 ? "entry in your list" : "entries in your list"
+        }
       </div>
     </div>
   );

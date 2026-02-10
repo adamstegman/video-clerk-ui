@@ -514,8 +514,9 @@ describe("WatchPage", () => {
 
     renderWatchPage({ initialEntries: entries });
 
-    // Initially, no filters selected, so no count shown
-    expect(screen.queryByText(/entries match/i)).not.toBeInTheDocument();
+    // Initially, no filters selected, shows total entries in list
+    expect(screen.getByText("10")).toBeInTheDocument();
+    expect(screen.getByText(/entries in your list/i)).toBeInTheDocument();
 
     // Select "Movie" filter
     const movieButton = screen.getByRole("button", { name: /Movie.*Feature length film/i });
@@ -544,6 +545,29 @@ describe("WatchPage", () => {
 
     // Should now show 5 matching entries (3 long + 2 short shows)
     expect(screen.getByText("5")).toBeInTheDocument();
+  });
+
+  it("questionnaire: allows starting with no filters selected", () => {
+    const entries = [makeEntry(1, "A"), makeEntry(2, "B"), makeEntry(3, "C"), makeEntry(4, "D")];
+    renderWatchPage({ initialEntries: entries });
+
+    // No filters selected - badge shows total entries in list
+    expect(screen.getByText("4")).toBeInTheDocument();
+    expect(screen.getByText(/entries in your list/i)).toBeInTheDocument();
+
+    // Start button should be enabled
+    const startButton = screen.getByRole("button", { name: /Start Swiping/i });
+    expect(startButton).not.toBeDisabled();
+
+    // Click start and verify we enter swiping with all entries
+    fireEvent.click(startButton);
+    expect(screen.queryByText(/How much time do you have\?/i)).not.toBeInTheDocument();
+
+    // All 4 entries should be in the deck (visible cards)
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+    expect(screen.getByText("C")).toBeInTheDocument();
+    expect(screen.getByText("D")).toBeInTheDocument();
   });
 
   it("questionnaire: disables start button when no matches", () => {
