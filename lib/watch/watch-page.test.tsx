@@ -118,7 +118,7 @@ describe('WatchPage', () => {
     expect(screen.getByText('Add some movies or shows to your list!')).toBeTruthy();
   });
 
-  it('shows questionnaire when showQuestionnaire is true', () => {
+  it('shows questionnaire with total count when no filters selected', () => {
     renderWithProviders(
       <WatchPage
         allEntries={[makeEntry(1, 'Test')]}
@@ -137,8 +137,36 @@ describe('WatchPage', () => {
       />
     );
 
-    // Questionnaire should render (exact text depends on component implementation)
+    // Questionnaire should render with total count shown
     expect(screen.getByText(/Start Swiping/i)).toBeTruthy();
+    expect(screen.getByText('1')).toBeTruthy();
+    expect(screen.getByText(/entry in your list/)).toBeTruthy();
+  });
+
+  it('enables start button without filters when entries exist', () => {
+    const onStartQuestionnaire = jest.fn();
+    renderWithProviders(
+      <WatchPage
+        allEntries={[makeEntry(1, 'Test')]}
+        deck={[]}
+        liked={[]}
+        likeGoal={3}
+        chosenWinner={null}
+        loading={false}
+        error={null}
+        markingWatched={false}
+        showQuestionnaire={true}
+        filters={{ timeTypes: [], selectedTags: [] }}
+        availableTags={[]}
+        matchingCount={1}
+        {...mockCallbacks}
+        onStartQuestionnaire={onStartQuestionnaire}
+      />
+    );
+
+    const startButton = screen.getByText(/Start Swiping/i);
+    fireEvent.press(startButton);
+    expect(onStartQuestionnaire).toHaveBeenCalled();
   });
 
   it('shows winner view when chosenWinner is set', () => {
