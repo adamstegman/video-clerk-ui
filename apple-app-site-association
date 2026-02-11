@@ -5,8 +5,7 @@
       {
         "appID": "YOUR_TEAM_ID.com.adamstegman.video-clerk",
         "paths": [
-          "/auth/*",
-          "/invite/*"
+          "/*"
         ]
       }
     ]
