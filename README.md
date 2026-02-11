@@ -16,7 +16,7 @@ A universal React Native application for deciding what to watch together. Built 
 - **Backend**: Supabase (Postgres + Auth + RLS)
 - **API**: TMDB API for movie/TV metadata
 - **Styling**: React Native StyleSheet
-- **Testing**: Vitest + React Testing Library
+- **Testing**: Jest + React Testing Library
 - **Deployment**: GitHub Pages (web), EAS Build (iOS)
 
 ## Development
@@ -239,7 +239,7 @@ video-clerk/
 │   │   ├── _layout.tsx           # Tab navigator
 │   │   ├── list/                 # List feature
 │   │   ├── watch/                # Watch feature
-│   │   └── settings.tsx          # Settings
+│   │   └── settings/              # Settings
 │   ├── invite/                   # Group invites
 │   ├── login.tsx                 # Authentication
 │   └── _layout.tsx               # Root layout
@@ -274,8 +274,9 @@ Single codebase serves:
 File-based routing with Expo Router:
 - `app/index.tsx` → `/`
 - `app/login.tsx` → `/login`
-- `app/(app)/list/index.tsx` → `/app/list`
-- `app/(app)/watch/[entryId].tsx` → `/app/watch/:entryId`
+- `app/(app)/list/index.tsx` → `/list`
+- `app/(app)/watch/index.tsx` → `/watch`
+- `app/invite/[inviteId].tsx` → `/invite/:inviteId`
 
 Parentheses `()` create route groups without adding path segments.
 
@@ -287,8 +288,8 @@ Parentheses `()` create route groups without adding path segments.
 
 ### Authentication
 
-- Supabase Auth with magic links
-- Universal Links for iOS deep linking (`/auth/*`, `/invite/*`)
+- Supabase Auth with email + password
+- Universal Links for iOS deep linking
 - Expo SecureStore for tokens on iOS
 - Web uses browser localStorage
 
@@ -299,10 +300,6 @@ React Native StyleSheet API:
 - Type-safe style objects
 - No CSS-in-JS runtime
 - Web compiled to CSS via react-native-web
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ## Documentation
 
