@@ -14,6 +14,7 @@ This document provides comprehensive guidance for AI assistants working on the V
 8. [Common Tasks](#common-tasks)
 9. [Deployment](#deployment)
 10. [Important Files Reference](#important-files-reference)
+11. [Documented Solutions (REQUIRED)](#documented-solutions-required)
 
 ---
 
@@ -951,6 +952,30 @@ Schema files in `supabase/schemas/`:
 
 ---
 
+## Documented Solutions (REQUIRED)
+
+The `docs/solutions/` directory contains institutional knowledge — lessons learned from past mistakes and workflow improvements. **Every AI agent (Claude, Cursor, Gemini, or any other) MUST consult these solutions at the start of every coding session and follow them throughout.**
+
+### How to use documented solutions
+
+1. **At session start**: Read all files in `docs/solutions/` to understand current workflow requirements
+2. **During work**: Follow the solutions as mandatory workflow steps, not optional suggestions
+3. **When you hit a problem**: Check if a documented solution already covers it before debugging from scratch
+4. **When you solve a new problem**: If it's likely to recur, add a new solution file following the existing format
+
+### Current solutions
+
+| Solution | Summary |
+|----------|---------|
+| [`workflow-issues/commit-push-on-open-pr`](docs/solutions/workflow-issues/commit-push-on-open-pr-System-20260206.md) | Always commit and push when the current branch has an open PR |
+| [`workflow-issues/update-docs-on-every-commit`](docs/solutions/workflow-issues/update-docs-on-every-commit-System-20260210.md) | Before each commit, verify that any docs changed in the PR still match the code |
+
+### Solution file format
+
+Solutions use YAML frontmatter for fast filtering by `tags`, `category`, `module`, and `symptoms`. See existing files for the template.
+
+---
+
 ## Best Practices for AI Assistants
 
 ### When Reading Code
@@ -996,4 +1021,4 @@ Schema files in `supabase/schemas/`:
 
 ---
 
-**Last Updated**: 2026-02-03
+**Last Updated**: 2026-02-10

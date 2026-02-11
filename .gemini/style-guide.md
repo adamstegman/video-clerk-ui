@@ -1,4 +1,4 @@
-# Cursor Rules for Video Clerk UI
+# Gemini Style Guide for Video Clerk UI
 
 This project uses `CLAUDE.md` as the canonical AI assistant guide. Read it first — it covers architecture, conventions, and workflows.
 
