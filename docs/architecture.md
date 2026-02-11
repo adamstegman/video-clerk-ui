@@ -34,7 +34,7 @@ Video Clerk is built on Expo SDK 54, which provides a unified development platfo
 - **Backend**: Supabase (Postgres + Auth + RLS)
 - **API**: TMDB API for movie/TV metadata
 - **Bundler**: Metro
-- **Testing**: Vitest + React Testing Library
+- **Testing**: Jest + React Testing Library
 - **Deployment**: GitHub Pages (web), EAS Build (iOS)
 
 ---
@@ -119,23 +119,26 @@ Expo Router v4 provides file-based routing similar to Next.js. Routes are define
 app/
 ├── index.tsx               # / (landing page)
 ├── login.tsx               # /login
+├── _layout.tsx             # Root layout
 ├── (app)/                  # Route group (no path segment)
-│   ├── _layout.tsx         # Layout for /app/*
+│   ├── _layout.tsx         # Tab navigator for authenticated routes
 │   ├── list/
-│   │   ├── index.tsx       # /app/list
-│   │   ├── add.tsx         # /app/list/add
-│   │   └── [entryId].tsx   # /app/list/:entryId
-│   └── watch/
-│       ├── index.tsx       # /app/watch
-│       └── [entryId].tsx   # /app/watch/:entryId
+│   │   ├── index.tsx       # /list
+│   │   ├── add/
+│   │   │   └── index.tsx   # /list/add
+│   │   └── [entryId].tsx   # /list/:entryId
+│   ├── watch/
+│   │   └── index.tsx       # /watch
+│   └── settings/
+│       └── index.tsx       # /settings
 └── invite/
-    └── [code].tsx          # /invite/:code
+    └── [inviteId].tsx      # /invite/:inviteId
 ```
 
 ### Route Groups
 
 Parentheses `()` create **route groups** that organize routes without adding URL segments:
-- `app/(app)/list/index.tsx` → `/app/list` (not `/app/(app)/list`)
+- `app/(app)/list/index.tsx` → `/list` (not `/(app)/list`)
 - Used for grouping authenticated routes under a shared layout
 
 ### Navigation
@@ -146,8 +149,8 @@ Programmatic navigation uses the `router` object:
 import { router } from 'expo-router';
 
 // Navigate forward
-router.push('/app/list');
-router.push(`/app/watch/${entryId}`);
+router.push('/(app)/list');
+router.push(`/(app)/watch/${entryId}`);
 
 // Replace (no back button)
 router.replace('/login');
@@ -159,8 +162,8 @@ router.back();
 ### Deep Linking
 
 Expo Router handles deep linking automatically:
-- Web: `/app/list` in browser
-- iOS: `videoclerk://app/list` via Universal Links
+- Web: `/list` in browser
+- iOS: `videoclerk://list` via Universal Links
 - All routes work as deep links without additional configuration
 
 ### Layout Routes
@@ -170,14 +173,22 @@ Layouts (`_layout.tsx`) wrap child routes and persist across navigation:
 ```typescript
 // app/(app)/_layout.tsx
 import { Tabs } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function AppLayout() {
+  // Auth check + TMDB providers wrapping Tabs...
   return (
-    <Tabs>
-      <Tabs.Screen name="list" options={{ title: "List" }} />
-      <Tabs.Screen name="watch" options={{ title: "Watch" }} />
-      <Tabs.Screen name="settings" options={{ title: "Settings" }} />
-    </Tabs>
+    <TMDBAPIProvider>
+      <TMDBConfiguration>
+        <TMDBGenres>
+          <Tabs>
+            <Tabs.Screen name="watch/index" options={{ title: "Watch" }} />
+            <Tabs.Screen name="list/index" options={{ title: "List" }} />
+            <Tabs.Screen name="settings/index" options={{ title: "Settings" }} />
+          </Tabs>
+        </TMDBGenres>
+      </TMDBConfiguration>
+    </TMDBAPIProvider>
   );
 }
 ```
@@ -190,12 +201,14 @@ This creates a bottom tab navigator for authenticated routes.
 
 ### Supabase Auth
 
-Video Clerk uses Supabase Auth with email magic links (passwordless authentication):
+Video Clerk uses Supabase Auth with email and password authentication:
 
-1. User enters email
-2. Supabase sends magic link via email
-3. User clicks link → redirected to app with auth token
-4. Token stored in `SecureStore` (iOS) or `localStorage` (web)
+1. User enters email and password on `/login`
+2. App calls `supabase.auth.signInWithPassword()`
+3. Token stored in `SecureStore` (iOS) or `localStorage` (web)
+4. User redirected to the Watch tab
+
+Signup is not currently enabled — users are provisioned externally.
 
 ### Auth Flow
 
@@ -221,25 +234,44 @@ Video Clerk uses Supabase Auth with email magic links (passwordless authenticati
 The `app/(app)/_layout.tsx` file guards all nested routes:
 
 ```typescript
-import { useEffect } from 'react';
-import { router, Slot } from 'expo-router';
-import { createClient } from '~/lib/supabase/client';
+import { useEffect, useState } from 'react';
+import { Tabs, router } from 'expo-router';
+import { supabase } from '../../lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 export default function AppLayout() {
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { user }, error } = await supabase.auth.getUser();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-      if (error || !user) {
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      setLoading(false);
+      if (!user) {
         router.replace('/login');
       }
-    };
+    });
 
-    checkAuth();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+        if (!session?.user) {
+          router.replace('/login');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  return <Slot />;
+  if (loading) return <LoadingSpinner />;
+  if (!user) return null;
+
+  return (
+    <Tabs>
+      {/* Tab screens */}
+    </Tabs>
+  );
 }
 ```
 
@@ -270,22 +302,26 @@ This ensures users can only access data they're authorized to see, even if clien
 
 ### Supabase Client
 
-A shared Supabase client is created per session:
+A shared Supabase client singleton is created at module level:
 
 ```typescript
 // lib/supabase/client.ts
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import type { Database } from './database.generated.types';
+import { createClient } from '@supabase/supabase-js';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+import type { Database } from './database.types';
 
-export function createClient() {
-  return createSupabaseClient<Database>(
-    process.env.EXPO_PUBLIC_SUPABASE_URL!,
-    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: Platform.OS === 'web' ? undefined : SecureSupabaseStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: Platform.OS === 'web',
+  },
+});
 ```
 
-The `Database` generic provides full TypeScript types for all tables and columns.
+The `Database` generic provides full TypeScript types for all tables and columns. On iOS, auth tokens are stored in `SecureStore`; on web, the default `localStorage` is used.
 
 ### Database Schema
 
@@ -304,7 +340,7 @@ Video Clerk uses a Postgres database with the following core tables:
 Container components fetch data using Supabase:
 
 ```typescript
-export function ListContainer() {
+export function ListPageContainer() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -313,7 +349,6 @@ export function ListContainer() {
 
     const load = async () => {
       try {
-        const supabase = createClient();
         const { data, error } = await supabase
           .from('entries')
           .select('*, tmdb_details(*), entry_tags(tags(*))')
@@ -332,7 +367,7 @@ export function ListContainer() {
     return () => { cancelled = true };
   }, []);
 
-  return <List entries={entries} loading={loading} />;
+  return <ListPage entries={entries} loading={loading} />;
 }
 ```
 
@@ -352,12 +387,10 @@ export class TMDBAPI {
   private baseURL = 'https://api.themoviedb.org/3';
   private bearerToken: string;
 
-  async searchMulti(query: string) {
-    return this.fetch<SearchResponse>(`/search/multi?query=${query}`);
-  }
-
-  async getMovieDetails(id: number) {
-    return this.fetch<MovieDetails>(`/movie/${id}`);
+  async multiSearch(query: string): Promise<TMDBSearchResults> {
+    return this.fetch<TMDBSearchResults>(
+      `/search/multi?query=${encodeURIComponent(query)}`
+    );
   }
 
   private async fetch<T>(path: string): Promise<T> {
@@ -377,40 +410,17 @@ TMDB responses are cached in the `tmdb_details` table to reduce API calls.
 
 ### React Context
 
-Global state is managed via React Context in a layered hierarchy:
+Global state is managed via React Context. The TMDB providers are nested inside the `(app)/_layout.tsx` tab navigator:
 
 ```
-Root (_layout.tsx)
-├─ AppDataProvider (user, session)
-│  └─ TMDBAPIProvider (API instance)
-│     └─ TMDBConfiguration (image config)
-│        └─ TMDBGenres (genre data)
-│           └─ App routes
+(app)/_layout.tsx
+└─ TMDBAPIProvider (API instance)
+   └─ TMDBConfiguration (image config)
+      └─ TMDBGenres (genre data)
+         └─ Tabs (Watch, List, Settings)
 ```
 
 Each provider handles a specific concern:
-
-**AppDataProvider**: User authentication state
-```typescript
-export const AppDataContext = createContext<AppData>({ user: null });
-
-export function AppDataProvider({ children }) {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
-  }, []);
-
-  return (
-    <AppDataContext.Provider value={{ user }}>
-      {children}
-    </AppDataContext.Provider>
-  );
-}
-```
 
 **TMDBAPIProvider**: TMDB API instance
 ```typescript
@@ -430,17 +440,21 @@ export function TMDBAPIProvider({ children }) {
 }
 ```
 
+Authentication state is managed directly in `(app)/_layout.tsx` via `useState` and `supabase.auth.onAuthStateChange`, rather than through a separate context provider.
+
 ### Local Component State
 
-Feature-specific state uses React hooks:
+Feature-specific state uses React hooks in container components:
 
 ```typescript
-export function WatchDeck() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [filters, setFilters] = useState<Filters>({});
-  const [dismissed, setDismissed] = useState<Set<number>>(new Set());
+export function WatchPageContainer() {
+  const [entries, setEntries] = useState<WatchCardEntry[]>([]);
+  const [filters, setFilters] = useState<WatchFilters>({});
+  const [loading, setLoading] = useState(true);
 
-  // Component logic...
+  // Data fetching, filtering logic...
+
+  return <WatchPage entries={entries} filters={filters} loading={loading} />;
 }
 ```
 
@@ -549,31 +563,29 @@ While NativeWind exists, we use vanilla StyleSheet for:
 Fast, isolated component tests with mocked dependencies:
 
 ```typescript
-// watch-card.test.tsx
-import { render, screen } from '@testing-library/react';
-import { WatchCard } from './watch-card';
+// settings-page.test.tsx
+import { render, screen, waitFor } from '@testing-library/react-native';
+import SettingsPage from '../../settings';
 
-describe('WatchCard', () => {
-  it('displays movie title', () => {
-    const entry = { title: 'Inception', year: 2010 };
-    render(<WatchCard entry={entry} />);
-    expect(screen.getByText('Inception')).toBeInTheDocument();
+jest.mock('../../../../lib/supabase/client', () => ({
+  supabase: {
+    auth: {
+      get getUser() { return mockGetUser; },
+      get signOut() { return mockSignOut; },
+    },
+    get rpc() { return mockRpc; },
+  },
+}));
+
+describe('SettingsPage', () => {
+  it('displays account email', async () => {
+    render(<SettingsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('test@example.com')).toBeTruthy();
+    });
   });
 });
-```
-
-**Mock Supabase**:
-```typescript
-vi.mock('~/lib/supabase/client', () => ({
-  createClient: () => ({
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        data: mockData,
-        error: null,
-      })),
-    })),
-  }),
-}));
 ```
 
 ### Integration Tests
@@ -581,8 +593,7 @@ vi.mock('~/lib/supabase/client', () => ({
 Tests against a real local Supabase instance:
 
 ```typescript
-// @vitest-environment node
-import { createTestUser, cleanupTestUser } from '~/test-utils/supabase';
+import { createTestUser, cleanupTestUser, createAdminClient } from '~/test-utils/supabase';
 
 describe('Application-level: Watch feature', () => {
   it('filters entries by genre', async () => {
@@ -593,11 +604,9 @@ describe('Application-level: Watch feature', () => {
       const { client } = testUser;
       const { data } = await client
         .from('entries')
-        .select('*')
-        .contains('tmdb_details.genre_ids', [28]); // Action
+        .select('*, tmdb_details(*)');
 
       expect(data).toBeDefined();
-      expect(data.every(e => e.tmdb_details.genre_ids.includes(28))).toBe(true);
     } finally {
       await cleanupTestUser(admin, testUser.userId);
     }
@@ -613,11 +622,11 @@ GitHub Actions runs tests automatically:
 # .github/workflows/tests.yml
 jobs:
   unit:
-    - run: npm test -- --exclude "**/*.integration.test.*"
+    - run: npx jest --testPathIgnorePatterns="integration"
 
   integration:
     - run: npx supabase start
-    - run: npm test -- integration.test
+    - run: npx jest integration.test
 ```
 
 Unit tests run on every push. Integration tests run after unit tests pass.
@@ -772,7 +781,6 @@ PR #123 → https://video-clerk.adamstegman.com/staging/pr-123/
 **Caching**:
 - TMDB responses cached in database
 - Supabase client caches auth tokens
-- React Query could be added for client-side caching (future)
 
 ---
 
@@ -786,34 +794,10 @@ To add Android support:
 3. Run `eas build --platform android`
 4. Most code works without changes (universal codebase)
 
-### Feature Flags
-
-For gradual feature rollouts:
-```typescript
-const FEATURES = {
-  commentingEnabled: true,
-  ratingsEnabled: false,
-};
-
-if (FEATURES.commentingEnabled) {
-  // Show commenting UI
-}
-```
-
-### Internationalization
-
-Expo supports i18n via `expo-localization`:
-```typescript
-import * as Localization from 'expo-localization';
-
-const locale = Localization.locale; // 'en-US', 'es-MX', etc.
-```
-
 ### Real-Time Features
 
 Supabase provides real-time subscriptions:
 ```typescript
-const supabase = createClient();
 const channel = supabase
   .channel('entries')
   .on('postgres_changes', {
@@ -825,27 +809,6 @@ const channel = supabase
   })
   .subscribe();
 ```
-
----
-
-## Future Architecture Improvements
-
-### Considered for v2
-
-1. **Offline Support**: Use AsyncStorage + sync queue for offline functionality
-2. **Push Notifications**: Via Expo Notifications + Supabase real-time
-3. **Image Optimization**: CDN with automatic resizing/format conversion
-4. **Analytics**: Add Expo Analytics or PostHog
-5. **Error Tracking**: Sentry for production error monitoring
-6. **Client-Side Caching**: React Query for optimistic updates
-7. **Background Sync**: Sync data in background on iOS
-
-### Not Planned
-
-- Server-side rendering (SSR): Conflicts with GitHub Pages
-- GraphQL: Supabase REST API is sufficient
-- Micro-frontends: App is small enough for monolith
-- Redux/MobX: Direct queries are simpler
 
 ---
 
