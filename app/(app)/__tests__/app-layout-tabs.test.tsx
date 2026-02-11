@@ -101,7 +101,7 @@ describe('App Layout - Tab Bar Configuration', () => {
     await renderLayout();
 
     const visibleTabs = capturedScreens.filter(s => s.options.href !== null);
-    expect(visibleTabs[2].name).toBe('settings');
+    expect(visibleTabs[2].name).toBe('settings/index');
     expect(visibleTabs[2].options.title).toBe('Settings');
   });
 
