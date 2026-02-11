@@ -1,13 +1,17 @@
+import { Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
   runOnJS,
   interpolate,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import type { ReactNode } from 'react';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface SwipeableCardProps {
   onSwipeLeft: () => void;
@@ -53,7 +57,13 @@ export function SwipeableCard({
         Math.abs(translateX.value) > SWIPE_THRESHOLD;
 
       if (shouldDismiss) {
-        runOnJS(translateX.value > 0 ? onSwipeRight : onSwipeLeft)();
+        const direction = translateX.value > 0 ? 1 : -1;
+        const callback = direction > 0 ? onSwipeRight : onSwipeLeft;
+        const exitX = direction * (SCREEN_WIDTH + 200);
+        translateX.value = withTiming(exitX, { duration: 300 }, () => {
+          runOnJS(callback)();
+        });
+        translateY.value = withTiming(translateY.value * 2, { duration: 300 });
       } else {
         translateX.value = withSpring(0, SPRING_CONFIG);
         translateY.value = withSpring(0, SPRING_CONFIG);
