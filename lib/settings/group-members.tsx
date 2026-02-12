@@ -13,21 +13,21 @@ export function GroupMembers({ currentUserId, members, loading }: GroupMembersPr
 
   return (
     <View style={styles.tableRow}>
-      <Text style={styles.tableLabel}>Members</Text>
+      <Text style={[styles.tableLabel, { color: colors.textPrimary }]}>Members</Text>
       <View style={styles.tableContent}>
         {loading ? (
-          <Text style={styles.tableText}>Loading...</Text>
+          <Text style={[styles.tableText, { color: colors.textPrimary }]}>Loading...</Text>
         ) : members.length > 0 ? (
           members.map((member) => (
             <View key={member.user_id} style={styles.emailRow}>
               {member.user_id === currentUserId && (
-                <Text style={[styles.youBadge, { backgroundColor: colors.primarySubtle }]}>You</Text>
+                <Text style={[styles.youBadge, { backgroundColor: colors.primarySubtle, color: colors.textBrandLight }]}>You</Text>
               )}
-              <Text style={styles.tableText}>{member.email}</Text>
+              <Text style={[styles.tableText, { color: colors.textPrimary }]}>{member.email}</Text>
             </View>
           ))
         ) : (
-          <Text style={styles.tableTextSecondary}>None</Text>
+          <Text style={[styles.tableTextSecondary, { color: colors.textTertiary }]}>None</Text>
         )}
       </View>
     </View>
@@ -43,7 +43,6 @@ const styles = StyleSheet.create({
   tableLabel: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1f2937',
     width: 100,
     paddingTop: 2,
   },
@@ -54,12 +53,10 @@ const styles = StyleSheet.create({
   },
   tableText: {
     fontSize: 15,
-    color: '#1f2937',
     textAlign: 'right',
   },
   tableTextSecondary: {
     fontSize: 15,
-    color: '#9ca3af',
   },
   emailRow: {
     flexDirection: 'row',
@@ -69,8 +66,6 @@ const styles = StyleSheet.create({
   youBadge: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6366f1',
-    // backgroundColor set inline via colors.primarySubtle
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,

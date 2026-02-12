@@ -28,8 +28,8 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Pick one to watch</Text>
-        <Text style={styles.subtitle}>You liked {liked.length}. Choose your winner:</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Pick one to watch</Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>You liked {liked.length}. Choose your winner:</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -45,7 +45,7 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
           return (
             <Pressable
               key={entry.id}
-              style={[styles.card, { backgroundColor: colors.surface }, isSelected && styles.cardSelected]}
+              style={[styles.card, { backgroundColor: colors.surface }, isSelected && [styles.cardSelected, { borderColor: colors.primary }]]}
               onPress={() => setSelectedId(entry.id)}
             >
               <View style={styles.cardContent}>
@@ -53,14 +53,14 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
                   <Image source={{ uri: posterUrl }} style={[styles.poster, { backgroundColor: colors.separator }]} contentFit="cover" />
                 )}
                 <View style={styles.textContent}>
-                  <Text style={styles.cardTitle} numberOfLines={2}>
+                  <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={2}>
                     {entry.title}
                   </Text>
                   {entry.releaseYear ? (
-                    <Text style={styles.cardYear}>{entry.releaseYear}</Text>
+                    <Text style={[styles.cardYear, { color: colors.textMuted }]}>{entry.releaseYear}</Text>
                   ) : null}
                   {entry.overview ? (
-                    <Text style={styles.cardOverview} numberOfLines={3}>
+                    <Text style={[styles.cardOverview, { color: colors.textSubtle }]} numberOfLines={3}>
                       {entry.overview}
                     </Text>
                   ) : null}
@@ -73,14 +73,14 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
 
       <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
         <Pressable style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }]} onPress={onStartOver}>
-          <Text style={styles.secondaryButtonText}>Start Over</Text>
+          <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Start Over</Text>
         </Pressable>
         <Pressable
           style={[styles.primaryButton, { backgroundColor: colors.primary }, !selectedId && styles.buttonDisabled]}
           onPress={handleChoose}
           disabled={!selectedId}
         >
-          <Text style={styles.primaryButtonText}>Choose Winner</Text>
+          <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Choose Winner</Text>
         </Pressable>
       </View>
     </SafeAreaView>
@@ -99,12 +99,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#18181b',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#71717a',
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -117,7 +115,6 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   cardSelected: {
-    borderColor: '#4f46e5',
     shadowColor: '#4f46e5',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -140,17 +137,14 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#18181b',
     marginBottom: 4,
   },
   cardYear: {
     fontSize: 14,
-    color: '#71717a',
     marginBottom: 8,
   },
   cardOverview: {
     fontSize: 14,
-    color: '#52525b',
     lineHeight: 20,
   },
   footer: {
@@ -167,7 +161,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -179,7 +172,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   secondaryButtonText: {
-    color: '#18181b',
     fontSize: 16,
     fontWeight: '600',
   },

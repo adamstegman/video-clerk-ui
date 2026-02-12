@@ -16,20 +16,20 @@ export function InvitePrompt({ error, accepting, onAccept, onDecline }: InvitePr
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]}>
       <View style={styles.centerContainer}>
-        <View style={styles.iconContainer}>
+        <View style={[styles.iconContainer, { backgroundColor: colors.primarySubtle }]}>
           <Text style={styles.iconText}>📨</Text>
         </View>
-        <Text style={styles.title}>Group Invitation</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: colors.text }]}>Group Invitation</Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>
           You've been invited to join a Video Clerk group.
         </Text>
-        <Text style={styles.description}>
+        <Text style={[styles.description, { color: colors.textTertiary }]}>
           Accepting this invitation will let you share your watch list with other group members.
         </Text>
 
         {error && (
-          <View style={[styles.errorContainer, { backgroundColor: colors.dangerSubtle }]}>
-            <Text style={styles.errorText}>{error}</Text>
+          <View style={[styles.errorContainer, { backgroundColor: colors.dangerSubtle, borderColor: colors.borderDanger }]}>
+            <Text style={[styles.errorText, { color: colors.textDangerStrong }]}>{error}</Text>
           </View>
         )}
 
@@ -37,28 +37,30 @@ export function InvitePrompt({ error, accepting, onAccept, onDecline }: InvitePr
           <Pressable
             style={({ pressed }) => [
               styles.secondaryButton,
+              { borderColor: colors.border },
               pressed && styles.buttonPressed,
             ]}
             onPress={onDecline}
             disabled={accepting}
           >
-            <Ionicons name="close" size={20} color="#374151" />
-            <Text style={styles.secondaryButtonText}>Decline</Text>
+            <Ionicons name="close" size={20} color={colors.textLabel} />
+            <Text style={[styles.secondaryButtonText, { color: colors.textLabel }]}>Decline</Text>
           </Pressable>
           <Pressable
             style={({ pressed }) => [
               styles.primaryButton,
+              { backgroundColor: colors.primary },
               pressed && styles.buttonPressed,
             ]}
             onPress={onAccept}
             disabled={accepting}
           >
             {accepting ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={colors.textOnColor} />
             ) : (
               <>
-                <Ionicons name="checkmark" size={20} color="#fff" />
-                <Text style={styles.primaryButtonText}>Accept</Text>
+                <Ionicons name="checkmark" size={20} color={colors.textOnColor} />
+                <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Accept</Text>
               </>
             )}
           </Pressable>
@@ -83,7 +85,6 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: '#eef2ff', // primarySubtle - static since it's decorative
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -94,31 +95,25 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#18181b',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#71717a',
     textAlign: 'center',
   },
   description: {
     fontSize: 14,
-    color: '#a1a1aa',
     textAlign: 'center',
     marginBottom: 16,
   },
   errorContainer: {
-    backgroundColor: '#fef2f2', // will be themed via inline style below
     borderWidth: 1,
-    borderColor: '#fecaca',
     borderRadius: 8,
     padding: 12,
     width: '100%',
   },
   errorText: {
     fontSize: 14,
-    color: '#dc2626',
     textAlign: 'center',
   },
   actions: {
@@ -133,14 +128,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#4f46e5', // primary - stays same in dark
     paddingVertical: 16,
     borderRadius: 12,
   },
   primaryButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
   },
   secondaryButton: {
     flex: 1,
@@ -150,14 +143,12 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     paddingVertical: 16,
     borderRadius: 12,
   },
   secondaryButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
   },
   buttonPressed: {
     opacity: 0.7,

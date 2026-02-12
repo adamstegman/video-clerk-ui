@@ -17,8 +17,8 @@ export function FeatureCard({ icon, iconBgColor, title, description }: FeatureCa
       <View style={[styles.cardIconContainer, { backgroundColor: iconBgColor }]}>
         {icon}
       </View>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardDescription}>{description}</Text>
+      <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{title}</Text>
+      <Text style={[styles.cardDescription, { color: colors.textSecondary }]}>{description}</Text>
     </View>
   );
 }
@@ -47,12 +47,10 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 12,
   },
   cardDescription: {
     fontSize: 14,
-    color: '#6b7280',
     lineHeight: 22,
   },
 });

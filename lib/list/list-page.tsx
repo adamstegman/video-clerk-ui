@@ -27,7 +27,7 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
     if (showWatchedHeader && index === watchedStartIndex) {
       items.push(
         <View key="watched-header" style={styles.sectionHeader}>
-          <Text style={styles.sectionHeaderText}>WATCHED</Text>
+          <Text style={[styles.sectionHeaderText, { color: colors.textSecondary }]}>WATCHED</Text>
         </View>
       );
     }
@@ -41,7 +41,7 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
     return (
       <View style={[styles.centerContainer, { backgroundColor: colors.surface }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
       </View>
     );
   }
@@ -49,7 +49,7 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
   if (error) {
     return (
       <View style={[styles.container, { backgroundColor: colors.surface }]}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={[styles.errorText, { color: colors.textDanger }]}>{error}</Text>
       </View>
     );
   }
@@ -57,9 +57,9 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
   if (!loading && !error && entries.length === 0) {
     return (
       <View style={[styles.centerContainer, { backgroundColor: colors.surface }]}>
-        <Text style={styles.emptyText}>Your list is empty.</Text>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Your list is empty.</Text>
         <Pressable style={[styles.addButton, { backgroundColor: colors.primary }]} onPress={() => router.push('/(app)/list/add')}>
-          <Text style={styles.addButtonText}>Add Something</Text>
+          <Text style={[styles.addButtonText, { color: colors.textOnColor }]}>Add Something</Text>
         </Pressable>
       </View>
     );
@@ -78,7 +78,7 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
         }
       />
       <Pressable style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => router.push('/(app)/list/add')}>
-        <Ionicons name="add" color="#fff" size={24} />
+        <Ionicons name="add" color={colors.textOnColor} size={24} />
       </Pressable>
     </GestureHandlerRootView>
   );
@@ -110,21 +110,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    color: '#6b7280',
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6b7280',
   },
   emptyText: {
     fontSize: 16,
-    color: '#6b7280',
     marginBottom: 24,
   },
   errorText: {
     fontSize: 14,
-    color: '#ef4444',
   },
   addButton: {
     paddingVertical: 12,
@@ -132,7 +128,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   addButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },

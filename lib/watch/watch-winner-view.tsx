@@ -71,14 +71,14 @@ export function WatchWinnerView({
               <Image source={{ uri: posterUrl }} style={[styles.poster, { backgroundColor: colors.separator }]} contentFit="cover" />
             )}
             <View style={styles.detailsText}>
-              <Text style={styles.title}>{winner.title}</Text>
-              {winner.releaseYear ? <Text style={styles.year}>{winner.releaseYear}</Text> : null}
+              <Text style={[styles.title, { color: colors.text }]}>{winner.title}</Text>
+              {winner.releaseYear ? <Text style={[styles.year, { color: colors.textMuted }]}>{winner.releaseYear}</Text> : null}
               <View style={styles.metadata}>
-                <Text style={styles.metadataText}>
+                <Text style={[styles.metadataText, { color: colors.textSubtle }]}>
                   {winner.mediaType === 'movie' ? 'Movie' : 'TV Show'}
                 </Text>
                 {winner.tags && winner.tags.length > 0 ? (
-                  <Text style={styles.metadataText}> • {winner.tags.join(', ')}</Text>
+                  <Text style={[styles.metadataText, { color: colors.textSubtle }]}> • {winner.tags.join(', ')}</Text>
                 ) : null}
               </View>
             </View>
@@ -86,15 +86,15 @@ export function WatchWinnerView({
 
           {winner.overview ? (
             <View style={styles.overviewSection}>
-              <Text style={styles.sectionTitle}>Overview</Text>
-              <Text style={styles.overview}>{winner.overview}</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Overview</Text>
+              <Text style={[styles.overview, { color: colors.textSubtle }]}>{winner.overview}</Text>
             </View>
           ) : null}
         </View>
 
         {error && (
-          <View style={[styles.errorContainer, { backgroundColor: colors.dangerSubtle }]}>
-            <Text style={styles.errorText}>{error}</Text>
+          <View style={[styles.errorContainer, { backgroundColor: colors.dangerSubtle, borderColor: colors.borderDanger }]}>
+            <Text style={[styles.errorText, { color: colors.textDangerStrong }]}>{error}</Text>
           </View>
         )}
       </ScrollView>
@@ -106,8 +106,8 @@ export function WatchWinnerView({
           onPress={onStartOver}
           disabled={markingWatched}
         >
-          <Ionicons name="refresh" size={20} color="#18181b" />
-          <Text style={styles.secondaryButtonText}>Start Over</Text>
+          <Ionicons name="refresh" size={20} color={colors.text} />
+          <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Start Over</Text>
         </Pressable>
         <Pressable
           style={[styles.primaryButton, { backgroundColor: colors.primary }, markingWatched && styles.buttonDisabled]}
@@ -115,11 +115,11 @@ export function WatchWinnerView({
           disabled={markingWatched}
         >
           {markingWatched ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color={colors.textOnColor} />
           ) : (
             <>
-              <Ionicons name="checkmark" size={20} color="#fff" />
-              <Text style={styles.primaryButtonText}>Mark as Watched</Text>
+              <Ionicons name="checkmark" size={20} color={colors.textOnColor} />
+              <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Mark as Watched</Text>
             </>
           )}
         </Pressable>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#fff',
+    color: '#fff', // on colored badge background
   },
   details: {
     marginTop: -20,
@@ -188,12 +188,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#18181b',
     marginBottom: 8,
   },
   year: {
     fontSize: 16,
-    color: '#71717a',
     marginBottom: 12,
   },
   metadata: {
@@ -202,7 +200,6 @@ const styles = StyleSheet.create({
   },
   metadataText: {
     fontSize: 14,
-    color: '#52525b',
   },
   overviewSection: {
     marginTop: 8,
@@ -210,13 +207,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#18181b',
     marginBottom: 12,
   },
   overview: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#52525b',
   },
   errorContainer: {
     marginHorizontal: 24,
@@ -224,11 +219,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#fecaca',
   },
   errorText: {
     fontSize: 14,
-    color: '#dc2626',
     textAlign: 'center',
   },
   footer: {
@@ -248,7 +241,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   primaryButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -263,7 +255,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   secondaryButtonText: {
-    color: '#18181b',
     fontSize: 16,
     fontWeight: '600',
   },

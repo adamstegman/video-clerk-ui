@@ -9,12 +9,12 @@ export function InviteSuccess() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]}>
       <View style={styles.centerContainer}>
-        <View style={styles.successIcon}>
-          <Ionicons name="checkmark" size={48} color="#fff" />
+        <View style={[styles.successIcon, { backgroundColor: colors.success }]}>
+          <Ionicons name="checkmark" size={48} color={colors.textOnColor} />
         </View>
-        <Text style={styles.title}>Invitation Accepted!</Text>
-        <Text style={styles.subtitle}>You've joined the group.</Text>
-        <Text style={styles.subtitle}>Redirecting to your list...</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Invitation Accepted!</Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>You've joined the group.</Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>Redirecting to your list...</Text>
       </View>
     </SafeAreaView>
   );
@@ -35,7 +35,6 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: '#22c55e',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -43,12 +42,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#18181b',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#71717a',
     textAlign: 'center',
   },
 });

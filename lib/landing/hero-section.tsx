@@ -14,16 +14,16 @@ export function HeroSection({ isWide }: HeroSectionProps) {
     <View style={[styles.hero, isWide && styles.heroWide]}>
       <TvMinimalPlayIcon size={isWide ? 192 : 128} />
       <View style={[styles.heroText, isWide && styles.heroTextWide]}>
-        <Text style={[styles.title, isWide && styles.titleWide]}>
+        <Text style={[styles.title, { color: colors.textPrimary }, isWide && styles.titleWide]}>
           Video Clerk
         </Text>
-        <Text style={[styles.subtitle, isWide && styles.subtitleWide]}>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }, isWide && styles.subtitleWide]}>
           Solve the "what do we watch?" conundrum
         </Text>
         <View style={styles.buttonContainer}>
           <Link href="/login" asChild>
             <Pressable style={[styles.button, { backgroundColor: colors.primaryHeader }]}>
-              <Text style={styles.buttonText}>Log In</Text>
+              <Text style={[styles.buttonText, { color: colors.textOnColor }]}>Log In</Text>
             </Pressable>
           </Link>
         </View>
@@ -55,14 +55,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: '700',
-    color: '#1f2937',
   },
   titleWide: {
     fontSize: 48,
   },
   subtitle: {
     fontSize: 18,
-    color: '#6b7280',
     textAlign: 'center',
   },
   subtitleWide: {
@@ -84,7 +82,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonText: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },

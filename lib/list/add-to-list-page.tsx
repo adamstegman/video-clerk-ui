@@ -40,7 +40,7 @@ export function AddToListPage({
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
       <View style={[styles.searchContainer, { borderBottomColor: colors.separator }]}>
         <TextInput
-          style={[styles.searchInput, { backgroundColor: colors.input }]}
+          style={[styles.searchInput, { backgroundColor: colors.input, color: colors.textPrimary }]}
           placeholder="Search movies and TV shows..."
           value={query}
           onChangeText={onQueryChange}
@@ -58,19 +58,19 @@ export function AddToListPage({
 
       {error && (
         <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={[styles.errorText, { color: colors.textDanger }]}>{error}</Text>
         </View>
       )}
 
       {!loading && !error && results.length === 0 && query.length > 0 && (
         <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>No results found</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No results found</Text>
         </View>
       )}
 
       {!loading && !error && results.length === 0 && query.length === 0 && (
         <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>Search for movies and TV shows</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Search for movies and TV shows</Text>
         </View>
       )}
 
@@ -109,7 +109,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 12,
     fontSize: 16,
-    color: '#1f2937',
   },
   centerContainer: {
     flex: 1,
@@ -119,12 +118,10 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#6b7280',
     textAlign: 'center',
   },
   errorText: {
     fontSize: 14,
-    color: '#ef4444',
     textAlign: 'center',
   },
   listContent: {

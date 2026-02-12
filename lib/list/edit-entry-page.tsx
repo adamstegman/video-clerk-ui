@@ -61,7 +61,7 @@ export function EditEntryPage({
       <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -71,7 +71,7 @@ export function EditEntryPage({
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
         <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>{error || 'Entry not found'}</Text>
+          <Text style={[styles.errorText, { color: colors.textDanger }]}>{error || 'Entry not found'}</Text>
         </View>
       </SafeAreaView>
     );
@@ -125,11 +125,9 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6b7280',
   },
   errorText: {
     fontSize: 14,
-    color: '#ef4444',
     textAlign: 'center',
   },
 });

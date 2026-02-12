@@ -15,26 +15,26 @@ export function EntryActions({ saving, deleting, onSave, onDelete }: EntryAction
   return (
     <View style={styles.actionsSection}>
       <Pressable
-        style={[styles.saveButton, isDisabled && styles.buttonDisabled]}
+        style={[styles.saveButton, { backgroundColor: colors.primary }, isDisabled && styles.buttonDisabled]}
         onPress={onSave}
         disabled={isDisabled}
       >
         {saving ? (
-          <ActivityIndicator size="small" color="#fff" />
+          <ActivityIndicator size="small" color={colors.textOnColor} />
         ) : (
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+          <Text style={[styles.saveButtonText, { color: colors.textOnColor }]}>Save Changes</Text>
         )}
       </Pressable>
 
       <Pressable
-        style={[styles.deleteButton, { backgroundColor: colors.secondaryButton }, isDisabled && styles.buttonDisabled]}
+        style={[styles.deleteButton, { backgroundColor: colors.secondaryButton, borderColor: colors.textDanger }, isDisabled && styles.buttonDisabled]}
         onPress={onDelete}
         disabled={isDisabled}
       >
         {deleting ? (
-          <ActivityIndicator size="small" color="#ef4444" />
+          <ActivityIndicator size="small" color={colors.textDanger} />
         ) : (
-          <Text style={styles.deleteButtonText}>Delete Entry</Text>
+          <Text style={[styles.deleteButtonText, { color: colors.textDanger }]}>Delete Entry</Text>
         )}
       </Pressable>
     </View>
@@ -46,14 +46,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   saveButton: {
-    backgroundColor: '#4f46e5',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
     marginBottom: 12,
   },
   saveButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -62,10 +60,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ef4444',
   },
   deleteButtonText: {
-    color: '#ef4444',
     fontSize: 16,
     fontWeight: '600',
   },

@@ -60,16 +60,16 @@ export default function AppLayout() {
             headerStyle: {
               backgroundColor: colors.primaryHeader,
             },
-            headerTintColor: '#fff',
+            headerTintColor: colors.textOnColor,
             headerTitleStyle: {
-              color: '#fff',
+              color: colors.textOnColor,
               fontWeight: '700',
             },
             sceneStyle: {
               backgroundColor: colors.page,
             },
             tabBarActiveTintColor: colors.primary,
-            tabBarInactiveTintColor: '#9ca3af',
+            tabBarInactiveTintColor: colors.textTertiary,
             tabBarLabelPosition: 'below-icon',
             tabBarLabelStyle: {
               fontSize: 12,
@@ -117,7 +117,7 @@ export default function AppLayout() {
               headerTitle: 'Add to List',
               headerRight: () => (
                 <Pressable onPress={() => router.replace('/(app)/list')}>
-                  <Ionicons name="checkmark" size={24} color="#fff" style={{ marginRight: 16 }} />
+                  <Ionicons name="checkmark" size={24} color={colors.textOnColor} style={{ marginRight: 16 }} />
                 </Pressable>
               ),
             }}
@@ -132,7 +132,7 @@ export default function AppLayout() {
                   onPress={() => router.replace('/(app)/list')}
                   style={{ padding: 12, marginLeft: 4 }}
                 >
-                  <Ionicons name="chevron-back" size={24} color="#fff" />
+                  <Ionicons name="chevron-back" size={24} color={colors.textOnColor} />
                 </Pressable>
               ),
             }}

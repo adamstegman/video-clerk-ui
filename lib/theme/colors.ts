@@ -1,6 +1,7 @@
 import { useColorScheme } from 'react-native';
 
 const lightColors = {
+  // Backgrounds
   page: '#ffffff',
   surface: '#f4f4f5',
   surfaceSubtle: '#fafafa',
@@ -24,9 +25,35 @@ const lightColors = {
   authInput: '#ffffff',
   authSecondary: '#e5e7eb',
   featureCard: '#ffffff',
+  disabled: '#e4e4e7',
+
+  // Text
+  text: '#18181b',
+  textPrimary: '#1f2937',
+  textLabel: '#374151',
+  textSecondary: '#6b7280',
+  textMuted: '#71717a',
+  textSubtle: '#52525b',
+  textTertiary: '#9ca3af',
+  textOnColor: '#ffffff',
+  textDanger: '#ef4444',
+  textDangerStrong: '#dc2626',
+  textBrand: '#4f46e5',
+  textBrandLight: '#6366f1',
+  textSuccess: '#22c55e',
+  textWarning: '#f59e0b',
+
+  // Borders
+  border: '#e5e7eb',
+  borderInput: '#d1d5db',
+  borderMuted: '#d4d4d8',
+  borderDanger: '#fecaca',
+  borderWarning: '#fde68a',
+  borderPrimarySubtle: '#c7d2fe',
 };
 
 const darkColors: ThemeColors = {
+  // Backgrounds
   page: '#09090b',
   surface: '#18181b',
   surfaceSubtle: '#18181b',
@@ -50,6 +77,31 @@ const darkColors: ThemeColors = {
   authInput: '#3f3f46',
   authSecondary: '#3f3f46',
   featureCard: '#27272a',
+  disabled: '#3f3f46',
+
+  // Text
+  text: '#fafafa',
+  textPrimary: '#f4f4f5',
+  textLabel: '#d4d4d8',
+  textSecondary: '#a1a1aa',
+  textMuted: '#a1a1aa',
+  textSubtle: '#a1a1aa',
+  textTertiary: '#71717a',
+  textOnColor: '#ffffff',
+  textDanger: '#ef4444',
+  textDangerStrong: '#f87171',
+  textBrand: '#818cf8',
+  textBrandLight: '#a5b4fc',
+  textSuccess: '#22c55e',
+  textWarning: '#f59e0b',
+
+  // Borders
+  border: '#3f3f46',
+  borderInput: '#52525b',
+  borderMuted: '#52525b',
+  borderDanger: '#7f1d1d',
+  borderWarning: '#78350f',
+  borderPrimarySubtle: '#312e81',
 };
 
 export type ThemeColors = typeof lightColors;

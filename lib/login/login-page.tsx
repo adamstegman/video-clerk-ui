@@ -30,23 +30,23 @@ export function LoginPage({
       <Link href="/" asChild>
         <Pressable style={styles.logo}>
           <Ionicons name="tv-outline" size={22} color={colors.primaryHeader} />
-          <Text style={styles.logoText}>Video Clerk</Text>
+          <Text style={[styles.logoText, { color: colors.textPrimary }]}>Video Clerk</Text>
         </Pressable>
       </Link>
 
       <View style={styles.formWrapper}>
         <View style={[styles.card, { backgroundColor: colors.authCard, borderColor: colors.separator }]}>
-          <Text style={styles.title}>Login</Text>
-          <Text style={styles.description}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Login</Text>
+          <Text style={[styles.description, { color: colors.textSecondary }]}>
             Enter your email below to login to your account
           </Text>
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={[styles.label, { color: colors.textLabel }]}>Email</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: colors.authInput }]}
+              style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary }]}
               placeholder="me@example.com"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={colors.textTertiary}
               value={email}
               onChangeText={onEmailChange}
               autoCapitalize="none"
@@ -56,9 +56,9 @@ export function LoginPage({
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={[styles.label, { color: colors.textLabel }]}>Password</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: colors.authInput }]}
+              style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary }]}
               placeholder=""
               value={password}
               onChangeText={onPasswordChange}
@@ -68,8 +68,8 @@ export function LoginPage({
           </View>
 
           {error && (
-            <View style={[styles.errorBox, { backgroundColor: colors.dangerSubtle }]}>
-              <Text style={styles.errorText}>{error}</Text>
+            <View style={[styles.errorBox, { backgroundColor: colors.dangerSubtle, borderColor: colors.borderDanger }]}>
+              <Text style={[styles.errorText, { color: colors.textDangerStrong }]}>{error}</Text>
             </View>
           )}
 
@@ -80,9 +80,9 @@ export function LoginPage({
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.textOnColor} />
             ) : (
-              <Text style={styles.buttonText}>Login</Text>
+              <Text style={[styles.buttonText, { color: colors.textOnColor }]}>Login</Text>
             )}
           </Pressable>
         </View>
@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1f2937',
   },
   formWrapper: {
     flex: 1,
@@ -125,12 +124,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1f2937',
     marginBottom: 8,
   },
   description: {
     fontSize: 14,
-    color: '#6b7280',
     marginBottom: 24,
   },
   fieldGroup: {
@@ -139,7 +136,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
     marginBottom: 8,
   },
   input: {
@@ -148,20 +144,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#d1d5db',
     fontSize: 16,
-    color: '#1f2937',
   },
   errorBox: {
     marginBottom: 16,
     padding: 12,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#fecaca',
   },
   errorText: {
     fontSize: 14,
-    color: '#dc2626',
   },
   button: {
     paddingVertical: 12,
@@ -170,7 +162,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   buttonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },

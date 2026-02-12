@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColors } from '../theme/colors';
 import { SavedEntryRow, type SavedEntryRowData } from './saved-entry-row';
 
 interface SwipeableEntryRowProps {
@@ -10,6 +11,7 @@ interface SwipeableEntryRowProps {
 }
 
 export function SwipeableEntryRow({ entry, onDelete }: SwipeableEntryRowProps) {
+  const colors = useThemeColors();
   const swipeableRef = useRef<Swipeable>(null);
 
   const handleDelete = () => {
@@ -33,9 +35,9 @@ export function SwipeableEntryRow({ entry, onDelete }: SwipeableEntryRowProps) {
 
   const renderRightActions = () => (
     <View style={styles.rightActionContainer}>
-      <Pressable style={styles.deleteButton} onPress={handleDelete}>
-        <Ionicons name="trash-outline" size={24} color="#fff" />
-        <Text style={styles.deleteText}>Delete</Text>
+      <Pressable style={[styles.deleteButton, { backgroundColor: colors.danger }]} onPress={handleDelete}>
+        <Ionicons name="trash-outline" size={24} color={colors.textOnColor} />
+        <Text style={[styles.deleteText, { color: colors.textOnColor }]}>Delete</Text>
       </Pressable>
     </View>
   );
@@ -63,7 +65,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   deleteButton: {
-    backgroundColor: '#ef4444',
     justifyContent: 'center',
     alignItems: 'center',
     width: 100,
@@ -73,7 +74,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   deleteText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
     marginTop: 4,

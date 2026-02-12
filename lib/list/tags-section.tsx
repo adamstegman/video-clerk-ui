@@ -26,25 +26,25 @@ export function TagsSection({
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Tags</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Tags</Text>
 
       {selectedTags.length > 0 && (
         <View style={styles.selectedTagsContainer}>
           {selectedTags.map((tag) => (
             <Pressable
               key={tag.id}
-              style={styles.selectedTag}
+              style={[styles.selectedTag, { backgroundColor: colors.primary }]}
               onPress={() => onToggleTag(tag)}
             >
-              <Text style={styles.selectedTagText}>{tag.name}</Text>
-              <Ionicons name="close" size={14} color="#fff" />
+              <Text style={[styles.selectedTagText, { color: colors.textOnColor }]}>{tag.name}</Text>
+              <Ionicons name="close" size={14} color={colors.textOnColor} />
             </Pressable>
           ))}
         </View>
       )}
 
       <TextInput
-        style={[styles.tagInput, { backgroundColor: colors.input }]}
+        style={[styles.tagInput, { backgroundColor: colors.input, color: colors.textPrimary }]}
         placeholder="Search or create tags..."
         value={tagQuery}
         onChangeText={onTagQueryChange}
@@ -54,7 +54,7 @@ export function TagsSection({
 
       {showCreateButton && (
         <Pressable style={[styles.createTagButton, { backgroundColor: colors.primaryLight }]} onPress={() => onCreateTag(tagQuery)}>
-          <Text style={styles.createTagButtonText}>Create "{tagQuery}"</Text>
+          <Text style={[styles.createTagButtonText, { color: colors.textBrand }]}>Create "{tagQuery}"</Text>
         </Pressable>
       )}
 
@@ -75,7 +75,8 @@ export function TagsSection({
                 <Text
                   style={[
                     styles.availableTagText,
-                    isSelected && styles.availableTagTextSelected,
+                    { color: colors.textSecondary },
+                    isSelected && { color: colors.textBrand, fontWeight: '500' },
                   ]}
                 >
                   {tag.name}
@@ -96,7 +97,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 12,
   },
   selectedTagsContainer: {
@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
   selectedTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4f46e5',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
@@ -115,7 +114,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedTagText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '500',
     marginRight: 6,
@@ -125,7 +123,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     fontSize: 16,
-    color: '#1f2937',
     marginBottom: 8,
   },
   createTagButton: {
@@ -135,7 +132,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   createTagButtonText: {
-    color: '#4f46e5',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -155,10 +151,5 @@ const styles = StyleSheet.create({
   },
   availableTagText: {
     fontSize: 14,
-    color: '#6b7280',
-  },
-  availableTagTextSelected: {
-    color: '#4f46e5',
-    fontWeight: '500',
   },
 });

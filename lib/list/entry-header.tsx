@@ -25,8 +25,8 @@ export function EntryHeader({ entry }: EntryHeaderProps) {
         <Image source={{ uri: posterUrl }} style={[styles.poster, { backgroundColor: colors.separator }]} contentFit="cover" />
       )}
       <View style={styles.headerText}>
-        <Text style={styles.title}>{entry.title}</Text>
-        {entry.releaseYear ? <Text style={styles.subtitle}>{entry.releaseYear}</Text> : null}
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{entry.title}</Text>
+        {entry.releaseYear ? <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{entry.releaseYear}</Text> : null}
       </View>
     </View>
   );
@@ -52,11 +52,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
   },
 });

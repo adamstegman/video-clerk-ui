@@ -42,9 +42,9 @@ export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
         />
       )}
       <View style={styles.content}>
-        <Text style={styles.title}>{entry.title}</Text>
-        {entry.releaseYear ? <Text style={styles.subtitle}>{entry.releaseYear}</Text> : null}
-        {entry.tags.length > 0 ? <Text style={styles.subtitle}>{entry.tags.join(', ')}</Text> : null}
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{entry.title}</Text>
+        {entry.releaseYear ? <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{entry.releaseYear}</Text> : null}
+        {entry.tags.length > 0 ? <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{entry.tags.join(', ')}</Text> : null}
       </View>
     </Pressable>
   );
@@ -73,11 +73,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
   },
   subtitle: {
     fontSize: 14,
-    color: '#6b7280',
     marginTop: 4,
   },
 });

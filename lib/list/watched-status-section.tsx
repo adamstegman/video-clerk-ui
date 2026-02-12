@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Switch } from 'react-native';
+import { useThemeColors } from '../theme/colors';
 
 interface WatchedStatusSectionProps {
   watched: boolean;
@@ -6,16 +7,18 @@ interface WatchedStatusSectionProps {
 }
 
 export function WatchedStatusSection({ watched, onWatchedChange }: WatchedStatusSectionProps) {
+  const colors = useThemeColors();
+
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Watched Status</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Watched Status</Text>
       <View style={styles.watchedRow}>
-        <Text style={styles.watchedLabel}>{watched ? 'Watched' : 'Not Watched'}</Text>
+        <Text style={[styles.watchedLabel, { color: colors.textLabel }]}>{watched ? 'Watched' : 'Not Watched'}</Text>
         <Switch
           value={watched}
           onValueChange={onWatchedChange}
-          trackColor={{ false: '#d1d5db', true: '#a5b4fc' }}
-          thumbColor={watched ? '#4f46e5' : '#f3f4f6'}
+          trackColor={{ false: colors.borderInput, true: colors.primaryDisabled }}
+          thumbColor={watched ? colors.primary : colors.input}
         />
       </View>
     </View>
@@ -29,7 +32,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 12,
   },
   watchedRow: {
@@ -40,6 +42,5 @@ const styles = StyleSheet.create({
   },
   watchedLabel: {
     fontSize: 16,
-    color: '#374151',
   },
 });

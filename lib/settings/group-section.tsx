@@ -52,7 +52,7 @@ export function GroupSection({
   return (
     <>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionHeaderText}>GROUP</Text>
+        <Text style={[styles.sectionHeaderText, { color: colors.textSecondary }]}>GROUP</Text>
       </View>
       <View style={[styles.groupSection, { backgroundColor: colors.surface, borderColor: colors.separator }]}>
         <GroupMembers
@@ -88,7 +88,6 @@ const styles = StyleSheet.create({
   sectionHeaderText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6b7280',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },

@@ -26,25 +26,26 @@ export function SearchResultRow({ item, config, isSaved, isSaving, onAdd }: Sear
     <View style={[styles.resultItem, { backgroundColor: colors.surface }]}>
       {posterUrl && <Image source={{ uri: posterUrl }} style={[styles.poster, { backgroundColor: colors.separator }]} contentFit="cover" />}
       <View style={styles.resultContent}>
-        <Text style={styles.resultTitle}>{item.displayName}</Text>
-        {item.releaseYear ? <Text style={styles.resultSubtitle}>{item.releaseYear}</Text> : null}
+        <Text style={[styles.resultTitle, { color: colors.textPrimary }]}>{item.displayName}</Text>
+        {item.releaseYear ? <Text style={[styles.resultSubtitle, { color: colors.textSecondary }]}>{item.releaseYear}</Text> : null}
         {item.genres.length > 0 ? (
-          <Text style={styles.resultSubtitle}>{item.genres.map((g) => g.name).join(', ')}</Text>
+          <Text style={[styles.resultSubtitle, { color: colors.textSecondary }]}>{item.genres.map((g) => g.name).join(', ')}</Text>
         ) : null}
       </View>
       <Pressable
         style={[
           styles.addButton,
-          isSaved && styles.savedButton,
+          { backgroundColor: colors.primary },
+          isSaved && { backgroundColor: colors.primaryMuted },
           isDisabled && styles.addButtonDisabled,
         ]}
         onPress={() => onAdd(item)}
         disabled={isDisabled}
       >
         {isSaving ? (
-          <ActivityIndicator size="small" color="#fff" />
+          <ActivityIndicator size="small" color={colors.textOnColor} />
         ) : (
-          <Text style={[styles.addButtonText, isSaved && styles.savedButtonText]}>
+          <Text style={[styles.addButtonText, { color: colors.textOnColor }, isSaved && { color: colors.textPrimary }]}>
             {isSaved ? 'Saved' : 'Save'}
           </Text>
         )}
@@ -73,16 +74,13 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 4,
   },
   resultSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
     marginTop: 2,
   },
   addButton: {
-    backgroundColor: '#4f46e5',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -93,15 +91,8 @@ const styles = StyleSheet.create({
   addButtonDisabled: {
     opacity: 0.7,
   },
-  savedButton: {
-    backgroundColor: '#c7d2fe',
-  },
   addButtonText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
-  },
-  savedButtonText: {
-    color: '#1f2937',
   },
 });

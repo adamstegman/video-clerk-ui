@@ -86,7 +86,7 @@ export function WatchPage({
     return (
       <View style={[styles.centerContainer, { backgroundColor: colors.page }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
       </View>
     );
   }
@@ -94,7 +94,7 @@ export function WatchPage({
   if (error) {
     return (
       <View style={[styles.centerContainer, { backgroundColor: colors.page }]}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={[styles.errorText, { color: colors.textDanger }]}>{error}</Text>
       </View>
     );
   }
@@ -103,8 +103,8 @@ export function WatchPage({
   if (!loading && !error && allEntries.length === 0) {
     return (
       <View style={[styles.centerContainer, { backgroundColor: colors.page }]}>
-        <Text style={styles.emptyText}>No unwatched entries.</Text>
-        <Text style={styles.subtitle}>Add some movies or shows to your list!</Text>
+        <Text style={[styles.emptyText, { color: colors.textPrimary }]}>No unwatched entries.</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Add some movies or shows to your list!</Text>
       </View>
     );
   }
@@ -159,10 +159,10 @@ export function WatchPage({
   if (deck.length === 0 && liked.length === 0) {
     return (
       <View style={[styles.centerContainer, { backgroundColor: colors.page }]}>
-        <Text style={styles.emptyText}>No entries match your filters.</Text>
-        <Text style={styles.subtitle}>Try different options.</Text>
+        <Text style={[styles.emptyText, { color: colors.textPrimary }]}>No entries match your filters.</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Try different options.</Text>
         <Pressable style={[styles.changeFiltersButton, { backgroundColor: colors.primary }]} onPress={onStartOver}>
-          <Text style={styles.changeFiltersButtonText}>Change Filters</Text>
+          <Text style={[styles.changeFiltersButtonText, { color: colors.textOnColor }]}>Change Filters</Text>
         </Pressable>
       </View>
     );
@@ -202,7 +202,7 @@ export function WatchPage({
         })}
       </View>
       <View style={styles.instructions}>
-        <Text style={styles.instructionsText}>
+        <Text style={[styles.instructionsText, { color: colors.textSecondary }]}>
           Swipe left to skip • Swipe right to like ({liked.length}/{likeGoal})
         </Text>
       </View>
@@ -231,22 +231,18 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6b7280',
   },
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6b7280',
     textAlign: 'center',
   },
   errorText: {
     fontSize: 14,
-    color: '#ef4444',
     textAlign: 'center',
   },
   instructions: {
@@ -256,7 +252,6 @@ const styles = StyleSheet.create({
   },
   instructionsText: {
     fontSize: 14,
-    color: '#6b7280',
     textAlign: 'center',
   },
   changeFiltersButton: {
@@ -266,7 +261,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   changeFiltersButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },

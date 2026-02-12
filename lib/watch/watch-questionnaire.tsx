@@ -47,7 +47,7 @@ export function WatchQuestionnaire({
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Time Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>How much time do you have?</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>How much time do you have?</Text>
           <View style={styles.timeOptions}>
             <TimeOption
               label="Short Show"
@@ -76,8 +76,8 @@ export function WatchQuestionnaire({
         {/* Mood/Tags Section */}
         {availableTags.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>What's your mood?</Text>
-            <Text style={styles.sectionSubtitle}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>What's your mood?</Text>
+            <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
               Select any tags that match how you're feeling
             </Text>
             <View style={styles.tagContainer}>
@@ -99,12 +99,12 @@ export function WatchQuestionnaire({
           style={[
             styles.matchingBadge,
             matchingCount > 0
-              ? { borderColor: '#c7d2fe', backgroundColor: colors.primarySubtle }
-              : { borderColor: '#fde68a', backgroundColor: colors.warningSubtle },
+              ? { borderColor: colors.borderPrimarySubtle, backgroundColor: colors.primarySubtle }
+              : { borderColor: colors.borderWarning, backgroundColor: colors.warningSubtle },
           ]}
         >
-          <Text style={styles.matchingCount}>{matchingCount}</Text>
-          <Text style={styles.matchingText}>
+          <Text style={[styles.matchingCount, { color: colors.text }]}>{matchingCount}</Text>
+          <Text style={[styles.matchingText, { color: colors.textMuted }]}>
             {hasFilters
               ? matchingCount === 1
                 ? 'entry matches your filters'
@@ -117,7 +117,7 @@ export function WatchQuestionnaire({
 
         {/* Helper Text */}
         {hasFilters && matchingCount === 0 && (
-          <Text style={styles.warningText}>
+          <Text style={[styles.warningText, { color: colors.textWarning }]}>
             No entries match these filters. Try different options.
           </Text>
         )}
@@ -126,14 +126,14 @@ export function WatchQuestionnaire({
       {/* Start Button */}
       <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
         <Pressable
-          style={[styles.startButton, { backgroundColor: colors.primary }, !canStart && styles.startButtonDisabled]}
+          style={[styles.startButton, { backgroundColor: colors.primary }, !canStart && { backgroundColor: colors.disabled }]}
           onPress={onStart}
           disabled={!canStart}
         >
-          <Text style={[styles.startButtonText, !canStart && styles.startButtonTextDisabled]}>
+          <Text style={[styles.startButtonText, { color: colors.textOnColor }, !canStart && { color: colors.textTertiary }]}>
             Start Swiping
           </Text>
-          <Ionicons name="checkmark" size={20} color={canStart ? '#fff' : '#a1a1aa'} />
+          <Ionicons name="checkmark" size={20} color={canStart ? colors.textOnColor : colors.textTertiary} />
         </Pressable>
       </View>
     </SafeAreaView>
@@ -157,19 +157,19 @@ function TimeOption({
     <Pressable
       style={[
         styles.timeOption,
-        { backgroundColor: colors.surface },
+        { backgroundColor: colors.surface, borderColor: colors.border },
         isSelected && { borderColor: colors.primary, backgroundColor: colors.primarySubtle },
       ]}
       onPress={onPress}
     >
       <View
-        style={[styles.timeOptionCheckbox, isSelected && { borderColor: colors.primary, backgroundColor: colors.primary }]}
+        style={[styles.timeOptionCheckbox, { borderColor: colors.borderMuted }, isSelected && { borderColor: colors.primary, backgroundColor: colors.primary }]}
       >
-        {isSelected && <Ionicons name="checkmark" size={16} color="#fff" />}
+        {isSelected && <Ionicons name="checkmark" size={16} color={colors.textOnColor} />}
       </View>
       <View style={styles.timeOptionContent}>
-        <Text style={styles.timeOptionLabel}>{label}</Text>
-        <Text style={styles.timeOptionDescription}>{description}</Text>
+        <Text style={[styles.timeOptionLabel, { color: colors.text }]}>{label}</Text>
+        <Text style={[styles.timeOptionDescription, { color: colors.textMuted }]}>{description}</Text>
       </View>
     </Pressable>
   );
@@ -191,7 +191,7 @@ function TagChip({
       style={[styles.tagChip, { backgroundColor: colors.surface }, isSelected && { backgroundColor: colors.primary }]}
       onPress={onPress}
     >
-      <Text style={[styles.tagChipText, isSelected && styles.tagChipTextSelected]}>
+      <Text style={[styles.tagChipText, { color: colors.textSubtle }, isSelected && { color: colors.textOnColor }]}>
         {label}
       </Text>
     </Pressable>
@@ -213,12 +213,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#18181b',
     marginBottom: 12,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#71717a',
     marginBottom: 12,
   },
   timeOptions: {
@@ -230,14 +228,12 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#e4e4e7',
   },
   timeOptionCheckbox: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#d4d4d8',
     marginRight: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -248,12 +244,10 @@ const styles = StyleSheet.create({
   timeOptionLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#18181b',
     marginBottom: 2,
   },
   timeOptionDescription: {
     fontSize: 14,
-    color: '#71717a',
   },
   tagContainer: {
     flexDirection: 'row',
@@ -268,10 +262,6 @@ const styles = StyleSheet.create({
   tagChipText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#3f3f46',
-  },
-  tagChipTextSelected: {
-    color: '#fff',
   },
   matchingBadge: {
     padding: 16,
@@ -283,16 +273,13 @@ const styles = StyleSheet.create({
   matchingCount: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#18181b',
   },
   matchingText: {
     fontSize: 14,
-    color: '#71717a',
     marginTop: 4,
   },
   warningText: {
     fontSize: 12,
-    color: '#f59e0b',
     textAlign: 'center',
   },
   footer: {
@@ -308,15 +295,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
   },
-  startButtonDisabled: {
-    backgroundColor: '#e4e4e7',
-  },
   startButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
-  },
-  startButtonTextDisabled: {
-    color: '#a1a1aa',
   },
 });

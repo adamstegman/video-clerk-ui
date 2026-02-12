@@ -66,8 +66,8 @@ export function SettingsPage({
         <AccountSection onSignOut={onSignOut} />
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Video Clerk v1.0.0</Text>
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, { color: colors.textTertiary }]}>Video Clerk v1.0.0</Text>
+          <Text style={[styles.footerText, { color: colors.textTertiary }]}>
             This application uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.
           </Text>
         </View>
@@ -91,6 +91,5 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: '#9ca3af',
   },
 });

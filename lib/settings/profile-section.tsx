@@ -10,12 +10,12 @@ export function ProfileSection({ email }: ProfileSectionProps) {
 
   return (
     <View style={[styles.profileSection, { backgroundColor: colors.surface, borderBottomColor: colors.separator }]}>
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>
+      <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+        <Text style={[styles.avatarText, { color: colors.textOnColor }]}>
           {email?.charAt(0).toUpperCase() || '?'}
         </Text>
       </View>
-      <Text style={styles.email}>{email || 'Not signed in'}</Text>
+      <Text style={[styles.email, { color: colors.textPrimary }]}>{email || 'Not signed in'}</Text>
     </View>
   );
 }
@@ -32,18 +32,15 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#4f46e5',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
     fontSize: 32,
     fontWeight: '600',
-    color: '#fff',
   },
   email: {
     fontSize: 16,
-    color: '#1f2937',
     fontWeight: '500',
   },
 });

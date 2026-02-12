@@ -27,14 +27,14 @@ export function InviteForm({
 
   return (
     <>
-      <View style={[styles.subsectionHeader, styles.inviteFormHeader]}>
-        <Text style={styles.subsectionHeaderText}>Invite to Group</Text>
-        <Text style={styles.helpText}>They must accept while signed in</Text>
+      <View style={[styles.subsectionHeader, styles.inviteFormHeader, { borderTopColor: colors.border }]}>
+        <Text style={[styles.subsectionHeaderText, { color: colors.textLabel }]}>Invite to Group</Text>
+        <Text style={[styles.helpText, { color: colors.textSecondary }]}>They must accept while signed in</Text>
       </View>
       <TextInput
-        style={[styles.inviteInput, { backgroundColor: colors.input }]}
+        style={[styles.inviteInput, { backgroundColor: colors.input, borderColor: colors.borderInput, color: colors.textPrimary }]}
         placeholder="friend@example.com"
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor={colors.textTertiary}
         value={inviteEmail}
         onChangeText={onInviteEmailChange}
         keyboardType="email-address"
@@ -45,56 +45,59 @@ export function InviteForm({
       <Pressable
         style={({ pressed }) => [
           styles.createInviteButton,
+          { backgroundColor: colors.primary },
           (pressed || inviting || inviteLink) && styles.inviteButtonPressed,
         ]}
         onPress={onInvite}
         disabled={inviting || !!inviteLink}
       >
-        <Ionicons name="person-add-outline" size={20} color="#fff" />
-        <Text style={styles.inviteButtonText}>
+        <Ionicons name="person-add-outline" size={20} color={colors.textOnColor} />
+        <Text style={[styles.inviteButtonText, { color: colors.textOnColor }]}>
           {inviting ? 'Creating...' : 'Create Invite'}
         </Text>
       </Pressable>
 
       {inviteLink && (
-        <View style={styles.inviteLinkContainer}>
-          <Text style={styles.inviteLinkLabel}>Invite Link:</Text>
+        <View style={[styles.inviteLinkContainer, { borderTopColor: colors.border }]}>
+          <Text style={[styles.inviteLinkLabel, { color: colors.textLabel }]}>Invite Link:</Text>
           <ScrollView
             horizontal
-            style={[styles.inviteLinkScroll, { backgroundColor: colors.surfaceSubtle }]}
+            style={[styles.inviteLinkScroll, { backgroundColor: colors.surfaceSubtle, borderColor: colors.borderInput }]}
             contentContainerStyle={styles.inviteLinkScrollContent}
           >
-            <Text style={styles.inviteLinkText}>{inviteLink}</Text>
+            <Text style={[styles.inviteLinkText, { color: colors.textPrimary }]}>{inviteLink}</Text>
           </ScrollView>
           <View style={styles.inviteLinkActions}>
             <Pressable
               style={({ pressed }) => [
                 styles.linkButton,
+                { borderColor: colors.primary },
                 pressed && styles.inviteButtonPressed,
               ]}
               onPress={onCopyInviteLink}
             >
               {copySuccess ? (
                 <>
-                  <Ionicons name="checkmark" size={18} color="#22c55e" />
-                  <Text style={styles.linkButtonTextSuccess}>Copied!</Text>
+                  <Ionicons name="checkmark" size={18} color={colors.textSuccess} />
+                  <Text style={[styles.linkButtonTextSuccess, { color: colors.textSuccess }]}>Copied!</Text>
                 </>
               ) : (
                 <>
-                  <Ionicons name="copy-outline" size={18} color="#4f46e5" />
-                  <Text style={styles.linkButtonText}>Copy</Text>
+                  <Ionicons name="copy-outline" size={18} color={colors.textBrand} />
+                  <Text style={[styles.linkButtonText, { color: colors.textBrand }]}>Copy</Text>
                 </>
               )}
             </Pressable>
             <Pressable
               style={({ pressed }) => [
                 styles.shareButton,
+                { backgroundColor: colors.primary },
                 pressed && styles.inviteButtonPressed,
               ]}
               onPress={onShareInvite}
             >
-              <Ionicons name="person-add-outline" size={18} color="#fff" />
-              <Text style={styles.shareButtonText}>Share</Text>
+              <Ionicons name="person-add-outline" size={18} color={colors.textOnColor} />
+              <Text style={[styles.shareButtonText, { color: colors.textOnColor }]}>Share</Text>
             </Pressable>
           </View>
         </View>
@@ -111,33 +114,27 @@ const styles = StyleSheet.create({
   subsectionHeaderText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
   },
   helpText: {
     fontSize: 12,
-    color: '#6b7280',
     marginTop: 4,
   },
   inviteFormHeader: {
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
     marginTop: 4,
   },
   inviteInput: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: '#1f2937',
   },
   createInviteButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#4f46e5',
     paddingVertical: 12,
     borderRadius: 8,
   },
@@ -147,23 +144,19 @@ const styles = StyleSheet.create({
   inviteButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
   },
   inviteLinkContainer: {
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
     gap: 8,
   },
   inviteLinkLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
   },
   inviteLinkScroll: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 6,
     maxHeight: 60,
   },
@@ -174,7 +167,6 @@ const styles = StyleSheet.create({
   inviteLinkText: {
     fontSize: 13,
     fontFamily: 'monospace',
-    color: '#1f2937',
   },
   inviteLinkActions: {
     flexDirection: 'row',
@@ -188,19 +180,16 @@ const styles = StyleSheet.create({
     gap: 6,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#4f46e5',
     paddingVertical: 10,
     borderRadius: 8,
   },
   linkButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#4f46e5',
   },
   linkButtonTextSuccess: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#22c55e',
   },
   shareButton: {
     flex: 1,
@@ -208,13 +197,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#4f46e5',
     paddingVertical: 10,
     borderRadius: 8,
   },
   shareButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#fff',
   },
 });

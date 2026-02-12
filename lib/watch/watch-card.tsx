@@ -65,19 +65,19 @@ export function WatchCard({ entry }: WatchCardProps) {
       {/* Text area */}
       <View style={[styles.textContainer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={2}>
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
             {entry.title}
           </Text>
           {entry.releaseYear ? (
-            <Text style={styles.year}>{entry.releaseYear}</Text>
+            <Text style={[styles.year, { color: colors.textMuted }]}>{entry.releaseYear}</Text>
           ) : null}
         </View>
         {entry.overview ? (
-          <Text style={styles.overview} numberOfLines={4}>
+          <Text style={[styles.overview, { color: colors.textSubtle }]} numberOfLines={4}>
             {entry.overview}
           </Text>
         ) : null}
-        <Text style={styles.metadata}>
+        <Text style={[styles.metadata, { color: colors.textMuted }]}>
           {mediaLabel}
           {tagLabel}
         </Text>
@@ -130,22 +130,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#18181b',
     flex: 1,
   },
   year: {
     fontSize: 14,
-    color: '#71717a',
   },
   overview: {
     fontSize: 14,
     lineHeight: 20,
-    color: '#52525b',
     marginBottom: 12,
   },
   metadata: {
     fontSize: 12,
-    color: '#71717a',
     marginTop: 'auto',
   },
 });
