@@ -22,7 +22,7 @@ export function HeroSection({ isWide }: HeroSectionProps) {
         </Text>
         <View style={styles.buttonContainer}>
           <Link href="/login" asChild>
-            <Pressable style={[styles.button, { backgroundColor: colors.primaryHeader }]}>
+            <Pressable style={{ ...styles.button, backgroundColor: colors.primaryHeader }}>
               <Text style={[styles.buttonText, { color: colors.textOnColor }]}>Log In</Text>
             </Pressable>
           </Link>
