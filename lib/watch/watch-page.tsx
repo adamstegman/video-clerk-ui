@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Pressable, useColorScheme } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { SwipeableCard } from './swipeable-card';
 import { WatchCard, type WatchCardEntry } from './watch-card';
@@ -79,9 +79,12 @@ export function WatchPage({
   onMarkWatched,
   onStartOver,
 }: WatchPageProps) {
+  const isDark = useColorScheme() === 'dark';
+  const darkBg = isDark && styles.darkBg;
+
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, darkBg]}>
         <ActivityIndicator size="large" color="#4f46e5" />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
@@ -90,7 +93,7 @@ export function WatchPage({
 
   if (error) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, darkBg]}>
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
@@ -99,7 +102,7 @@ export function WatchPage({
   // Empty state
   if (!loading && !error && allEntries.length === 0) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, darkBg]}>
         <Text style={styles.emptyText}>No unwatched entries.</Text>
         <Text style={styles.subtitle}>Add some movies or shows to your list!</Text>
       </View>
@@ -155,7 +158,7 @@ export function WatchPage({
   // No matches state
   if (deck.length === 0 && liked.length === 0) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, darkBg]}>
         <Text style={styles.emptyText}>No entries match your filters.</Text>
         <Text style={styles.subtitle}>Try different options.</Text>
         <Pressable style={styles.changeFiltersButton} onPress={onStartOver}>
@@ -175,7 +178,7 @@ export function WatchPage({
   const visibleDeck = deck.slice(0, 4);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, darkBg]}>
       <View style={styles.cardContainer}>
         {/* Render bottom-to-top so the top card is last (on top in z-order) */}
         {[...visibleDeck].reverse().map((entry, renderIndex) => {
@@ -269,5 +272,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  darkBg: {
+    backgroundColor: '#000000',
   },
 });
