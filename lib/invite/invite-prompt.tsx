@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColors } from '../theme/colors';
 
 interface InvitePromptProps {
   error: string | null;
@@ -10,8 +11,10 @@ interface InvitePromptProps {
 }
 
 export function InvitePrompt({ error, accepting, onAccept, onDecline }: InvitePromptProps) {
+  const colors = useThemeColors();
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]}>
       <View style={styles.centerContainer}>
         <View style={styles.iconContainer}>
           <Text style={styles.iconText}>📨</Text>
@@ -25,7 +28,7 @@ export function InvitePrompt({ error, accepting, onAccept, onDecline }: InvitePr
         </Text>
 
         {error && (
-          <View style={styles.errorContainer}>
+          <View style={[styles.errorContainer, { backgroundColor: colors.dangerSubtle }]}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
@@ -68,7 +71,6 @@ export function InvitePrompt({ error, accepting, onAccept, onDecline }: InvitePr
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   centerContainer: {
     flex: 1,
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: '#eef2ff',
+    backgroundColor: '#eef2ff', // primarySubtle - static since it's decorative
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -107,7 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorContainer: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: '#fef2f2', // will be themed via inline style below
     borderWidth: 1,
     borderColor: '#fecaca',
     borderRadius: 8,
@@ -131,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#4f46e5', // primary - stays same in dark
     paddingVertical: 16,
     borderRadius: 12,
   },
@@ -146,7 +148,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#e5e7eb',
     paddingVertical: 16,

@@ -1,5 +1,6 @@
 import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeColors } from '../theme/colors';
 import type { TMDBConfigurationState } from '../tmdb-api/tmdb-configuration';
 import type { TMDBSearchResult, TMDBGenre } from '../tmdb-api/tmdb-api';
 import { SearchResultRow } from './search-result-row';
@@ -33,11 +34,13 @@ export function AddToListPage({
   config,
   onAddToList,
 }: AddToListPageProps) {
+  const colors = useThemeColors();
+
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <View style={styles.searchContainer}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
+      <View style={[styles.searchContainer, { borderBottomColor: colors.separator }]}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: colors.input }]}
           placeholder="Search movies and TV shows..."
           value={query}
           onChangeText={onQueryChange}
@@ -49,7 +52,7 @@ export function AddToListPage({
 
       {loading && (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#4f46e5" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       )}
 
@@ -95,16 +98,13 @@ export function AddToListPage({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
   },
   searchInput: {
-    backgroundColor: '#f3f4f6',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,

@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeColors } from '../theme/colors';
 import { EntryHeader } from './entry-header';
 import { WatchedStatusSection } from './watched-status-section';
 import { TagsSection } from './tags-section';
@@ -53,11 +54,13 @@ export function EditEntryPage({
   onSave,
   onDelete,
 }: EditEntryPageProps) {
+  const colors = useThemeColors();
+
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#4f46e5" />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </SafeAreaView>
@@ -66,7 +69,7 @@ export function EditEntryPage({
 
   if (error || !entry) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
         <View style={styles.centerContainer}>
           <Text style={styles.errorText}>{error || 'Entry not found'}</Text>
         </View>
@@ -75,7 +78,7 @@ export function EditEntryPage({
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <EntryHeader entry={entry} />
 
@@ -107,7 +110,6 @@ export function EditEntryPage({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   centerContainer: {
     flex: 1,

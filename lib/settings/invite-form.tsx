@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Pressable, ScrollView, TextInput } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColors } from '../theme/colors';
 
 interface InviteFormProps {
   inviteEmail: string;
@@ -22,6 +23,8 @@ export function InviteForm({
   onCopyInviteLink,
   onShareInvite,
 }: InviteFormProps) {
+  const colors = useThemeColors();
+
   return (
     <>
       <View style={[styles.subsectionHeader, styles.inviteFormHeader]}>
@@ -29,7 +32,7 @@ export function InviteForm({
         <Text style={styles.helpText}>They must accept while signed in</Text>
       </View>
       <TextInput
-        style={styles.inviteInput}
+        style={[styles.inviteInput, { backgroundColor: colors.input }]}
         placeholder="friend@example.com"
         placeholderTextColor="#9ca3af"
         value={inviteEmail}
@@ -58,7 +61,7 @@ export function InviteForm({
           <Text style={styles.inviteLinkLabel}>Invite Link:</Text>
           <ScrollView
             horizontal
-            style={styles.inviteLinkScroll}
+            style={[styles.inviteLinkScroll, { backgroundColor: colors.surfaceSubtle }]}
             contentContainerStyle={styles.inviteLinkScrollContent}
           >
             <Text style={styles.inviteLinkText}>{inviteLink}</Text>
@@ -121,7 +124,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   inviteInput: {
-    backgroundColor: '#f4f4f5',
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 8,
@@ -160,7 +162,6 @@ const styles = StyleSheet.create({
     color: '#374151',
   },
   inviteLinkScroll: {
-    backgroundColor: '#f9fafb',
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 6,
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#4f46e5',
     paddingVertical: 10,

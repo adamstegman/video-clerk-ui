@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { useThemeColors } from '../theme/colors';
 import { GroupMembers } from './group-members';
 import { PendingInvitations } from './pending-invitations';
 import { InviteForm } from './invite-form';
@@ -46,12 +47,14 @@ export function GroupSection({
   onCopyInviteLink,
   onShareInvite,
 }: GroupSectionProps) {
+  const colors = useThemeColors();
+
   return (
     <>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionHeaderText}>GROUP</Text>
       </View>
-      <View style={styles.groupSection}>
+      <View style={[styles.groupSection, { backgroundColor: colors.surface, borderColor: colors.separator }]}>
         <GroupMembers
           currentUserId={currentUserId}
           members={groupMembers}
@@ -90,10 +93,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   groupSection: {
-    backgroundColor: '#f4f4f5',
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#e5e7eb',
     paddingHorizontal: 16,
     paddingBottom: 16,
     gap: 12,

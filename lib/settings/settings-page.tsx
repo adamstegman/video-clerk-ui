@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { User } from '@supabase/supabase-js';
+import { useThemeColors } from '../theme/colors';
 import { ProfileSection } from './profile-section';
 import { GroupSection } from './group-section';
 import type { GroupMember, PendingInvite } from './group-section';
@@ -39,8 +40,10 @@ export function SettingsPage({
   onShareInvite,
   onSignOut,
 }: SettingsPageProps) {
+  const colors = useThemeColors();
+
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
       <ScrollView style={styles.content}>
         <ProfileSection email={user?.email} />
 
@@ -76,7 +79,6 @@ export function SettingsPage({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   content: {
     flex: 1,

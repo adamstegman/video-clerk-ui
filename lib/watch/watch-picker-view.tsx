@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useContext, useState } from 'react';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
+import { useThemeColors } from '../theme/colors';
 import type { WatchCardEntry } from './watch-card';
 
 interface WatchPickerViewProps {
@@ -13,6 +14,7 @@ interface WatchPickerViewProps {
 
 export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPickerViewProps) {
   const config = useContext(TMDBConfigurationContext);
+  const colors = useThemeColors();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const handleChoose = () => {
@@ -24,7 +26,7 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
       <View style={styles.header}>
         <Text style={styles.title}>Pick one to watch</Text>
         <Text style={styles.subtitle}>You liked {liked.length}. Choose your winner:</Text>
@@ -43,12 +45,12 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
           return (
             <Pressable
               key={entry.id}
-              style={[styles.card, isSelected && styles.cardSelected]}
+              style={[styles.card, { backgroundColor: colors.surface }, isSelected && styles.cardSelected]}
               onPress={() => setSelectedId(entry.id)}
             >
               <View style={styles.cardContent}>
                 {posterUrl && (
-                  <Image source={{ uri: posterUrl }} style={styles.poster} contentFit="cover" />
+                  <Image source={{ uri: posterUrl }} style={[styles.poster, { backgroundColor: colors.separator }]} contentFit="cover" />
                 )}
                 <View style={styles.textContent}>
                   <Text style={styles.cardTitle} numberOfLines={2}>
@@ -69,12 +71,12 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
         })}
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Pressable style={styles.secondaryButton} onPress={onStartOver}>
+      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
+        <Pressable style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }]} onPress={onStartOver}>
           <Text style={styles.secondaryButtonText}>Start Over</Text>
         </Pressable>
         <Pressable
-          style={[styles.primaryButton, !selectedId && styles.buttonDisabled]}
+          style={[styles.primaryButton, { backgroundColor: colors.primary }, !selectedId && styles.buttonDisabled]}
           onPress={handleChoose}
           disabled={!selectedId}
         >
@@ -88,7 +90,6 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   header: {
     paddingHorizontal: 24,
@@ -110,7 +111,6 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   card: {
-    backgroundColor: '#f4f4f5',
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 2,
@@ -133,7 +133,6 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 8,
     marginRight: 16,
-    backgroundColor: '#e5e7eb',
   },
   textContent: {
     flex: 1,
@@ -160,12 +159,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    backgroundColor: '#f4f4f5',
   },
   primaryButton: {
     flex: 1,
-    backgroundColor: '#4f46e5',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -177,12 +173,10 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
   },
   secondaryButtonText: {
     color: '#18181b',

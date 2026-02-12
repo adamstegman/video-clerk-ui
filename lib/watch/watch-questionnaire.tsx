@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColors, type ThemeColors } from '../theme/colors';
 
 export interface QuestionnaireFilters {
   timeTypes: ('short-show' | 'long-show' | 'movie')[];
@@ -22,6 +23,8 @@ export function WatchQuestionnaire({
   onStart,
   matchingCount,
 }: WatchQuestionnaireProps) {
+  const colors = useThemeColors();
+
   const toggleTimeType = (type: 'short-show' | 'long-show' | 'movie') => {
     const newTimeTypes = filters.timeTypes.includes(type)
       ? filters.timeTypes.filter((t) => t !== type)
@@ -40,7 +43,7 @@ export function WatchQuestionnaire({
   const canStart = matchingCount > 0;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Time Section */}
         <View style={styles.section}>
@@ -51,18 +54,21 @@ export function WatchQuestionnaire({
               description="Quick episodes (under 30 min)"
               isSelected={filters.timeTypes.includes('short-show')}
               onPress={() => toggleTimeType('short-show')}
+              colors={colors}
             />
             <TimeOption
               label="Long Show"
               description="Full episodes (30+ min)"
               isSelected={filters.timeTypes.includes('long-show')}
               onPress={() => toggleTimeType('long-show')}
+              colors={colors}
             />
             <TimeOption
               label="Movie"
               description="Feature length film"
               isSelected={filters.timeTypes.includes('movie')}
               onPress={() => toggleTimeType('movie')}
+              colors={colors}
             />
           </View>
         </View>
@@ -81,6 +87,7 @@ export function WatchQuestionnaire({
                   label={tag}
                   isSelected={filters.selectedTags.includes(tag)}
                   onPress={() => toggleTag(tag)}
+                  colors={colors}
                 />
               ))}
             </View>
@@ -91,7 +98,9 @@ export function WatchQuestionnaire({
         <View
           style={[
             styles.matchingBadge,
-            matchingCount > 0 ? styles.matchingBadgeSuccess : styles.matchingBadgeWarning,
+            matchingCount > 0
+              ? { borderColor: '#c7d2fe', backgroundColor: colors.primarySubtle }
+              : { borderColor: '#fde68a', backgroundColor: colors.warningSubtle },
           ]}
         >
           <Text style={styles.matchingCount}>{matchingCount}</Text>
@@ -115,9 +124,9 @@ export function WatchQuestionnaire({
       </ScrollView>
 
       {/* Start Button */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
         <Pressable
-          style={[styles.startButton, !canStart && styles.startButtonDisabled]}
+          style={[styles.startButton, { backgroundColor: colors.primary }, !canStart && styles.startButtonDisabled]}
           onPress={onStart}
           disabled={!canStart}
         >
@@ -136,19 +145,25 @@ function TimeOption({
   description,
   isSelected,
   onPress,
+  colors,
 }: {
   label: string;
   description: string;
   isSelected: boolean;
   onPress: () => void;
+  colors: ThemeColors;
 }) {
   return (
     <Pressable
-      style={[styles.timeOption, isSelected && styles.timeOptionSelected]}
+      style={[
+        styles.timeOption,
+        { backgroundColor: colors.surface },
+        isSelected && { borderColor: colors.primary, backgroundColor: colors.primarySubtle },
+      ]}
       onPress={onPress}
     >
       <View
-        style={[styles.timeOptionCheckbox, isSelected && styles.timeOptionCheckboxSelected]}
+        style={[styles.timeOptionCheckbox, isSelected && { borderColor: colors.primary, backgroundColor: colors.primary }]}
       >
         {isSelected && <Ionicons name="checkmark" size={16} color="#fff" />}
       </View>
@@ -164,14 +179,16 @@ function TagChip({
   label,
   isSelected,
   onPress,
+  colors,
 }: {
   label: string;
   isSelected: boolean;
   onPress: () => void;
+  colors: ThemeColors;
 }) {
   return (
     <Pressable
-      style={[styles.tagChip, isSelected && styles.tagChipSelected]}
+      style={[styles.tagChip, { backgroundColor: colors.surface }, isSelected && { backgroundColor: colors.primary }]}
       onPress={onPress}
     >
       <Text style={[styles.tagChipText, isSelected && styles.tagChipTextSelected]}>
@@ -184,7 +201,6 @@ function TagChip({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -215,11 +231,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e4e4e7',
-    backgroundColor: '#f4f4f5',
-  },
-  timeOptionSelected: {
-    borderColor: '#4f46e5',
-    backgroundColor: '#eef2ff',
   },
   timeOptionCheckbox: {
     width: 24,
@@ -230,10 +241,6 @@ const styles = StyleSheet.create({
     marginRight: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  timeOptionCheckboxSelected: {
-    borderColor: '#4f46e5',
-    backgroundColor: '#4f46e5',
   },
   timeOptionContent: {
     flex: 1,
@@ -257,10 +264,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#f4f4f5',
-  },
-  tagChipSelected: {
-    backgroundColor: '#4f46e5',
   },
   tagChipText: {
     fontSize: 14,
@@ -276,14 +279,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     marginBottom: 16,
-  },
-  matchingBadgeSuccess: {
-    borderColor: '#c7d2fe',
-    backgroundColor: '#eef2ff',
-  },
-  matchingBadgeWarning: {
-    borderColor: '#fde68a',
-    backgroundColor: '#fef3c7',
   },
   matchingCount: {
     fontSize: 32,
@@ -304,15 +299,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    backgroundColor: '#f4f4f5',
   },
   startButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#4f46e5',
     paddingVertical: 16,
     borderRadius: 12,
   },

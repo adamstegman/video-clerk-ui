@@ -1,15 +1,17 @@
 import { View, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColors } from '../theme/colors';
 import { HeroSection } from './hero-section';
 import { FeatureCard } from './feature-card';
 
 export function LandingPage() {
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
+  const colors = useThemeColors();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <HeroSection isWide={isWide} />
@@ -43,7 +45,6 @@ export function LandingPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   scrollContent: {
     flexGrow: 1,

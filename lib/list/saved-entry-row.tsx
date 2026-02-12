@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
+import { useThemeColors } from '../theme/colors';
 
 export interface SavedEntryRowData {
   id: number;
@@ -15,6 +16,7 @@ export interface SavedEntryRowData {
 
 export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
   const config = useContext(TMDBConfigurationContext);
+  const colors = useThemeColors();
   const router = useRouter();
 
   // Use larger poster size
@@ -28,7 +30,7 @@ export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
 
   return (
     <Pressable
-      style={[styles.container, entry.isWatched && styles.containerWatched]}
+      style={[styles.container, { backgroundColor: colors.surface }, entry.isWatched && styles.containerWatched]}
       onPress={() => router.push(`/(app)/list/${entry.id}`)}
     >
       {posterUrl && (
@@ -54,7 +56,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: '#f4f4f5',
   },
   containerWatched: {
     opacity: 0.7,

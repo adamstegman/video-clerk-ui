@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { EditEntryTag } from './edit-entry-page';
+import { useThemeColors } from '../theme/colors';
 
 interface TagsSectionProps {
   selectedTags: EditEntryTag[];
@@ -19,6 +20,7 @@ export function TagsSection({
   onTagQueryChange,
   onCreateTag,
 }: TagsSectionProps) {
+  const colors = useThemeColors();
   const exactMatch = availableTags.find((tag) => tag.name.toLowerCase() === tagQuery.toLowerCase());
   const showCreateButton = tagQuery.trim().length > 0 && !exactMatch;
 
@@ -42,7 +44,7 @@ export function TagsSection({
       )}
 
       <TextInput
-        style={styles.tagInput}
+        style={[styles.tagInput, { backgroundColor: colors.input }]}
         placeholder="Search or create tags..."
         value={tagQuery}
         onChangeText={onTagQueryChange}
@@ -51,7 +53,7 @@ export function TagsSection({
       />
 
       {showCreateButton && (
-        <Pressable style={styles.createTagButton} onPress={() => onCreateTag(tagQuery)}>
+        <Pressable style={[styles.createTagButton, { backgroundColor: colors.primaryLight }]} onPress={() => onCreateTag(tagQuery)}>
           <Text style={styles.createTagButtonText}>Create "{tagQuery}"</Text>
         </Pressable>
       )}
@@ -63,7 +65,11 @@ export function TagsSection({
             return (
               <Pressable
                 key={tag.id}
-                style={[styles.availableTag, isSelected && styles.availableTagSelected]}
+                style={[
+                  styles.availableTag,
+                  { backgroundColor: colors.input, borderColor: colors.separator },
+                  isSelected && [styles.availableTagSelected, { backgroundColor: colors.primaryLight, borderColor: colors.primary }],
+                ]}
                 onPress={() => onToggleTag(tag)}
               >
                 <Text
@@ -115,7 +121,6 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   tagInput: {
-    backgroundColor: '#f3f4f6',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -124,7 +129,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   createTagButton: {
-    backgroundColor: '#e0e7ff',
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -145,13 +149,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginRight: 8,
     marginBottom: 8,
-    backgroundColor: '#f3f4f6',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
   },
   availableTagSelected: {
-    backgroundColor: '#e0e7ff',
-    borderColor: '#4f46e5',
   },
   availableTagText: {
     fontSize: 14,

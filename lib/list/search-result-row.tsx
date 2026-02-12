@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import type { TMDBConfigurationState } from '../tmdb-api/tmdb-configuration';
+import { useThemeColors } from '../theme/colors';
 import type { SearchResultItem } from './add-to-list-page';
 
 interface SearchResultRowProps {
@@ -12,6 +13,7 @@ interface SearchResultRowProps {
 }
 
 export function SearchResultRow({ item, config, isSaved, isSaving, onAdd }: SearchResultRowProps) {
+  const colors = useThemeColors();
   const posterSize = config.images.poster_sizes[1] || config.images.poster_sizes[0];
   const posterUrl =
     item.poster_path && config.images.secure_base_url
@@ -21,8 +23,8 @@ export function SearchResultRow({ item, config, isSaved, isSaving, onAdd }: Sear
   const isDisabled = isSaved || isSaving;
 
   return (
-    <View style={styles.resultItem}>
-      {posterUrl && <Image source={{ uri: posterUrl }} style={styles.poster} contentFit="cover" />}
+    <View style={[styles.resultItem, { backgroundColor: colors.surface }]}>
+      {posterUrl && <Image source={{ uri: posterUrl }} style={[styles.poster, { backgroundColor: colors.separator }]} contentFit="cover" />}
       <View style={styles.resultContent}>
         <Text style={styles.resultTitle}>{item.displayName}</Text>
         {item.releaseYear ? <Text style={styles.resultSubtitle}>{item.releaseYear}</Text> : null}
@@ -55,7 +57,6 @@ const styles = StyleSheet.create({
   resultItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#f4f4f5',
     borderRadius: 12,
     padding: 12,
   },
@@ -64,7 +65,6 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 8,
     marginRight: 12,
-    backgroundColor: '#e5e7eb',
   },
   resultContent: {
     flex: 1,

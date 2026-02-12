@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import type { ReactNode } from 'react';
+import { useThemeColors } from '../theme/colors';
 
 interface FeatureCardProps {
   icon: ReactNode;
@@ -9,8 +10,10 @@ interface FeatureCardProps {
 }
 
 export function FeatureCard({ icon, iconBgColor, title, description }: FeatureCardProps) {
+  const colors = useThemeColors();
+
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colors.featureCard, borderColor: colors.separator }]}>
       <View style={[styles.cardIconContainer, { backgroundColor: iconBgColor }]}>
         {icon}
       </View>
@@ -23,11 +26,9 @@ export function FeatureCard({ icon, iconBgColor, title, description }: FeatureCa
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
     borderRadius: 12,
     padding: 24,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,

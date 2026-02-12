@@ -56,7 +56,7 @@ export function SwipeableEntryRow({ entry, onDelete }: SwipeableEntryRowProps) {
 
 const styles = StyleSheet.create({
   rowContainer: {
-    backgroundColor: '#f4f4f5',
+    // backgroundColor comes from SavedEntryRow via theme
   },
   rightActionContainer: {
     justifyContent: 'center',

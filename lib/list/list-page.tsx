@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, FlatList, RefreshControl, ActivityIndicator, Pr
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useThemeColors } from '../theme/colors';
 import { SwipeableEntryRow } from './swipeable-entry-row';
 import type { SavedEntryRowData } from './saved-entry-row';
 
@@ -16,6 +17,7 @@ interface ListPageProps {
 
 export function ListPage({ entries, loading, error, refreshing, onRefresh, onDelete }: ListPageProps) {
   const router = useRouter();
+  const colors = useThemeColors();
   const watchedStartIndex = entries.findIndex((entry) => entry.isWatched);
   const showWatchedHeader = watchedStartIndex > 0;
 
@@ -37,8 +39,8 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
 
   if (loading && !error && entries.length === 0) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4f46e5" />
+      <View style={[styles.centerContainer, { backgroundColor: colors.surface }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
@@ -46,7 +48,7 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.surface }]}>
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
@@ -54,9 +56,9 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
 
   if (!loading && !error && entries.length === 0) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.surface }]}>
         <Text style={styles.emptyText}>Your list is empty.</Text>
-        <Pressable style={styles.addButton} onPress={() => router.push('/(app)/list/add')}>
+        <Pressable style={[styles.addButton, { backgroundColor: colors.primary }]} onPress={() => router.push('/(app)/list/add')}>
           <Text style={styles.addButtonText}>Add Something</Text>
         </Pressable>
       </View>
@@ -64,18 +66,18 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
   }
 
   return (
-    <GestureHandlerRootView style={styles.container}>
+    <GestureHandlerRootView style={[styles.container, { backgroundColor: colors.surface }]}>
       <FlatList
         data={entries}
         renderItem={renderItem}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.separator }]} />}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#4f46e5']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
         }
       />
-      <Pressable style={styles.fab} onPress={() => router.push('/(app)/list/add')}>
+      <Pressable style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => router.push('/(app)/list/add')}>
         <Ionicons name="add" color="#fff" size={24} />
       </Pressable>
     </GestureHandlerRootView>
@@ -85,21 +87,18 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
-    backgroundColor: '#f4f4f5',
   },
   listContent: {
     paddingBottom: 24,
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#e5e7eb',
     marginLeft: 76,
   },
   sectionHeader: {
@@ -128,7 +127,6 @@ const styles = StyleSheet.create({
     color: '#ef4444',
   },
   addButton: {
-    backgroundColor: '#4f46e5',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -145,7 +143,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#4f46e5',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',

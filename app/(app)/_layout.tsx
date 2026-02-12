@@ -6,9 +6,11 @@ import { supabase } from '../../lib/supabase/client';
 import { TMDBAPIProvider } from '../../lib/tmdb-api/tmdb-api-provider';
 import { TMDBConfiguration } from '../../lib/tmdb-api/tmdb-configuration';
 import { TMDBGenres } from '../../lib/tmdb-api/tmdb-genres';
+import { useThemeColors } from '../../lib/theme/colors';
 import type { User } from '@supabase/supabase-js';
 
 export default function AppLayout() {
+  const colors = useThemeColors();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,8 +39,8 @@ export default function AppLayout() {
 
   if (loading) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#fff" />
+      <View style={[styles.loading, { backgroundColor: colors.page }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -56,7 +58,7 @@ export default function AppLayout() {
             headerShown: true,
             headerTitleAlign: 'center',
             headerStyle: {
-              backgroundColor: '#6366f1',
+              backgroundColor: colors.primaryHeader,
             },
             headerTintColor: '#fff',
             headerTitleStyle: {
@@ -64,9 +66,9 @@ export default function AppLayout() {
               fontWeight: '700',
             },
             sceneStyle: {
-              backgroundColor: '#ffffff',
+              backgroundColor: colors.page,
             },
-            tabBarActiveTintColor: '#4f46e5',
+            tabBarActiveTintColor: colors.primary,
             tabBarInactiveTintColor: '#9ca3af',
             tabBarLabelPosition: 'below-icon',
             tabBarLabelStyle: {
@@ -75,11 +77,11 @@ export default function AppLayout() {
             },
             tabBarStyle: {
               borderTopWidth: 1,
-              borderTopColor: '#e5e7eb',
+              borderTopColor: colors.separator,
               height: 65,
               paddingTop: 4,
               paddingBottom: 4,
-              backgroundColor: '#f4f4f5',
+              backgroundColor: colors.tabBar,
             },
           }}
         >
@@ -147,6 +149,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
   },
 });

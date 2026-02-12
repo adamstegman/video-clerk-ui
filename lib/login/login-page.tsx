@@ -2,6 +2,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColors } from '../theme/colors';
 
 interface LoginPageProps {
   email: string;
@@ -22,17 +23,19 @@ export function LoginPage({
   onPasswordChange,
   onSubmit,
 }: LoginPageProps) {
+  const colors = useThemeColors();
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]}>
       <Link href="/" asChild>
         <Pressable style={styles.logo}>
-          <Ionicons name="tv-outline" size={22} color="#6366f1" />
+          <Ionicons name="tv-outline" size={22} color={colors.primaryHeader} />
           <Text style={styles.logoText}>Video Clerk</Text>
         </Pressable>
       </Link>
 
       <View style={styles.formWrapper}>
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.authCard, borderColor: colors.separator }]}>
           <Text style={styles.title}>Login</Text>
           <Text style={styles.description}>
             Enter your email below to login to your account
@@ -41,7 +44,7 @@ export function LoginPage({
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Email</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.authInput }]}
               placeholder="me@example.com"
               placeholderTextColor="#9ca3af"
               value={email}
@@ -55,7 +58,7 @@ export function LoginPage({
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Password</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.authInput }]}
               placeholder=""
               value={password}
               onChangeText={onPasswordChange}
@@ -65,14 +68,14 @@ export function LoginPage({
           </View>
 
           {error && (
-            <View style={styles.errorBox}>
+            <View style={[styles.errorBox, { backgroundColor: colors.dangerSubtle }]}>
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
 
           <Pressable
             testID="login-button"
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[styles.button, { backgroundColor: colors.primaryHeader }, loading && { backgroundColor: colors.primaryDisabled }]}
             onPress={onSubmit}
             disabled={loading}
           >
@@ -91,7 +94,6 @@ export function LoginPage({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   logo: {
     position: 'absolute',
@@ -116,10 +118,8 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 384,
-    backgroundColor: '#f4f4f5',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     padding: 24,
   },
   title: {
@@ -149,7 +149,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#d1d5db',
-    backgroundColor: '#f4f4f5',
     fontSize: 16,
     color: '#1f2937',
   },
@@ -157,7 +156,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 12,
     borderRadius: 6,
-    backgroundColor: '#fef2f2',
     borderWidth: 1,
     borderColor: '#fecaca',
   },
@@ -166,14 +164,10 @@ const styles = StyleSheet.create({
     color: '#dc2626',
   },
   button: {
-    backgroundColor: '#6366f1',
     paddingVertical: 12,
     borderRadius: 6,
     alignItems: 'center',
     width: '100%',
-  },
-  buttonDisabled: {
-    backgroundColor: '#a5b4fc',
   },
   buttonText: {
     color: '#fff',

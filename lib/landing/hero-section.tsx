@@ -1,12 +1,15 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Link } from 'expo-router';
 import { TvMinimalPlayIcon } from '../icons/tv-minimal-play-icon';
+import { useThemeColors } from '../theme/colors';
 
 interface HeroSectionProps {
   isWide: boolean;
 }
 
 export function HeroSection({ isWide }: HeroSectionProps) {
+  const colors = useThemeColors();
+
   return (
     <View style={[styles.hero, isWide && styles.heroWide]}>
       <TvMinimalPlayIcon size={isWide ? 192 : 128} />
@@ -19,7 +22,7 @@ export function HeroSection({ isWide }: HeroSectionProps) {
         </Text>
         <View style={styles.buttonContainer}>
           <Link href="/login" asChild>
-            <Pressable style={styles.button}>
+            <Pressable style={[styles.button, { backgroundColor: colors.primaryHeader }]}>
               <Text style={styles.buttonText}>Log In</Text>
             </Pressable>
           </Link>
@@ -70,7 +73,6 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   button: {
-    backgroundColor: '#6366f1',
     paddingVertical: 14,
     paddingHorizontal: 40,
     borderRadius: 10,

@@ -3,12 +3,14 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import type { EditEntryData } from './edit-entry-page';
+import { useThemeColors } from '../theme/colors';
 
 interface EntryHeaderProps {
   entry: EditEntryData;
 }
 
 export function EntryHeader({ entry }: EntryHeaderProps) {
+  const colors = useThemeColors();
   const config = useContext(TMDBConfigurationContext);
 
   const posterSize = config.images.poster_sizes[2] || config.images.poster_sizes[0];
@@ -20,7 +22,7 @@ export function EntryHeader({ entry }: EntryHeaderProps) {
   return (
     <View style={styles.header}>
       {posterUrl && (
-        <Image source={{ uri: posterUrl }} style={styles.poster} contentFit="cover" />
+        <Image source={{ uri: posterUrl }} style={[styles.poster, { backgroundColor: colors.separator }]} contentFit="cover" />
       )}
       <View style={styles.headerText}>
         <Text style={styles.title}>{entry.title}</Text>
@@ -41,7 +43,7 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 8,
     marginRight: 16,
-    backgroundColor: '#e5e7eb',
+    // backgroundColor set inline via colors.separator
   },
   headerText: {
     flex: 1,

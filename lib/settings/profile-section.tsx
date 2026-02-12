@@ -1,12 +1,15 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { useThemeColors } from '../theme/colors';
 
 interface ProfileSectionProps {
   email: string | undefined;
 }
 
 export function ProfileSection({ email }: ProfileSectionProps) {
+  const colors = useThemeColors();
+
   return (
-    <View style={styles.profileSection}>
+    <View style={[styles.profileSection, { backgroundColor: colors.surface, borderBottomColor: colors.separator }]}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>
           {email?.charAt(0).toUpperCase() || '?'}
@@ -23,9 +26,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#f4f4f5',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
   },
   avatar: {
     width: 80,

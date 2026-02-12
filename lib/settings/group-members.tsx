@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import type { GroupMember } from './group-section';
+import { useThemeColors } from '../theme/colors';
 
 interface GroupMembersProps {
   currentUserId: string | undefined;
@@ -8,6 +9,8 @@ interface GroupMembersProps {
 }
 
 export function GroupMembers({ currentUserId, members, loading }: GroupMembersProps) {
+  const colors = useThemeColors();
+
   return (
     <View style={styles.tableRow}>
       <Text style={styles.tableLabel}>Members</Text>
@@ -18,7 +21,7 @@ export function GroupMembers({ currentUserId, members, loading }: GroupMembersPr
           members.map((member) => (
             <View key={member.user_id} style={styles.emailRow}>
               {member.user_id === currentUserId && (
-                <Text style={styles.youBadge}>You</Text>
+                <Text style={[styles.youBadge, { backgroundColor: colors.primarySubtle }]}>You</Text>
               )}
               <Text style={styles.tableText}>{member.email}</Text>
             </View>
@@ -67,7 +70,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#6366f1',
-    backgroundColor: '#eef2ff',
+    // backgroundColor set inline via colors.primarySubtle
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,

@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { useContext, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
+import { useThemeColors } from '../theme/colors';
 import type { WatchCardEntry } from './watch-card';
 
 interface WatchWinnerViewProps {
@@ -20,6 +21,7 @@ export function WatchWinnerView({
   onStartOver,
 }: WatchWinnerViewProps) {
   const config = useContext(TMDBConfigurationContext);
+  const colors = useThemeColors();
   const [error, setError] = useState<string | null>(null);
 
   const handleMarkWatched = async () => {
@@ -45,16 +47,16 @@ export function WatchWinnerView({
       : null;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Hero Section */}
         <View style={styles.hero}>
           {backdropUrl ? (
             <Image source={{ uri: backdropUrl }} style={styles.backdrop} contentFit="cover" />
           ) : (
-            <View style={styles.backdropPlaceholder} />
+            <View style={[styles.backdropPlaceholder, { backgroundColor: colors.placeholder }]} />
           )}
-          <View style={styles.heroOverlay} />
+          <View style={[styles.heroOverlay, { backgroundColor: colors.overlay }]} />
           <View style={styles.heroContent}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>🎉 Winner!</Text>
@@ -63,10 +65,10 @@ export function WatchWinnerView({
         </View>
 
         {/* Details Section */}
-        <View style={styles.details}>
+        <View style={[styles.details, { backgroundColor: colors.surface }]}>
           <View style={styles.detailsHeader}>
             {posterUrl && (
-              <Image source={{ uri: posterUrl }} style={styles.poster} contentFit="cover" />
+              <Image source={{ uri: posterUrl }} style={[styles.poster, { backgroundColor: colors.separator }]} contentFit="cover" />
             )}
             <View style={styles.detailsText}>
               <Text style={styles.title}>{winner.title}</Text>
@@ -91,16 +93,16 @@ export function WatchWinnerView({
         </View>
 
         {error && (
-          <View style={styles.errorContainer}>
+          <View style={[styles.errorContainer, { backgroundColor: colors.dangerSubtle }]}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
       </ScrollView>
 
       {/* Footer Actions */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
         <Pressable
-          style={[styles.secondaryButton, markingWatched && styles.buttonDisabled]}
+          style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }, markingWatched && styles.buttonDisabled]}
           onPress={onStartOver}
           disabled={markingWatched}
         >
@@ -108,7 +110,7 @@ export function WatchWinnerView({
           <Text style={styles.secondaryButtonText}>Start Over</Text>
         </Pressable>
         <Pressable
-          style={[styles.primaryButton, markingWatched && styles.buttonDisabled]}
+          style={[styles.primaryButton, { backgroundColor: colors.primary }, markingWatched && styles.buttonDisabled]}
           onPress={handleMarkWatched}
           disabled={markingWatched}
         >
@@ -129,7 +131,6 @@ export function WatchWinnerView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   scrollContent: {
     flexGrow: 1,
@@ -145,11 +146,9 @@ const styles = StyleSheet.create({
   backdropPlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#52525b',
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   heroContent: {
     ...StyleSheet.absoluteFillObject,
@@ -168,7 +167,6 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   details: {
-    backgroundColor: '#f4f4f5',
     marginTop: -20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -183,7 +181,6 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 8,
     marginRight: 16,
-    backgroundColor: '#e5e7eb',
   },
   detailsText: {
     flex: 1,
@@ -225,7 +222,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     marginTop: 16,
     padding: 16,
-    backgroundColor: '#fef2f2',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#fecaca',
@@ -241,12 +237,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    backgroundColor: '#f4f4f5',
   },
   primaryButton: {
     flex: 1,
-    backgroundColor: '#4f46e5',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -261,12 +254,10 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,

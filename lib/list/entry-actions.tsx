@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { useThemeColors } from '../theme/colors';
 
 interface EntryActionsProps {
   saving: boolean;
@@ -8,6 +9,7 @@ interface EntryActionsProps {
 }
 
 export function EntryActions({ saving, deleting, onSave, onDelete }: EntryActionsProps) {
+  const colors = useThemeColors();
   const isDisabled = saving || deleting;
 
   return (
@@ -25,7 +27,7 @@ export function EntryActions({ saving, deleting, onSave, onDelete }: EntryAction
       </Pressable>
 
       <Pressable
-        style={[styles.deleteButton, isDisabled && styles.buttonDisabled]}
+        style={[styles.deleteButton, { backgroundColor: colors.secondaryButton }, isDisabled && styles.buttonDisabled]}
         onPress={onDelete}
         disabled={isDisabled}
       >
@@ -56,7 +58,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   deleteButton: {
-    backgroundColor: '#fff',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',

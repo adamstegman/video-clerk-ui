@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { useThemeColors } from '../theme/colors';
 import { SwipeableCard } from './swipeable-card';
 import { WatchCard, type WatchCardEntry } from './watch-card';
 import { WatchPickerView } from './watch-picker-view';
@@ -79,10 +80,12 @@ export function WatchPage({
   onMarkWatched,
   onStartOver,
 }: WatchPageProps) {
+  const colors = useThemeColors();
+
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4f46e5" />
+      <View style={[styles.centerContainer, { backgroundColor: colors.page }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
@@ -90,7 +93,7 @@ export function WatchPage({
 
   if (error) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.page }]}>
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
@@ -99,7 +102,7 @@ export function WatchPage({
   // Empty state
   if (!loading && !error && allEntries.length === 0) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.page }]}>
         <Text style={styles.emptyText}>No unwatched entries.</Text>
         <Text style={styles.subtitle}>Add some movies or shows to your list!</Text>
       </View>
@@ -155,10 +158,10 @@ export function WatchPage({
   // No matches state
   if (deck.length === 0 && liked.length === 0) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.page }]}>
         <Text style={styles.emptyText}>No entries match your filters.</Text>
         <Text style={styles.subtitle}>Try different options.</Text>
-        <Pressable style={styles.changeFiltersButton} onPress={onStartOver}>
+        <Pressable style={[styles.changeFiltersButton, { backgroundColor: colors.primary }]} onPress={onStartOver}>
           <Text style={styles.changeFiltersButtonText}>Change Filters</Text>
         </Pressable>
       </View>
@@ -175,7 +178,7 @@ export function WatchPage({
   const visibleDeck = deck.slice(0, 4);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.page }]}>
       <View style={styles.cardContainer}>
         {/* Render bottom-to-top so the top card is last (on top in z-order) */}
         {[...visibleDeck].reverse().map((entry, renderIndex) => {
@@ -210,14 +213,12 @@ export function WatchPage({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
-    backgroundColor: '#ffffff',
   },
   cardContainer: {
     flex: 1,
@@ -260,7 +261,6 @@ const styles = StyleSheet.create({
   },
   changeFiltersButton: {
     marginTop: 24,
-    backgroundColor: '#4f46e5',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,

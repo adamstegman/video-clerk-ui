@@ -1,10 +1,13 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColors } from '../theme/colors';
 
 export function InviteSuccess() {
+  const colors = useThemeColors();
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]}>
       <View style={styles.centerContainer}>
         <View style={styles.successIcon}>
           <Ionicons name="checkmark" size={48} color="#fff" />
@@ -20,7 +23,6 @@ export function InviteSuccess() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   centerContainer: {
     flex: 1,

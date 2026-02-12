@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
+import { useThemeColors } from '../theme/colors';
 
 export interface WatchCardEntry {
   id: number;
@@ -24,6 +25,7 @@ export function WatchCard({ entry }: WatchCardProps) {
   const cardWidth = Math.min(screenWidth - 48, 600);
   const cardHeight = screenHeight * 0.7;
   const config = useContext(TMDBConfigurationContext);
+  const colors = useThemeColors();
 
   const backdropSizeIndex = config.images.backdrop_sizes.length > 1 ? 1 : 0;
   const backdropSize =
@@ -44,7 +46,7 @@ export function WatchCard({ entry }: WatchCardProps) {
   const tagLabel = entry.tags && entry.tags.length > 0 ? ` | ${entry.tags.join(', ')}` : '';
 
   return (
-    <View style={[styles.card, { width: cardWidth, height: cardHeight }]}>
+    <View style={[styles.card, { width: cardWidth, height: cardHeight, backgroundColor: colors.surface, borderColor: colors.separator }]}>
       {/* Backdrop area - 62% of card height */}
       <View style={styles.backdropContainer}>
         {imageUrl ? (
@@ -55,13 +57,13 @@ export function WatchCard({ entry }: WatchCardProps) {
             transition={200}
           />
         ) : (
-          <View style={styles.backdropPlaceholder} />
+          <View style={[styles.backdropPlaceholder, { backgroundColor: colors.placeholder }]} />
         )}
         <View style={styles.gradient} />
       </View>
 
-      {/* Text area - white background, remaining height */}
-      <View style={styles.textContainer}>
+      {/* Text area */}
+      <View style={[styles.textContainer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={2}>
             {entry.title}
@@ -87,7 +89,6 @@ export function WatchCard({ entry }: WatchCardProps) {
 const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
-    backgroundColor: '#f4f4f5',
     overflow: 'hidden',
     elevation: 4,
     shadowColor: '#000',
@@ -95,7 +96,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     borderWidth: 1,
-    borderColor: '#e4e4e7',
   },
   backdropContainer: {
     width: '100%',
@@ -109,7 +109,6 @@ const styles = StyleSheet.create({
   backdropPlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#52525b',
   },
   gradient: {
     ...StyleSheet.absoluteFillObject,
@@ -117,9 +116,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
     borderTopWidth: 1,
-    borderTopColor: '#e4e4e7',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 24,
