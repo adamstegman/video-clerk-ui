@@ -44,7 +44,6 @@
       "package": "com.adamstegman.video_clerk"
     },
     "web": {
-      "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [

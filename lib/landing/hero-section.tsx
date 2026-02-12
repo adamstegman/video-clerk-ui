@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Link } from 'expo-router';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { TvMinimalPlayIcon } from '../icons/tv-minimal-play-icon';
 
 interface HeroSectionProps {
   isWide: boolean;
@@ -9,11 +9,7 @@ interface HeroSectionProps {
 export function HeroSection({ isWide }: HeroSectionProps) {
   return (
     <View style={[styles.hero, isWide && styles.heroWide]}>
-      <Ionicons
-        name="tv-outline"
-        size={isWide ? 192 : 128}
-        color="#6366f1"
-      />
+      <TvMinimalPlayIcon size={isWide ? 192 : 128} />
       <View style={[styles.heroText, isWide && styles.heroTextWide]}>
         <Text style={[styles.title, isWide && styles.titleWide]}>
           Video Clerk
