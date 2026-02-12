@@ -68,7 +68,8 @@ export function TagsSection({
                 style={[
                   styles.availableTag,
                   { backgroundColor: colors.input, borderColor: colors.separator },
-                  isSelected && [styles.availableTagSelected, { backgroundColor: colors.primaryLight, borderColor: colors.primary }],
+                  isSelected && styles.availableTagSelected,
+                  isSelected && { backgroundColor: colors.primaryLight, borderColor: colors.primary },
                 ]}
                 onPress={() => onToggleTag(tag)}
               >

@@ -45,7 +45,7 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
           return (
             <Pressable
               key={entry.id}
-              style={[styles.card, { backgroundColor: colors.surface }, isSelected && [styles.cardSelected, { borderColor: colors.primary }]]}
+              style={[styles.card, { backgroundColor: colors.surface }, isSelected && styles.cardSelected, isSelected && { borderColor: colors.primary }]}
               onPress={() => setSelectedId(entry.id)}
             >
               <View style={styles.cardContent}>

@@ -14,10 +14,10 @@ export function HeroSection({ isWide }: HeroSectionProps) {
     <View style={[styles.hero, isWide && styles.heroWide]}>
       <TvMinimalPlayIcon size={isWide ? 192 : 128} />
       <View style={[styles.heroText, isWide && styles.heroTextWide]}>
-        <Text style={[styles.title, { color: colors.textPrimary }, isWide && styles.titleWide]}>
+        <Text style={[styles.title, isWide && styles.titleWide, { color: colors.textPrimary }]}>
           Video Clerk
         </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }, isWide && styles.subtitleWide]}>
+        <Text style={[styles.subtitle, isWide && styles.subtitleWide, { color: colors.textSecondary }]}>
           Solve the "what do we watch?" conundrum
         </Text>
         <View style={styles.buttonContainer}>
