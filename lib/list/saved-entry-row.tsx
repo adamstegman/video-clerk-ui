@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
   },
   containerWatched: {
     opacity: 0.7,

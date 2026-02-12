@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   groupSection: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: '#e5e7eb',

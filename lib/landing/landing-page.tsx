@@ -43,7 +43,7 @@ export function LandingPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   },
   scrollContent: {
     flexGrow: 1,

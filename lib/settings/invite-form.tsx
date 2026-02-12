@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   inviteInput: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 8,
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     borderWidth: 1,
     borderColor: '#4f46e5',
     paddingVertical: 10,

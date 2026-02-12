@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Tabs, router } from 'expo-router';
-import { ActivityIndicator, View, StyleSheet, Pressable, useColorScheme } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Pressable } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { supabase } from '../../lib/supabase/client';
 import { TMDBAPIProvider } from '../../lib/tmdb-api/tmdb-api-provider';
@@ -9,8 +9,6 @@ import { TMDBGenres } from '../../lib/tmdb-api/tmdb-genres';
 import type { User } from '@supabase/supabase-js';
 
 export default function AppLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +37,7 @@ export default function AppLayout() {
 
   if (loading) {
     return (
-      <View style={[styles.loading, isDark && styles.loadingDark]}>
+      <View style={styles.loading}>
         <ActivityIndicator size="large" color="#fff" />
       </View>
     );
@@ -66,9 +64,9 @@ export default function AppLayout() {
               fontWeight: '700',
             },
             sceneStyle: {
-              backgroundColor: isDark ? '#000000' : '#f4f4f5',
+              backgroundColor: '#ffffff',
             },
-            tabBarActiveTintColor: isDark ? '#818cf8' : '#4f46e5',
+            tabBarActiveTintColor: '#4f46e5',
             tabBarInactiveTintColor: '#9ca3af',
             tabBarLabelPosition: 'below-icon',
             tabBarLabelStyle: {
@@ -77,11 +75,11 @@ export default function AppLayout() {
             },
             tabBarStyle: {
               borderTopWidth: 1,
-              borderTopColor: isDark ? '#38383a' : '#e5e7eb',
+              borderTopColor: '#e5e7eb',
               height: 65,
               paddingTop: 4,
               paddingBottom: 4,
-              backgroundColor: isDark ? '#1c1c1e' : '#fff',
+              backgroundColor: '#f4f4f5',
             },
           }}
         >
@@ -149,9 +147,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f4f4f5',
-  },
-  loadingDark: {
-    backgroundColor: '#000000',
+    backgroundColor: '#ffffff',
   },
 });

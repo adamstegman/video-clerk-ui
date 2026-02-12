@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   resultItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f4f4f5',
     borderRadius: 12,
     padding: 12,
   },

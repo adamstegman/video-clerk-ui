@@ -184,7 +184,7 @@ function TagChip({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: '#ffffff',
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e4e4e7',
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
   },
   timeOptionSelected: {
     borderColor: '#4f46e5',
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
   },
   startButton: {
     flexDirection: 'row',

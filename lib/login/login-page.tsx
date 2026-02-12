@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 384,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#d1d5db',
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     fontSize: 16,
     color: '#1f2937',
   },

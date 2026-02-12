@@ -85,14 +85,14 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
   },
   listContent: {
     paddingBottom: 24,

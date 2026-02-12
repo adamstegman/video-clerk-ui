@@ -23,7 +23,7 @@ export function FeatureCard({ icon, iconBgColor, title, description }: FeatureCa
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     borderRadius: 12,
     padding: 24,
     borderWidth: 1,

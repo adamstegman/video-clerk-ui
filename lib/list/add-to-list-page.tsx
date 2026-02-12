@@ -95,7 +95,7 @@ export function AddToListPage({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: '#ffffff',
   },
   searchContainer: {
     paddingHorizontal: 16,

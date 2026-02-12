@@ -87,7 +87,7 @@ export function WatchCard({ entry }: WatchCardProps) {
 const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     overflow: 'hidden',
     elevation: 4,
     shadowColor: '#000',
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     borderTopWidth: 1,
     borderTopColor: '#e4e4e7',
     paddingHorizontal: 20,

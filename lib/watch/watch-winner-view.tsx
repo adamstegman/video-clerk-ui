@@ -129,7 +129,7 @@ export function WatchWinnerView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: '#ffffff',
   },
   scrollContent: {
     flexGrow: 1,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   details: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     marginTop: -20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
   },
   primaryButton: {
     flex: 1,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f5',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
