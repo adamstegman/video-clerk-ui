@@ -1,42 +1,37 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Redirecting…</title>
-    <meta name="robots" content="noindex" />
-  </head>
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Video Clerk</title>
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  <link rel="icon" href="/staging/pr-27/favicon.ico" /></head>
+
   <body>
-    <script>
-      (function () {
-        var path = window.location.pathname || "/";
-        // If a hashed asset is missing, don't redirect-loop the page. Just serve the 404.
-        // (The real fix is ensuring `.nojekyll` is deployed so `_index-...js` isn't excluded.)
-        var isAsset =
-          path.indexOf("/assets/") !== -1 ||
-          /\.(js|css|map|png|jpg|jpeg|gif|svg|webp|ico|txt|xml|json|webmanifest)$/i.test(path);
-        if (isAsset) return;
-
-        // Match both `/staging/pr-9` and `/staging/pr-9/...`
-        var stagingMatch = path.match(/^\/staging\/pr-\d+(?=\/|$)/);
-        var base = stagingMatch ? stagingMatch[0] + "/" : "/";
-
-        // Store the path relative to the base URL so the app can navigate
-        // using Expo Router without needing to know the deployment prefix.
-        var baseWithoutTrailingSlash = base.slice(0, -1);
-        var relativePath = path.slice(baseWithoutTrailingSlash.length) || "/";
-        try {
-          window.sessionStorage.setItem(
-            "__video_clerk_redirect__",
-            relativePath + window.location.search + window.location.hash
-          );
-        } catch (e) {
-          // ignore
-        }
-
-        window.location.replace(base);
-      })();
-    </script>
-  </body>
+    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <!-- The root element for your Expo app. -->
+    <div id="root"></div>
+  <script src="/staging/pr-27/_expo/static/js/web/entry-e797e0ae83f15f3877cf2099de76fdd6.js" defer></script>
+</body>
 </html>
-
