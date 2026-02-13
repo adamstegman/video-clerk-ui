@@ -21,10 +21,14 @@
         var stagingMatch = path.match(/^\/staging\/pr-\d+(?=\/|$)/);
         var base = stagingMatch ? stagingMatch[0] + "/" : "/";
 
+        // Store the path relative to the base URL so the app can navigate
+        // using Expo Router without needing to know the deployment prefix.
+        var baseWithoutTrailingSlash = base.slice(0, -1);
+        var relativePath = path.slice(baseWithoutTrailingSlash.length) || "/";
         try {
           window.sessionStorage.setItem(
             "__video_clerk_redirect__",
-            window.location.pathname + window.location.search + window.location.hash
+            relativePath + window.location.search + window.location.hash
           );
         } catch (e) {
           // ignore
