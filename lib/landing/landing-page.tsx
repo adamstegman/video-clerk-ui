@@ -18,20 +18,20 @@ export function LandingPage() {
 
           <View style={[styles.cardsContainer, isWide && styles.cardsContainerWide]}>
             <FeatureCard
-              icon={<Ionicons name="bulb-outline" size={isWide ? 32 : 24} color="#a16207" />}
-              iconBgColor="#fef08a"
+              icon={<Ionicons name="bulb-outline" size={isWide ? 32 : 24} color={colors.iconAmber} />}
+              iconBgColor={colors.iconAmberBg}
               title='Solve the "what do we watch?" conundrum'
               description="Never waste time deciding what to watch again. Video Clerk helps you make quick, satisfying choices."
             />
             <FeatureCard
-              icon={<Ionicons name="list" size={isWide ? 32 : 24} color="#1d4ed8" />}
-              iconBgColor="#93c5fd"
+              icon={<Ionicons name="list" size={isWide ? 32 : 24} color={colors.iconBlue} />}
+              iconBgColor={colors.iconBlueBg}
               title="Add things to watch to your list when you hear about them"
               description="Build your watchlist over time. When someone recommends a show or movie, add it instantly—no decision needed."
             />
             <FeatureCard
-              icon={<Ionicons name="filter" size={isWide ? 32 : 24} color="#7e22ce" />}
-              iconBgColor="#c084fc"
+              icon={<Ionicons name="filter" size={isWide ? 32 : 24} color={colors.iconPurple} />}
+              iconBgColor={colors.iconPurpleBg}
               title="Filter that list based on your mood to find a winner"
               description="When it's time to watch, filter your list by mood, genre, or length. Find the perfect match for right now."
             />

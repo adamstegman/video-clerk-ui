@@ -25,6 +25,12 @@ const lightColors = {
   authInput: '#ffffff',
   authSecondary: '#e5e7eb',
   featureCard: '#ffffff',
+  iconAmberBg: '#fef08a',
+  iconBlueBg: '#93c5fd',
+  iconPurpleBg: '#c084fc',
+  iconAmber: '#a16207',
+  iconBlue: '#1d4ed8',
+  iconPurple: '#7e22ce',
   disabled: '#e4e4e7',
 
   // Text
@@ -77,6 +83,12 @@ const darkColors: ThemeColors = {
   authInput: '#3f3f46',
   authSecondary: '#3f3f46',
   featureCard: '#27272a',
+  iconAmberBg: 'rgba(161,98,7,0.2)',
+  iconBlueBg: 'rgba(29,78,216,0.2)',
+  iconPurpleBg: 'rgba(126,34,206,0.2)',
+  iconAmber: '#facc15',
+  iconBlue: '#93c5fd',
+  iconPurple: '#c084fc',
   disabled: '#3f3f46',
 
   // Text
