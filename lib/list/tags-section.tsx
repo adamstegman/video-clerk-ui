@@ -69,7 +69,7 @@ export function TagsSection({
                   styles.availableTag,
                   { backgroundColor: colors.input, borderColor: colors.separator },
                   isSelected && styles.availableTagSelected,
-                  isSelected && { backgroundColor: colors.primaryLight, borderColor: colors.primary },
+                  isSelected && { backgroundColor: colors.primary, borderColor: colors.primary },
                 ]}
                 onPress={() => onToggleTag(tag)}
               >
@@ -77,7 +77,7 @@ export function TagsSection({
                   style={[
                     styles.availableTagText,
                     { color: colors.textSecondary },
-                    isSelected && { color: colors.textBrand, fontWeight: '500' },
+                    isSelected && { color: colors.textOnColor, fontWeight: '500' },
                   ]}
                 >
                   {tag.name}
