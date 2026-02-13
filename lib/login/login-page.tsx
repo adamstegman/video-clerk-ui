@@ -44,7 +44,7 @@ export function LoginPage({
           <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: colors.textLabel }]}>Email</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary }]}
+              style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary, outlineColor: colors.primary }]}
               placeholder="me@example.com"
               placeholderTextColor={colors.textTertiary}
               value={email}
@@ -58,7 +58,7 @@ export function LoginPage({
           <View style={styles.fieldGroup}>
             <Text style={[styles.label, { color: colors.textLabel }]}>Password</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary }]}
+              style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary, outlineColor: colors.primary }]}
               placeholder=""
               value={password}
               onChangeText={onPasswordChange}

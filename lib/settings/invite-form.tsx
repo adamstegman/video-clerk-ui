@@ -32,7 +32,7 @@ export function InviteForm({
         <Text style={[styles.helpText, { color: colors.textSecondary }]}>They must accept while signed in</Text>
       </View>
       <TextInput
-        style={[styles.inviteInput, { backgroundColor: colors.input, borderColor: colors.borderInput, color: colors.textPrimary }]}
+        style={[styles.inviteInput, { backgroundColor: colors.input, borderColor: colors.borderInput, color: colors.textPrimary, outlineColor: colors.primary }]}
         placeholder="friend@example.com"
         placeholderTextColor={colors.textTertiary}
         value={inviteEmail}

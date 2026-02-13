@@ -44,7 +44,7 @@ export function TagsSection({
       )}
 
       <TextInput
-        style={[styles.tagInput, { backgroundColor: colors.input, color: colors.textPrimary }]}
+        style={[styles.tagInput, { backgroundColor: colors.input, color: colors.textPrimary, outlineColor: colors.primary }]}
         placeholder="Search or create tags..."
         value={tagQuery}
         onChangeText={onTagQueryChange}

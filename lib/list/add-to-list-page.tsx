@@ -40,7 +40,7 @@ export function AddToListPage({
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
       <View style={[styles.searchContainer, { borderBottomColor: colors.separator }]}>
         <TextInput
-          style={[styles.searchInput, { backgroundColor: colors.input, color: colors.textPrimary }]}
+          style={[styles.searchInput, { backgroundColor: colors.input, color: colors.textPrimary, outlineColor: colors.primary }]}
           placeholder="Search movies and TV shows..."
           value={query}
           onChangeText={onQueryChange}
