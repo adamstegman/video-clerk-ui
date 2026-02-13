@@ -49,7 +49,7 @@ export function SwipeableEntryRow({ entry, onDelete }: SwipeableEntryRowProps) {
       overshootRight={false}
       rightThreshold={40}
     >
-      <View style={styles.rowContainer}>
+      <View style={[styles.rowContainer, { backgroundColor: colors.surface }]}>
         <SavedEntryRow entry={entry} />
       </View>
     </Swipeable>
