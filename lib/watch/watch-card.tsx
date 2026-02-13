@@ -46,7 +46,7 @@ export function WatchCard({ entry }: WatchCardProps) {
   const tagLabel = entry.tags && entry.tags.length > 0 ? ` | ${entry.tags.join(', ')}` : '';
 
   return (
-    <View style={[styles.card, { width: cardWidth, height: cardHeight, backgroundColor: colors.surface, borderColor: colors.separator }]}>
+    <View style={[styles.card, { width: cardWidth, height: cardHeight, backgroundColor: colors.watchCard, borderColor: colors.separator }]}>
       {/* Backdrop area - 62% of card height */}
       <View style={styles.backdropContainer}>
         {imageUrl ? (
@@ -63,7 +63,7 @@ export function WatchCard({ entry }: WatchCardProps) {
       </View>
 
       {/* Text area */}
-      <View style={[styles.textContainer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
+      <View style={[styles.textContainer, { backgroundColor: colors.watchCard, borderTopColor: colors.separator }]}>
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
             {entry.title}

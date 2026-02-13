@@ -178,7 +178,7 @@ export function WatchPage({
   const visibleDeck = deck.slice(0, 4);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.page }]}>
+    <View style={[styles.container, { backgroundColor: colors.watchDeck }]}>
       <View style={styles.cardContainer}>
         {/* Render bottom-to-top so the top card is last (on top in z-order) */}
         {[...visibleDeck].reverse().map((entry, renderIndex) => {
