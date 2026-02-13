@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { supabase } from '../supabase/client';
 import { LoginPage } from './login-page';
 
 export function LoginPageContainer() {
+  const { redirect } = useLocalSearchParams<{ redirect?: string }>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +28,7 @@ export function LoginPageContainer() {
       setError(authError.message);
       setLoading(false);
     } else {
-      router.replace('/(app)/watch');
+      router.replace(redirect || '/(app)/watch');
     }
   }
 

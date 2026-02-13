@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Tabs, router } from 'expo-router';
+import { Tabs, router, usePathname } from 'expo-router';
 import { ActivityIndicator, View, StyleSheet, Pressable } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { supabase } from '../../lib/supabase/client';
@@ -11,6 +11,7 @@ import type { User } from '@supabase/supabase-js';
 
 export default function AppLayout() {
   const colors = useThemeColors();
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +21,7 @@ export default function AppLayout() {
       setUser(user);
       setLoading(false);
       if (!user) {
-        router.replace('/login');
+        router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
       }
     });
 
