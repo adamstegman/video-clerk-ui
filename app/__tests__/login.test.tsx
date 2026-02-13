@@ -4,12 +4,14 @@ import LoginPage from '../login';
 
 // Mock expo-router
 const mockReplace = jest.fn();
+let mockSearchParams: Record<string, string> = {};
 
 jest.mock('expo-router', () => ({
   router: {
     get replace() { return mockReplace; },
   },
   Link: ({ children }: { children: React.ReactNode }) => children,
+  useLocalSearchParams: () => mockSearchParams,
 }));
 
 // Mock @expo/vector-icons
@@ -34,6 +36,7 @@ jest.mock('../../lib/supabase/client', () => ({
 describe('LoginPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSearchParams = {};
   });
 
   it('redirects to Watch tab after successful login', async () => {
@@ -47,6 +50,21 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith('/(app)/watch');
+    });
+  });
+
+  it('redirects to the redirect param after successful login', async () => {
+    mockSearchParams = { redirect: '/(app)/list' };
+    mockSignInWithPassword.mockResolvedValue({ error: null });
+
+    render(<LoginPage />);
+
+    fireEvent.changeText(screen.getByPlaceholderText('me@example.com'), 'test@example.com');
+    fireEvent.changeText(screen.getByDisplayValue(''), 'password123');
+    fireEvent.press(screen.getByTestId('login-button'));
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith('/(app)/list');
     });
   });
 

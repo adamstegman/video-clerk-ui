@@ -7,6 +7,8 @@ import AppLayout from '../_layout';
 const capturedScreens: Array<{ name: string; options: any }> = [];
 
 // Mock expo-router Tabs to capture screen configuration
+const mockReplace = jest.fn();
+
 jest.mock('expo-router', () => {
   function MockTabs({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
@@ -22,8 +24,9 @@ jest.mock('expo-router', () => {
   return {
     Tabs: MockTabs,
     router: {
-      replace: jest.fn(),
+      get replace() { return mockReplace; },
     },
+    usePathname: () => '/list',
   };
 });
 
