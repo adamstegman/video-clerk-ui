@@ -21,7 +21,7 @@ export default function AppLayout() {
       setUser(user);
       setLoading(false);
       if (!user) {
-        router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+        router.replace({ pathname: '/login', params: { redirect: pathname } });
       }
     });
 

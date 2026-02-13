@@ -54,7 +54,7 @@ describe('LoginPage', () => {
   });
 
   it('redirects to the redirect param after successful login', async () => {
-    mockSearchParams = { redirect: '/(app)/list' };
+    mockSearchParams = { redirect: '/list' };
     mockSignInWithPassword.mockResolvedValue({ error: null });
 
     render(<LoginPage />);
@@ -64,7 +64,7 @@ describe('LoginPage', () => {
     fireEvent.press(screen.getByTestId('login-button'));
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith('/(app)/list');
+      expect(mockReplace).toHaveBeenCalledWith('/list');
     });
   });
 

@@ -61,9 +61,10 @@ describe('App Layout - Auth Guard', () => {
     render(<AppLayout />);
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(
-        '/login?redirect=%2Flist'
-      );
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/login',
+        params: { redirect: '/list' },
+      });
     });
   });
 });
