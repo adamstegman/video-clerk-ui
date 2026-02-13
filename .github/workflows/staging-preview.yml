@@ -72,6 +72,11 @@ jobs:
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
           EXPO_PUBLIC_TMDB_API_READ_TOKEN: ${{ secrets.VITE_TMDB_API_READ_TOKEN }}
 
+      # SPA routing: copy index.html to 404.html so GitHub Pages serves
+      # the app for any deep link path, letting Expo Router handle routing.
+      - name: Create 404.html for SPA routing
+        run: cp dist/index.html dist/404.html
+
       # GitHub Pages (branch deploy) runs Jekyll unless disabled.
       # Our asset filenames can start with "_" (e.g. "_expo/..."), which Jekyll will exclude.
       - name: Add .nojekyll (allow _* assets)
