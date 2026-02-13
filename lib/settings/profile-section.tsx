@@ -9,7 +9,7 @@ export function ProfileSection({ email }: ProfileSectionProps) {
   const colors = useThemeColors();
 
   return (
-    <View style={[styles.profileSection, { backgroundColor: colors.surface, borderBottomColor: colors.separator }]}>
+    <View style={[styles.profileSection, { backgroundColor: colors.page, borderBottomColor: colors.separator }]}>
       <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
         <Text style={[styles.avatarText, { color: colors.textOnColor }]}>
           {email?.charAt(0).toUpperCase() || '?'}
