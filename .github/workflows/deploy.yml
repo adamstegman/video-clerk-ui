@@ -37,10 +37,18 @@ jobs:
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
           EXPO_PUBLIC_TMDB_API_READ_TOKEN: ${{ secrets.VITE_TMDB_API_READ_TOKEN }}
 
-      # SPA routing: copy index.html to 404.html so GitHub Pages serves
-      # the app for any deep link path, letting Expo Router handle routing.
-      - name: Create 404.html for SPA routing
-        run: cp dist/index.html dist/404.html
+      # Inject SPA deep-link restore script into index.html.
+      # The 404.html (from public/) encodes the original path in a hash
+      # fragment. This script runs before Expo Router and restores the URL.
+      - name: Inject deep-link restore script
+        run: |
+          node -e "
+          const fs = require('fs');
+          let html = fs.readFileSync('dist/index.html', 'utf8');
+          const script = \`<script>(function(){var h=location.hash;if(h&&h.startsWith('#__path=')){var p=decodeURIComponent(h.slice(8));history.replaceState(null,'',location.pathname.replace(/\\\\/$/,'')+p);location.hash='';}})();</script>\`;
+          html = html.replace('<body>', '<body>' + script);
+          fs.writeFileSync('dist/index.html', html);
+          "
 
       - name: Add .nojekyll (allow _* assets)
         run: touch dist/.nojekyll

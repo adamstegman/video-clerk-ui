@@ -15,32 +15,38 @@ permissions:
 concurrency: staging-preview-${{ github.ref }}
 
 jobs:
-  ensure-root-nojekyll:
+  ensure-root-spa-support:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
+          path: gh-pages
 
-      - name: Ensure .nojekyll exists at site root
+      - name: Ensure .nojekyll and 404.html at site root
         run: |
-          touch .nojekyll
+          touch gh-pages/.nojekyll
+          cp public/404.html gh-pages/404.html
+          cd gh-pages
           if [ -z "$(git status --porcelain)" ]; then
-            echo "Root .nojekyll already present."
+            echo "Root .nojekyll and 404.html already up to date."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .nojekyll
-          git commit -m "Add .nojekyll to GitHub Pages root"
+          git add .nojekyll 404.html
+          git commit -m "Update root .nojekyll and 404.html for SPA routing"
           git push
 
   deploy:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
-    needs: ensure-root-nojekyll
+    needs: ensure-root-spa-support
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,10 +78,19 @@ jobs:
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
           EXPO_PUBLIC_TMDB_API_READ_TOKEN: ${{ secrets.VITE_TMDB_API_READ_TOKEN }}
 
-      # SPA routing: copy index.html to 404.html so GitHub Pages serves
-      # the app for any deep link path, letting Expo Router handle routing.
-      - name: Create 404.html for SPA routing
-        run: cp dist/index.html dist/404.html
+      # Inject SPA deep-link restore script into index.html.
+      # The root 404.html encodes the original path in a hash fragment
+      # (e.g. #__path=%2Fsettings). This script runs before Expo Router
+      # and restores the URL via history.replaceState.
+      - name: Inject deep-link restore script
+        run: |
+          node -e "
+          const fs = require('fs');
+          let html = fs.readFileSync('dist/index.html', 'utf8');
+          const script = \`<script>(function(){var h=location.hash;if(h&&h.startsWith('#__path=')){var p=decodeURIComponent(h.slice(8));history.replaceState(null,'',location.pathname.replace(/\\\\/$/,'')+p);location.hash='';}})();</script>\`;
+          html = html.replace('<body>', '<body>' + script);
+          fs.writeFileSync('dist/index.html', html);
+          "
 
       # GitHub Pages (branch deploy) runs Jekyll unless disabled.
       # Our asset filenames can start with "_" (e.g. "_expo/..."), which Jekyll will exclude.
