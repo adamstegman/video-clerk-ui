@@ -1,37 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Video Clerk</title>
-    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
-    <style id="expo-reset">
-      /* These styles make the body full-height */
-      html,
-      body {
-        height: 100%;
-      }
-      /* These styles disable body scrolling if you are using <ScrollView> */
-      body {
-        overflow: hidden;
-      }
-      /* These styles make the root element full-height */
-      #root {
-        display: flex;
-        height: 100%;
-        flex: 1;
-      }
-    </style>
-  <link rel="icon" href="/staging/pr-27/favicon.ico" /></head>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting…</title>
+    <meta name="robots" content="noindex" />
+  </head>
   <body>
-    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
-    <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
-    <!-- The root element for your Expo app. -->
-    <div id="root"></div>
-  <script src="/staging/pr-27/_expo/static/js/web/entry-e797e0ae83f15f3877cf2099de76fdd6.js" defer></script>
-</body>
+    <script>
+      (function () {
+        var path = window.location.pathname || "/";
+        // Don't redirect asset requests
+        if (/\.(js|css|map|png|jpg|jpeg|gif|svg|webp|ico|txt|xml|json|webmanifest)$/i.test(path)) return;
+        if (path.indexOf("/assets/") !== -1 || path.indexOf("/_expo/") !== -1) return;
+
+        // Find the base URL (staging prefix or root)
+        var match = path.match(/^(\/staging\/pr-\d+)(\/.*)?$/);
+        var base, subPath;
+        if (match) {
+          base = match[1] + "/";
+          subPath = match[2] || "";
+        } else {
+          base = "/";
+          subPath = path === "/" ? "" : path;
+        }
+
+        // Redirect to base with the sub-path encoded in the hash fragment.
+        // The inline script in index.html reads the hash and restores the URL
+        // via history.replaceState before Expo Router initializes.
+        if (subPath) {
+          window.location.replace(base + "#__path=" + encodeURIComponent(subPath + window.location.search));
+        } else {
+          window.location.replace(base);
+        }
+      })();
+    </script>
+  </body>
 </html>
