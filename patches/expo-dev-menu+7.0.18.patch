@@ -1,0 +1,13 @@
+diff --git a/node_modules/expo-dev-menu/ios/Modules/DevMenuPreferences.swift b/node_modules/expo-dev-menu/ios/Modules/DevMenuPreferences.swift
+index 1885fe7..a210bdd 100644
+--- a/node_modules/expo-dev-menu/ios/Modules/DevMenuPreferences.swift
++++ b/node_modules/expo-dev-menu/ios/Modules/DevMenuPreferences.swift
+@@ -39,7 +39,7 @@ public class DevMenuPreferences: Module {
+       touchGestureEnabledKey: true,
+       keyCommandsEnabledKey: true,
+       showsAtLaunchKey: false,
+-      isOnboardingFinishedKey: false
++      isOnboardingFinishedKey: true
+     ])
+     #endif
+ 

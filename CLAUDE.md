@@ -14,14 +14,17 @@ This document provides comprehensive guidance for AI assistants working on the V
 8. [Common Tasks](#common-tasks)
 9. [Deployment](#deployment)
 10. [Important Files Reference](#important-files-reference)
+11. [Documented Solutions (REQUIRED)](#documented-solutions-required)
 
 ---
 
 ## Project Overview
 
-**Video Clerk** is a mobile-first web application that solves the "what do we watch?" problem by separating:
+**Video Clerk** is a universal React Native application that solves the "what do we watch?" problem by separating:
 - **Discovery Phase**: Adding shows/movies to a list when you hear about them
 - **Decision Phase**: Filtering that list based on current mood to find a winner
+
+Built with Expo for web and iOS from a single codebase.
 
 ### Key Features
 - User authentication via Supabase Auth
@@ -30,10 +33,12 @@ This document provides comprehensive guidance for AI assistants working on the V
 - Card-swiping interface for choosing content
 - Tag-based filtering and organization
 - Group invitations for collaborative lists
+- Cross-platform: Works on web (GitHub Pages) and iOS (App Store)
 
 ### Architecture Philosophy
-- **Mobile-first responsive design** with safe area insets
-- **SPA mode** (no SSR) for simplified deployment
+- **Universal platform** - single codebase for web and iOS
+- **Mobile-first design** with safe area insets
+- **Static export** (no SSR) for simplified web deployment
 - **Container/Presenter pattern** for separation of concerns
 - **Feature-based folder structure** for maintainability
 - **Minimal dependencies** - direct Supabase client calls, no GraphQL/query libraries
@@ -43,10 +48,12 @@ This document provides comprehensive guidance for AI assistants working on the V
 ## Technology Stack
 
 ### Core Framework
-- **React 19.2** - UI library
-- **React Router 7** - Routing with file-system based routes (`@react-router/fs-routes`)
+- **Expo SDK 54** - React Native + Web universal platform
+- **React Native** - Cross-platform UI framework
+- **React 18.3** - UI library (via React Native)
+- **Expo Router v4** - File-based routing for universal apps
 - **TypeScript 5.9** - Type safety with strict mode
-- **Vite 7** - Build tool and dev server
+- **Metro** - Bundler for React Native
 
 ### Backend & Data
 - **Supabase** - Postgres database, authentication, RLS
@@ -54,122 +61,109 @@ This document provides comprehensive guidance for AI assistants working on the V
 - Generated TypeScript types from database schema
 
 ### Styling
-- **Tailwind CSS 4** - Utility-first CSS framework
-- **clsx** - Conditional class composition
-- **tailwind-merge** - Conflicting class resolution
-- **motion** (Framer Motion successor) - Animations
+- **React Native StyleSheet** - Cross-platform styling API
+- **react-native-web** - Compiles React Native to web CSS
 
 ### UI Components
-- **lucide-react** - Icon library
-- Custom components (no component library like MUI/Chakra)
+- **@expo/vector-icons** - Icon library
+- Custom components built with React Native primitives (View, Text, Pressable, etc.)
 
 ### Testing
-- **Vitest 2.0** - Test runner
-- **@testing-library/react 16.3** - Component testing
+- **Jest 29** (via jest-expo) - Unit & integration test runner
+- **Playwright** - Browser-based E2E tests (Chromium)
+- **@testing-library/react** - Component testing
 - **@testing-library/user-event** - User interaction simulation
 - **jsdom** - DOM environment for unit tests
 
 ### Development Tools
 - **@dotenvx/dotenvx** - Environment variable management
 - **Supabase CLI** - Local development database
+- **EAS Build** - Expo Application Services for iOS builds
+- **EAS Submit** - App Store submission automation
 
 ---
 
 ## Project Structure
 
 ```
-video-clerk-ui/
-├── app/                          # Application source code
-│   ├── routes/                   # Route files (fs-routes pattern)
-│   │   ├── _index.tsx           # Landing/marketing page
-│   │   ├── login.tsx            # Auth routes
-│   │   ├── app.tsx              # Protected app layout + clientLoader auth guard
-│   │   ├── app.list.tsx         # List feature routes
-│   │   ├── app.watch.tsx        # Watch feature routes
-│   │   └── app.settings.tsx     # Settings route
-│   │
-│   ├── list/                    # List feature (all list-related code)
-│   │   ├── list-page-container.tsx
-│   │   ├── list-page.tsx
-│   │   ├── add-to-list-page.tsx
-│   │   ├── edit-entry-page-container.tsx
-│   │   ├── saved-entry-row.tsx
-│   │   └── *.test.tsx
-│   │
-│   ├── watch/                   # Watch feature (card swiping)
-│   │   ├── watch-page-container.tsx
-│   │   ├── watch-page.tsx
-│   │   ├── components/
-│   │   │   ├── watch-card.tsx
-│   │   │   ├── watch-deck-view.tsx
-│   │   │   ├── watch-picker-view.tsx
-│   │   │   └── watch-winner-view.tsx
-│   │   └── *.test.tsx
-│   │
-│   ├── settings/                # Settings feature
-│   │   ├── settings-page.tsx
-│   │   └── *.test.tsx
-│   │
-│   ├── components/              # Shared UI components
-│   │   ├── header/
-│   │   ├── nav-bar/
-│   │   ├── auth/                # Composable auth form blocks
-│   │   └── *.tsx
-│   │
-│   ├── tmdb-api/               # TMDB API integration
-│   │   ├── tmdb-api.ts         # TMDBAPI class
+video-clerk/
+├── app/                          # Expo Router routes
+│   ├── (app)/                    # Protected routes (requires auth)
+│   │   ├── _layout.tsx           # Tab navigator
+│   │   ├── list/                 # List feature
+│   │   │   ├── index.tsx         # List view
+│   │   │   ├── add.tsx           # Add entry
+│   │   │   └── [entryId].tsx     # Edit entry
+│   │   ├── watch/                # Watch feature
+│   │   │   ├── index.tsx         # Watch deck
+│   │   │   └── [entryId].tsx     # Watch details
+│   │   └── settings.tsx          # Settings
+│   ├── invite/                   # Group invites
+│   │   └── [code].tsx            # Invite handler
+│   ├── login.tsx                 # Authentication
+│   ├── index.tsx                 # Landing/marketing page
+│   └── _layout.tsx               # Root layout
+│
+├── lib/                          # Shared libraries
+│   ├── supabase/                 # Supabase client + types
+│   │   ├── client.ts             # createClient() factory
+│   │   └── database.generated.types.ts
+│   ├── tmdb-api/                 # TMDB API wrapper
+│   │   ├── tmdb-api.ts           # TMDBAPI class
 │   │   ├── tmdb-api-provider.tsx
 │   │   ├── tmdb-configuration.tsx
 │   │   └── tmdb-genres.tsx
-│   │
-│   ├── lib/                    # Utilities & clients
-│   │   ├── utils.ts            # Styling utilities (cn, class constants)
-│   │   └── supabase/
-│   │       ├── client.ts       # createClient() factory
-│   │       └── database.types.ts
-│   │
-│   ├── app-data/               # Global app context
-│   │   └── app-data-provider.tsx
-│   │
-│   ├── test-utils/             # Testing utilities
-│   │   └── supabase.ts
-│   │
-│   ├── root.tsx                # Root layout & error boundary
-│   ├── app.css                 # Global styles
-│   └── routes.ts               # Route config (auto-generated)
+│   └── utils/                    # Utilities
+│       └── error-handling.ts
 │
-├── supabase/                   # Database schema & migrations
-│   ├── config.toml             # Local Supabase config
-│   ├── schemas/                # Schema definitions (SQL)
+├── components/                   # Shared UI components
+│   ├── header/
+│   ├── nav-bar/
+│   ├── auth/                     # Composable auth form blocks
+│   └── *.tsx
+│
+├── assets/                       # Images and icons
+│   ├── icon.png
+│   └── splash.png
+│
+├── supabase/                     # Database schema
+│   ├── config.toml               # Local Supabase config
+│   ├── schemas/                  # Schema definitions
 │   │   ├── 00_groups.sql
 │   │   ├── 01_tags.sql
 │   │   ├── 02_tmdb_details.sql
 │   │   ├── 03_entries.sql
 │   │   └── ...
-│   └── migrations/             # Migration history
+│   └── migrations/               # Migration history
 │
-├── public/                     # Static assets
-│   └── 404.html               # SPA routing fallback
+├── .github/workflows/            # CI/CD
+│   ├── deploy.yml                # Production deployment
+│   ├── staging-preview.yml       # PR previews
+│   └── tests.yml                 # Tests
 │
-├── .github/                    # CI/CD workflows
-│   └── workflows/
-│       ├── tests.yml          # Unit & integration tests
-│       ├── deploy.yml         # Production deployment
-│       └── staging-preview.yml # PR previews
+├── e2e/                            # Playwright E2E tests
+│   ├── helpers.ts                  # Test utilities (auth, env)
+│   └── core-flows.spec.ts         # Core user flow tests
 │
+├── app.json                      # Expo configuration
+├── eas.json                      # EAS Build configuration
+├── metro.config.js               # Metro bundler config
+├── playwright.config.ts          # Playwright E2E config
 ├── package.json
 ├── tsconfig.json
-├── vite.config.ts
-├── react-router.config.ts
-└── vitest.setup.ts
+└── jest.setup.js
 ```
 
 ### Feature-Based Organization
 
-Each feature (list, watch, settings) contains:
-- **Container components**: Data fetching and state management (`*-container.tsx`)
-- **Presentational components**: UI rendering (no suffix)
-- **Feature-specific components**: In `components/` subdirectory
+Each feature (list, watch, settings) is organized as:
+- **Routes**: In `app/(app)/feature-name/` directory
+  - `index.tsx` - Main feature route
+  - `[param].tsx` - Dynamic routes
+- **Business logic**: In `lib/feature-name/` directory
+  - Container components with data fetching
+  - Presentational components
+  - Feature-specific utilities
 - **Tests**: Co-located with components (`*.test.tsx`, `*.integration.test.ts`)
 
 ---
@@ -186,30 +180,47 @@ npm install
 npx supabase start
 
 # Create .env file with output from supabase start
-# Set VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
-# VITE_SUPABASE_SECRET_KEY, and VITE_TMDB_API_READ_TOKEN
+# Set EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY,
+# SUPABASE_SECRET_KEY, and EXPO_PUBLIC_TMDB_API_READ_TOKEN
 ```
 
 ### Development Commands
 
 ```bash
-# Start dev server with HMR (http://localhost:5173)
-npm run dev
+# Start Expo development server
+npm start
+
+# Then choose your platform:
+# - Press 'w' to open in web browser
+# - Press 'i' to open in iOS simulator
+# - Press 'a' to open in Android emulator
+# - Scan QR code with Expo Go app on physical device
+
+# Or start directly for a specific platform:
+npm run web      # Web only (http://localhost:8081)
+npm run ios      # iOS only
+npm run android  # Android only
 
 # Run type checking
 npm run typecheck
 
-# Run tests (unit only)
-npm test -- --exclude "**/*.integration.test.*"
+# Run unit tests (excludes integration and e2e)
+npm test
 
 # Run integration tests (requires local Supabase)
-npm test -- integration.test
+npm run test:integration
 
-# Build for production
-npm run build
+# Run E2E tests (requires local Supabase, starts Expo automatically)
+npm run test:e2e
 
-# Start production server
-npm start
+# Run E2E tests in headed browser
+npm run test:e2e:headed
+
+# Build for production (web)
+npm run build:web
+
+# Build for iOS
+eas build --platform ios --profile production
 ```
 
 ### Database Workflow
@@ -226,7 +237,7 @@ npx supabase start
 npx supabase db reset
 
 # Regenerate TypeScript types
-npx supabase gen types typescript --local > app/lib/supabase/database.generated.types.ts
+npx supabase gen types typescript --local > lib/supabase/database.generated.types.ts
 
 # Push to production
 npx supabase db push
@@ -236,59 +247,76 @@ npx supabase db push
 
 **Local Development** (`.env`):
 ```bash
-VITE_SUPABASE_URL=http://localhost:54321
-VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=eyJ...
-VITE_SUPABASE_SECRET_KEY=eyJ...
-VITE_TMDB_API_READ_TOKEN=eyJh...
+EXPO_PUBLIC_SUPABASE_URL=http://localhost:54321
+EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SECRET_KEY=eyJ...
+EXPO_PUBLIC_TMDB_API_READ_TOKEN=eyJh...
 ```
 
 **Production** (GitHub Secrets):
-- `VITE_SUPABASE_URL` - Production Supabase URL
-- `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` - Production anon key
-- `VITE_TMDB_API_READ_TOKEN` - TMDB API read token
-- `PAGES_DOMAIN` (Variable) - Custom domain for GitHub Pages
+- `VITE_SUPABASE_URL` - Production Supabase URL (mapped to `EXPO_PUBLIC_SUPABASE_URL` in workflows)
+- `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` - Production anon key (mapped to `EXPO_PUBLIC_SUPABASE_ANON_KEY`)
+- `VITE_TMDB_API_READ_TOKEN` - TMDB API read token (mapped to `EXPO_PUBLIC_TMDB_API_READ_TOKEN`)
+- `PAGES_DOMAIN` (Variable) - Custom domain for GitHub Pages (`video-clerk.adamstegman.com`)
+
+*Note: Secret names use `VITE_` prefix for backward compatibility, but are mapped to `EXPO_PUBLIC_` in workflows.*
 
 ---
 
 ## Architectural Patterns
 
-### 1. File-System Based Routing
+### 1. File-System Based Routing (Expo Router)
 
-Routes are automatically generated from files in `app/routes/`:
+Routes are automatically generated from files in `app/`:
 
 **Naming Convention**:
-- `app.list.tsx` → `/app/list` (layout route)
-- `app.list._index.tsx` → `/app/list` (index route)
-- `app.list.$entryId.tsx` → `/app/list/:entryId` (dynamic param)
-- `app.list_.add.tsx` → `/app/add` (underscore escapes parent path)
+- `app/index.tsx` → `/`
+- `app/login.tsx` → `/login`
+- `app/(app)/list/index.tsx` → `/app/list`
+- `app/(app)/watch/[entryId].tsx` → `/app/watch/:entryId`
+- `app/invite/[code].tsx` → `/invite/:code`
+
+Parentheses `()` create route groups without adding path segments.
 
 **Route Files Export**:
 ```typescript
-// Meta tags
-export function meta({ }: Route.MetaArgs) {
-  return [
-    { title: "Page Title" },
-    { name: "description", content: "..." }
-  ];
-}
-
-// Client-side data loader (runs before render)
-export async function clientLoader({ params }: Route.ClientLoaderArgs) {
-  return { data: await fetchData(params.id) };
-}
+import { Stack } from 'expo-router';
+import { View, Text } from 'react-native';
 
 // Component
 export default function MyRoute() {
-  return <div>Content</div>;
+  return (
+    <View>
+      <Text>Content</Text>
+    </View>
+  );
 }
 
-// Pass config to parent layout (app/routes/app.tsx:16-19)
-export const handle: RouteHandle = {
-  rightHeaderAction: {
-    to: "/app/list",
-    icon: <Check />,
-  },
-};
+// Layout with navigation options
+export default function Layout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: true,
+        title: "Page Title"
+      }}
+    />
+  );
+}
+```
+
+**Navigation**:
+```typescript
+import { router } from 'expo-router';
+
+// Navigate
+router.push('/app/list');
+
+// Navigate with params
+router.push(`/app/watch/${entryId}`);
+
+// Go back
+router.back();
 ```
 
 ### 2. Container/Presenter Pattern
@@ -297,8 +325,11 @@ export const handle: RouteHandle = {
 
 **Container Component** (`*-container.tsx`):
 ```typescript
-// app/list/list-page-container.tsx
-export function ListPageContainer() {
+// lib/list/list-container.tsx
+import { useState, useEffect } from 'react';
+import { createClient } from '~/lib/supabase/client';
+
+export function ListContainer() {
   const [entries, setEntries] = useState<SavedEntryRowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -326,23 +357,32 @@ export function ListPageContainer() {
     return () => { cancelled = true };
   }, []);
 
-  return <ListPage entries={entries} loading={loading} error={error} />;
+  return <List entries={entries} loading={loading} error={error} />;
 }
 ```
 
 **Presentational Component**:
 ```typescript
-// app/list/list-page.tsx
-interface ListPageProps {
+// lib/list/list.tsx
+import { View, Text, ActivityIndicator, FlatList } from 'react-native';
+
+interface ListProps {
   entries: SavedEntryRowData[];
   loading: boolean;
   error: string | null;
 }
 
-export function ListPage({ entries, loading, error }: ListPageProps) {
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  return <div>{entries.map(entry => ...)}</div>;
+export function List({ entries, loading, error }: ListProps) {
+  if (loading) return <ActivityIndicator />;
+  if (error) return <Text>{error}</Text>;
+
+  return (
+    <FlatList
+      data={entries}
+      renderItem={({ item }) => <EntryRow entry={item} />}
+      keyExtractor={(item) => item.id.toString()}
+    />
+  );
 }
 ```
 
@@ -382,20 +422,32 @@ const { user } = useContext(AppDataContext);
 
 ### 4. Authentication Guard
 
-All routes under `/app/*` require authentication via `clientLoader` in `app/routes/app.tsx:21-31`:
+All routes under `app/(app)/*` require authentication via the `(app)/_layout.tsx` file:
 
 ```typescript
-export async function clientLoader({ request }: { request: Request }): Promise<AppData | Response> {
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    const url = new URL(request.url);
-    const returnTo = url.pathname + url.search;
-    return redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
-  }
-  return data;
+import { useEffect } from 'react';
+import { router, Slot } from 'expo-router';
+import { createClient } from '~/lib/supabase/client';
+
+export default function AppLayout() {
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        router.replace('/login');
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  return <Slot />;
 }
 ```
+
+The `(app)` route group requires authentication, while `/login` and `/invite` routes are public.
 
 ### 5. Supabase Client Usage
 
@@ -449,9 +501,9 @@ function normalizeDetails(details: TmdbDetail | TmdbDetail[] | null): TmdbDetail
 
 | Type | Convention | Example |
 |------|------------|---------|
-| Components | PascalCase | `WatchCard`, `ListPageContainer` |
-| Files (components) | kebab-case | `watch-card.tsx`, `list-page-container.tsx` |
-| Route files | dot notation | `app.list.$entryId.tsx` |
+| Components | PascalCase | `WatchCard`, `ListContainer` |
+| Files (components) | kebab-case | `watch-card.tsx`, `list-container.tsx` |
+| Route files | directory-based | `app/(app)/list/index.tsx`, `app/(app)/watch/[entryId].tsx` |
 | Types/Interfaces | PascalCase | `WatchCardEntry`, `EditEntryData` |
 | Functions | camelCase | `getReleaseYear`, `normalizeDetails` |
 | Constants | UPPER_SNAKE_CASE | `SUPABASE_URL`, `TMDB_API_READ_TOKEN` |
@@ -467,32 +519,55 @@ import { createClient } from '~/lib/supabase/client';
 
 ### Styling Patterns
 
-**Utility function** (app/lib/utils.ts:4-6):
+**React Native StyleSheet**:
 ```typescript
-import { cn } from '~/lib/utils';
+import { View, Text, StyleSheet } from 'react-native';
 
-<div className={cn(
-  "flex items-center",
-  isActive && "bg-indigo-600",
-  className
-)} />
+export function MyComponent() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Title</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+});
 ```
 
-**Style constants** (app/lib/utils.ts:8-14):
+**Combining styles**:
 ```typescript
-import { pageTitleClasses, errorTextClasses } from '~/lib/utils';
-
-<h1 className={pageTitleClasses}>Title</h1>
-<p className={errorTextClasses}>Error message</p>
+<View style={[styles.base, isActive && styles.active]} />
 ```
 
-**Available constants**:
-- `pageTitleClasses` - Page titles
-- `sectionSpacingClasses` - Section spacing
-- `secondaryTextClasses` - Secondary text
-- `primaryHeadingClasses` - Primary headings
-- `errorTextClasses` - Error messages
-- `successTextClasses` - Success messages
+**Inline styles for dynamic values**:
+```typescript
+<View style={[styles.container, { backgroundColor: color }]} />
+```
+
+**Cross-platform styling**:
+```typescript
+import { Platform, StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+  text: {
+    ...Platform.select({
+      ios: { fontFamily: 'System' },
+      android: { fontFamily: 'Roboto' },
+      web: { fontFamily: 'system-ui' },
+    }),
+  },
+});
+```
 
 ### Component Structure
 
@@ -500,7 +575,7 @@ import { pageTitleClasses, errorTextClasses } from '~/lib/utils';
 ```typescript
 // 1. Imports
 import { useState } from 'react';
-import type { ComponentProps } from './types';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 
 // 2. Types/Interfaces
 interface MyComponentProps {
@@ -518,11 +593,23 @@ export function MyComponent({ data, onSelect }: MyComponentProps) {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <div>
-      {/* JSX */}
-    </div>
+    <View style={styles.container}>
+      {data.map((item, index) => (
+        <Pressable key={index} onPress={() => onSelect(index)}>
+          <Text>{item}</Text>
+        </Pressable>
+      ))}
+    </View>
   );
 }
+
+// 5. Styles
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+});
 ```
 
 ### Error Handling Pattern
@@ -550,16 +637,17 @@ try {
 
 - **Unit tests**: `*.test.tsx` or `*.test.ts`
 - **Integration tests**: `*.integration.test.ts`
+- **E2E tests**: `e2e/*.spec.ts` (Playwright)
 
 ### Unit Test Pattern
 
 **Mock Supabase client**:
 ```typescript
-const mockOrder = vi.hoisted(() => vi.fn());
-const mockSelect = vi.hoisted(() => vi.fn(() => ({ order: mockOrder })));
-const mockFrom = vi.hoisted(() => vi.fn(() => ({ select: mockSelect })));
+const mockOrder = jest.fn();
+const mockSelect = jest.fn(() => ({ order: mockOrder }));
+const mockFrom = jest.fn(() => ({ select: mockSelect }));
 
-vi.mock("~/lib/supabase/client", () => ({
+jest.mock("~/lib/supabase/client", () => ({
   createClient: () => ({
     from: mockFrom,
   }),
@@ -589,25 +677,39 @@ describe("ListPageContainer", () => {
 
 **Render helper**:
 ```typescript
-function renderWithProviders() {
-  const router = createMemoryRouter([{
-    path: "/app/list",
-    element: (
-      <TMDBConfigurationContext value={mockConfig}>
-        <ListPageContainer />
-      </TMDBConfigurationContext>
-    ),
-  }]);
-  return render(<RouterProvider router={router} />);
+import { render } from '@testing-library/react';
+import { TMDBConfigurationContext } from '~/lib/tmdb-api/tmdb-configuration';
+
+function renderWithProviders(component: React.ReactElement) {
+  return render(
+    <TMDBConfigurationContext.Provider value={mockConfig}>
+      {component}
+    </TMDBConfigurationContext.Provider>
+  );
 }
+
+// Usage
+renderWithProviders(<ListContainer />);
+```
+
+**Mock Expo Router**:
+```typescript
+// Mock expo-router navigation
+jest.mock('expo-router', () => ({
+  router: {
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+  },
+  useLocalSearchParams: () => ({}),
+}));
 ```
 
 ### Integration Test Pattern
 
-**Important**: Add `@vitest-environment node` comment:
+**Important**: Add `@jest-environment node` comment:
 ```typescript
-// @vitest-environment node
-import { describe, it, expect } from 'vitest';
+// @jest-environment node
 import { createTestUser, cleanupTestUser, createAdminClient } from '~/test-utils/supabase';
 
 describe('Application-level: feature name', () => {
@@ -642,15 +744,18 @@ describe('Application-level: feature name', () => {
 
 ```bash
 # Unit tests only (fast, no external deps)
-npm test -- --exclude "**/*.integration.test.*"
-
-# Integration tests only (requires Supabase)
-npm test -- integration.test
-
-# All tests
 npm test
 
-# Watch mode
+# Integration tests only (requires Supabase)
+npm run test:integration
+
+# E2E tests (requires Supabase, starts Expo dev server automatically)
+npm run test:e2e
+
+# E2E tests in headed browser
+npm run test:e2e:headed
+
+# Watch mode (unit tests)
 npm test -- --watch
 
 # Specific file
@@ -662,6 +767,7 @@ npm test -- list-page.test.tsx
 **GitHub Actions** (.github/workflows/tests.yml):
 1. **Unit tests**: Run on every push/PR (no Supabase required)
 2. **Integration tests**: Run after unit tests pass (starts local Supabase in Docker)
+3. **E2E tests**: Run after unit tests pass (starts local Supabase + Expo, uses Playwright/Chromium)
 
 ---
 
@@ -669,12 +775,12 @@ npm test -- list-page.test.tsx
 
 ### Adding a New Feature
 
-1. **Create feature directory**: `app/my-feature/`
-2. **Create route file**: `app/routes/app.my-feature.tsx`
-3. **Create container component**: `app/my-feature/my-feature-page-container.tsx`
-4. **Create presenter component**: `app/my-feature/my-feature-page.tsx`
-5. **Add tests**: `app/my-feature/my-feature-page.test.tsx`
-6. **Add navigation**: Update `app/components/nav-bar/nav-bar.tsx`
+1. **Create route file**: `app/(app)/my-feature/index.tsx` (for `/app/my-feature`)
+2. **Create container component**: `lib/my-feature/my-feature-container.tsx`
+3. **Create presenter component**: `lib/my-feature/my-feature.tsx`
+4. **Create components**: `lib/my-feature/components/` for feature-specific components
+5. **Add tests**: `lib/my-feature/__tests__/` or co-located `.test.tsx` files
+6. **Add navigation**: Update `app/(app)/_layout.tsx` tab configuration if needed
 
 ### Adding a Database Table
 
@@ -706,7 +812,7 @@ npx supabase db reset
 
 4. **Regenerate types**:
 ```bash
-npx supabase gen types typescript --local > app/lib/supabase/database.generated.types.ts
+npx supabase gen types typescript --local > lib/supabase/database.generated.types.ts
 ```
 
 5. **Push to production**:
@@ -754,17 +860,19 @@ async myNewMethod(param: string): Promise<MyResponse> {
 
 ## Deployment
 
-### GitHub Pages (Production)
+### GitHub Pages (Web)
 
 **Automatic deployment** on push to `main` branch via `.github/workflows/deploy.yml`.
 
 **Required Secrets** (Settings → Secrets → Actions):
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
-- `VITE_TMDB_API_READ_TOKEN`
+- `VITE_SUPABASE_URL` - Production Supabase URL
+- `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` - Production anon key
+- `VITE_TMDB_API_READ_TOKEN` - TMDB API token
 
 **Required Variables**:
-- `PAGES_DOMAIN` - Custom domain (e.g., `videoclerk.example.com`)
+- `PAGES_DOMAIN` - Custom domain (`video-clerk.adamstegman.com`)
+
+*Note: Secret names use `VITE_` prefix for backward compatibility, but are mapped to `EXPO_PUBLIC_` in workflows.*
 
 **Setup**:
 1. Add secrets/variables in GitHub
@@ -772,32 +880,44 @@ async myNewMethod(param: string): Promise<MyResponse> {
 3. Configure custom domain in GitHub Pages settings (optional)
 4. Enable workflow write permissions (Settings → Actions → General → Read and write permissions)
 
+**Manual deployment**:
+```bash
+npm run build:web  # Exports to dist/
+# Outputs to dist/ directory
+```
+
 ### PR Staging Previews
 
 **Automatic preview** on pull request via `.github/workflows/staging-preview.yml`.
 
 - Preview URL: `https://yourdomain.com/staging/pr-<PR_NUMBER>/`
+- Uses dynamic `baseUrl` configuration for subdirectory routing
 - Automatically cleaned up when PR closes
 
-### Docker Deployment
+### iOS App Store
 
-Build and run Docker container:
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete iOS deployment guide.
 
+**Quick start**:
 ```bash
-docker build -t video-clerk .
-docker run -p 3000:3000 video-clerk
+# Install EAS CLI
+npm install -g eas-cli
+
+# Login to Expo
+eas login
+
+# Build for TestFlight
+eas build --platform ios --profile production
+
+# Submit to TestFlight
+eas submit --platform ios --profile production
 ```
 
-Deploy to any platform supporting Docker (AWS ECS, Google Cloud Run, Fly.io, Railway, etc.).
-
-### DIY Deployment
-
-Deploy the built app to any Node.js hosting:
-
-```bash
-npm run build
-# Deploy build/ directory
-```
+**Requirements**:
+- Apple Developer account
+- App Store Connect setup
+- iOS distribution certificate
+- App-specific privacy manifest
 
 ---
 
@@ -807,24 +927,26 @@ npm run build
 
 | File | Purpose | Key Settings |
 |------|---------|--------------|
-| `package.json` | Dependencies, scripts | `type: "module"`, React Router 7, Supabase |
-| `tsconfig.json` | TypeScript config | `strict: true`, path alias `~/*` → `app/*` |
-| `vite.config.ts` | Build config | Base path support, Tailwind, test config |
-| `react-router.config.ts` | Router config | `ssr: false`, basename for sub-paths |
-| `vitest.setup.ts` | Test setup | Testing library, error suppression |
+| `package.json` | Dependencies, scripts | Main: `expo-router/entry`, Expo SDK 54 |
+| `tsconfig.json` | TypeScript config | Extends `expo/tsconfig.base`, path alias `~/*` → `app/*` |
+| `app.json` | Expo config | App name, slug, platforms, experiments.baseUrl |
+| `metro.config.js` | Metro bundler | Standard Expo Metro configuration |
+| `eas.json` | EAS Build config | Build profiles (dev, preview, production) |
+| `jest.config.js` | Jest config | Test patterns, path mappings, ignore patterns |
+| `playwright.config.ts` | Playwright E2E config | Chromium, web server, base URL |
 | `supabase/config.toml` | Local Supabase | Port settings, API config |
 
 ### Key Application Files
 
 | File | Purpose |
 |------|---------|
-| `app/root.tsx` | Root layout, error boundary |
-| `app/routes/app.tsx` | Protected layout, auth guard, context providers |
-| `app/lib/supabase/client.ts` | Supabase client factory |
-| `app/lib/supabase/database.types.ts` | Generated database types |
-| `app/lib/utils.ts` | Styling utilities and constants |
-| `app/app-data/app-data-provider.tsx` | User context provider |
-| `app/tmdb-api/tmdb-api.ts` | TMDB API wrapper class |
+| `app/_layout.tsx` | Root layout with context providers |
+| `app/(app)/_layout.tsx` | Protected layout, auth guard, tab navigation |
+| `lib/supabase/client.ts` | Supabase client factory |
+| `lib/supabase/database.generated.types.ts` | Generated database types |
+| `lib/tmdb-api/tmdb-api.ts` | TMDB API wrapper class |
+| `lib/tmdb-api/tmdb-api-provider.tsx` | TMDB API context provider |
+| `lib/utils/error-handling.ts` | Error handling utilities |
 
 ### Database Schema
 
@@ -844,6 +966,30 @@ Schema files in `supabase/schemas/`:
 | `.github/workflows/tests.yml` | Unit + integration tests | Push, PR |
 | `.github/workflows/deploy.yml` | Production deployment | Push to `main` |
 | `.github/workflows/staging-preview.yml` | PR preview deployment | PR open/update/close |
+
+---
+
+## Documented Solutions (REQUIRED)
+
+The `docs/solutions/` directory contains institutional knowledge — lessons learned from past mistakes and workflow improvements. **Every AI agent (Claude, Cursor, Gemini, or any other) MUST consult these solutions at the start of every coding session and follow them throughout.**
+
+### How to use documented solutions
+
+1. **At session start**: Read all files in `docs/solutions/` to understand current workflow requirements
+2. **During work**: Follow the solutions as mandatory workflow steps, not optional suggestions
+3. **When you hit a problem**: Check if a documented solution already covers it before debugging from scratch
+4. **When you solve a new problem**: If it's likely to recur, add a new solution file following the existing format
+
+### Current solutions
+
+| Solution | Summary |
+|----------|---------|
+| [`workflow-issues/commit-push-on-open-pr`](docs/solutions/workflow-issues/commit-push-on-open-pr-System-20260206.md) | Always commit and push when the current branch has an open PR |
+| [`workflow-issues/update-docs-on-every-commit`](docs/solutions/workflow-issues/update-docs-on-every-commit-System-20260210.md) | Before each commit, verify that any docs changed in the PR still match the code |
+
+### Solution file format
+
+Solutions use YAML frontmatter for fast filtering by `tags`, `category`, `module`, and `symptoms`. See existing files for the template.
 
 ---
 
@@ -885,11 +1031,11 @@ Schema files in `supabase/schemas/`:
 
 ## Questions & Support
 
-- **Documentation**: See `README.md` for development setup
+- **Documentation**: See `README.md` for development setup and `DEPLOYMENT.md` for iOS deployment
 - **Issues**: Check existing GitHub issues or create a new one
-- **Schema Reference**: `app/lib/supabase/database.types.ts` for all table structures
-- **API Reference**: [React Router 7 docs](https://reactrouter.com/), [Supabase docs](https://supabase.com/docs)
+- **Schema Reference**: `lib/supabase/database.generated.types.ts` for all table structures
+- **API Reference**: [Expo docs](https://docs.expo.dev/), [Expo Router docs](https://docs.expo.dev/router/introduction/), [Supabase docs](https://supabase.com/docs), [React Native docs](https://reactnative.dev/docs/getting-started)
 
 ---
 
-**Last Updated**: 2026-01-24
+**Last Updated**: 2026-02-10

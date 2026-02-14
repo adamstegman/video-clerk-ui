@@ -1,0 +1,81 @@
+import { useContext } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
+import { useThemeColors } from '../theme/colors';
+
+export interface SavedEntryRowData {
+  id: number;
+  title: string;
+  releaseYear: string;
+  posterPath: string | null;
+  tags: string[];
+  isWatched: boolean;
+}
+
+export function SavedEntryRow({ entry }: { entry: SavedEntryRowData }) {
+  const config = useContext(TMDBConfigurationContext);
+  const colors = useThemeColors();
+  const router = useRouter();
+
+  // Use larger poster size
+  const posterSizeIndex =
+    config.images.poster_sizes.length > 2 ? 2 : config.images.poster_sizes.length - 1;
+  const posterSize = config.images.poster_sizes[posterSizeIndex] || config.images.poster_sizes[0];
+  const posterUrl =
+    entry.posterPath && config.images.secure_base_url
+      ? `${config.images.secure_base_url}${posterSize}${entry.posterPath}`
+      : null;
+
+  return (
+    <Pressable
+      style={[styles.container, { backgroundColor: colors.surface }, entry.isWatched && styles.containerWatched]}
+      onPress={() => router.push(`/(app)/list/${entry.id}`)}
+    >
+      {posterUrl && (
+        <Image
+          source={{ uri: posterUrl }}
+          style={styles.poster}
+          contentFit="cover"
+          transition={150}
+        />
+      )}
+      <View style={styles.content}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{entry.title}</Text>
+        {entry.releaseYear ? <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{entry.releaseYear}</Text> : null}
+        {entry.tags.length > 0 ? <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{entry.tags.join(', ')}</Text> : null}
+      </View>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  containerWatched: {
+    opacity: 0.7,
+  },
+  poster: {
+    width: 48,
+    height: 72,
+    borderRadius: 6,
+    marginRight: 12,
+  },
+  content: {
+    flex: 1,
+    minWidth: 0,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  subtitle: {
+    fontSize: 14,
+    marginTop: 4,
+  },
+});

@@ -10,29 +10,30 @@
     <script>
       (function () {
         var path = window.location.pathname || "/";
-        // If a hashed asset is missing, don't redirect-loop the page. Just serve the 404.
-        // (The real fix is ensuring `.nojekyll` is deployed so `_index-...js` isn't excluded.)
-        var isAsset =
-          path.indexOf("/assets/") !== -1 ||
-          /\.(js|css|map|png|jpg|jpeg|gif|svg|webp|ico|txt|xml|json|webmanifest)$/i.test(path);
-        if (isAsset) return;
+        // Don't redirect asset requests
+        if (/\.(js|css|map|png|jpg|jpeg|gif|svg|webp|ico|txt|xml|json|webmanifest)$/i.test(path)) return;
+        if (path.indexOf("/assets/") !== -1 || path.indexOf("/_expo/") !== -1) return;
 
-        // Match both `/staging/pr-9` and `/staging/pr-9/...`
-        var stagingMatch = path.match(/^\/staging\/pr-\d+(?=\/|$)/);
-        var base = stagingMatch ? stagingMatch[0] + "/" : "/";
-
-        try {
-          window.sessionStorage.setItem(
-            "__video_clerk_redirect__",
-            window.location.pathname + window.location.search + window.location.hash
-          );
-        } catch (e) {
-          // ignore
+        // Find the base URL (staging prefix or root)
+        var match = path.match(/^(\/staging\/pr-\d+)(\/.*)?$/);
+        var base, subPath;
+        if (match) {
+          base = match[1] + "/";
+          subPath = match[2] || "";
+        } else {
+          base = "/";
+          subPath = path === "/" ? "" : path;
         }
 
-        window.location.replace(base);
+        // Redirect to base with the sub-path encoded in the hash fragment.
+        // The inline script in index.html reads the hash and restores the URL
+        // via history.replaceState before Expo Router initializes.
+        if (subPath) {
+          window.location.replace(base + "#__path=" + encodeURIComponent(subPath + window.location.search));
+        } else {
+          window.location.replace(base);
+        }
       })();
     </script>
   </body>
 </html>
-

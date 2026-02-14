@@ -9,9 +9,9 @@
   "theme_color": "#6366f1",
   "icons": [
     {
-      "src": "/tv-minimal-play.light.png",
-      "sizes": "256x256",
-      "type": "image/png"
+      "src": "/tv-minimal-play.light.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ]
 }
