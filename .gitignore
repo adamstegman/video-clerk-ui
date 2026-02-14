@@ -48,6 +48,11 @@ build/
 # react-router generated types
 .react-router/
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
 # AI assistant plans
 docs/plans/
 

@@ -69,7 +69,8 @@ Built with Expo for web and iOS from a single codebase.
 - Custom components built with React Native primitives (View, Text, Pressable, etc.)
 
 ### Testing
-- **Vitest 2.0** - Test runner
+- **Jest 29** (via jest-expo) - Unit & integration test runner
+- **Playwright** - Browser-based E2E tests (Chromium)
 - **@testing-library/react** - Component testing
 - **@testing-library/user-event** - User interaction simulation
 - **jsdom** - DOM environment for unit tests
@@ -140,12 +141,17 @@ video-clerk/
 │   ├── staging-preview.yml       # PR previews
 │   └── tests.yml                 # Tests
 │
+├── e2e/                            # Playwright E2E tests
+│   ├── helpers.ts                  # Test utilities (auth, env)
+│   └── core-flows.spec.ts         # Core user flow tests
+│
 ├── app.json                      # Expo configuration
 ├── eas.json                      # EAS Build configuration
 ├── metro.config.js               # Metro bundler config
+├── playwright.config.ts          # Playwright E2E config
 ├── package.json
 ├── tsconfig.json
-└── vitest.setup.ts
+└── jest.setup.js
 ```
 
 ### Feature-Based Organization
@@ -198,11 +204,17 @@ npm run android  # Android only
 # Run type checking
 npm run typecheck
 
-# Run tests (unit only)
-npm test -- --exclude "**/*.integration.test.*"
+# Run unit tests (excludes integration and e2e)
+npm test
 
 # Run integration tests (requires local Supabase)
-npm test -- integration.test
+npm run test:integration
+
+# Run E2E tests (requires local Supabase, starts Expo automatically)
+npm run test:e2e
+
+# Run E2E tests in headed browser
+npm run test:e2e:headed
 
 # Build for production (web)
 npm run build:web
@@ -625,16 +637,17 @@ try {
 
 - **Unit tests**: `*.test.tsx` or `*.test.ts`
 - **Integration tests**: `*.integration.test.ts`
+- **E2E tests**: `e2e/*.spec.ts` (Playwright)
 
 ### Unit Test Pattern
 
 **Mock Supabase client**:
 ```typescript
-const mockOrder = vi.hoisted(() => vi.fn());
-const mockSelect = vi.hoisted(() => vi.fn(() => ({ order: mockOrder })));
-const mockFrom = vi.hoisted(() => vi.fn(() => ({ select: mockSelect })));
+const mockOrder = jest.fn();
+const mockSelect = jest.fn(() => ({ order: mockOrder }));
+const mockFrom = jest.fn(() => ({ select: mockSelect }));
 
-vi.mock("~/lib/supabase/client", () => ({
+jest.mock("~/lib/supabase/client", () => ({
   createClient: () => ({
     from: mockFrom,
   }),
@@ -682,11 +695,11 @@ renderWithProviders(<ListContainer />);
 **Mock Expo Router**:
 ```typescript
 // Mock expo-router navigation
-vi.mock('expo-router', () => ({
+jest.mock('expo-router', () => ({
   router: {
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
   },
   useLocalSearchParams: () => ({}),
 }));
@@ -694,10 +707,9 @@ vi.mock('expo-router', () => ({
 
 ### Integration Test Pattern
 
-**Important**: Add `@vitest-environment node` comment:
+**Important**: Add `@jest-environment node` comment:
 ```typescript
-// @vitest-environment node
-import { describe, it, expect } from 'vitest';
+// @jest-environment node
 import { createTestUser, cleanupTestUser, createAdminClient } from '~/test-utils/supabase';
 
 describe('Application-level: feature name', () => {
@@ -732,15 +744,18 @@ describe('Application-level: feature name', () => {
 
 ```bash
 # Unit tests only (fast, no external deps)
-npm test -- --exclude "**/*.integration.test.*"
-
-# Integration tests only (requires Supabase)
-npm test -- integration.test
-
-# All tests
 npm test
 
-# Watch mode
+# Integration tests only (requires Supabase)
+npm run test:integration
+
+# E2E tests (requires Supabase, starts Expo dev server automatically)
+npm run test:e2e
+
+# E2E tests in headed browser
+npm run test:e2e:headed
+
+# Watch mode (unit tests)
 npm test -- --watch
 
 # Specific file
@@ -752,6 +767,7 @@ npm test -- list-page.test.tsx
 **GitHub Actions** (.github/workflows/tests.yml):
 1. **Unit tests**: Run on every push/PR (no Supabase required)
 2. **Integration tests**: Run after unit tests pass (starts local Supabase in Docker)
+3. **E2E tests**: Run after unit tests pass (starts local Supabase + Expo, uses Playwright/Chromium)
 
 ---
 
@@ -916,7 +932,8 @@ eas submit --platform ios --profile production
 | `app.json` | Expo config | App name, slug, platforms, experiments.baseUrl |
 | `metro.config.js` | Metro bundler | Standard Expo Metro configuration |
 | `eas.json` | EAS Build config | Build profiles (dev, preview, production) |
-| `vitest.setup.ts` | Test setup | Testing library, error suppression |
+| `jest.config.js` | Jest config | Test patterns, path mappings, ignore patterns |
+| `playwright.config.ts` | Playwright E2E config | Chromium, web server, base URL |
 | `supabase/config.toml` | Local Supabase | Port settings, API config |
 
 ### Key Application Files
