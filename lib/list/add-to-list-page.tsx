@@ -1,6 +1,7 @@
 import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColors } from '../theme/colors';
+import { ContentContainer } from '../components/content-container';
 import type { TMDBConfigurationState } from '../tmdb-api/tmdb-configuration';
 import type { TMDBSearchResult, TMDBGenre } from '../tmdb-api/tmdb-api';
 import { SearchResultRow } from './search-result-row';
@@ -38,59 +39,61 @@ export function AddToListPage({
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
-      <View style={[styles.searchContainer, { borderBottomColor: colors.separator }]}>
-        <TextInput
-          style={[styles.searchInput, { backgroundColor: colors.input, color: colors.textPrimary, outlineColor: colors.primary }]}
-          placeholder="Search movies and TV shows..."
-          value={query}
-          onChangeText={onQueryChange}
-          autoFocus
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-      </View>
-
-      {loading && (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+      <ContentContainer maxWidth={720}>
+        <View style={[styles.searchContainer, { borderBottomColor: colors.separator }]}>
+          <TextInput
+            style={[styles.searchInput, { backgroundColor: colors.input, color: colors.textPrimary, outlineColor: colors.primary }]}
+            placeholder="Search movies and TV shows..."
+            value={query}
+            onChangeText={onQueryChange}
+            autoFocus
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
         </View>
-      )}
 
-      {error && (
-        <View style={styles.centerContainer}>
-          <Text style={[styles.errorText, { color: colors.textDanger }]}>{error}</Text>
-        </View>
-      )}
+        {loading && (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        )}
 
-      {!loading && !error && results.length === 0 && query.length > 0 && (
-        <View style={styles.centerContainer}>
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No results found</Text>
-        </View>
-      )}
+        {error && (
+          <View style={styles.centerContainer}>
+            <Text style={[styles.errorText, { color: colors.textDanger }]}>{error}</Text>
+          </View>
+        )}
 
-      {!loading && !error && results.length === 0 && query.length === 0 && (
-        <View style={styles.centerContainer}>
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Search for movies and TV shows</Text>
-        </View>
-      )}
+        {!loading && !error && results.length === 0 && query.length > 0 && (
+          <View style={styles.centerContainer}>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No results found</Text>
+          </View>
+        )}
 
-      {results.length > 0 && (
-        <FlatList
-          data={results}
-          renderItem={({ item }) => (
-            <SearchResultRow
-              item={item}
-              config={config}
-              isSaved={savedTmdbIds.has(item.id)}
-              isSaving={savingId === item.id}
-              onAdd={onAddToList}
-            />
-          )}
-          keyExtractor={(item) => `${item.media_type}-${item.id}`}
-          contentContainerStyle={styles.listContent}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-        />
-      )}
+        {!loading && !error && results.length === 0 && query.length === 0 && (
+          <View style={styles.centerContainer}>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Search for movies and TV shows</Text>
+          </View>
+        )}
+
+        {results.length > 0 && (
+          <FlatList
+            data={results}
+            renderItem={({ item }) => (
+              <SearchResultRow
+                item={item}
+                config={config}
+                isSaved={savedTmdbIds.has(item.id)}
+                isSaving={savingId === item.id}
+                onAdd={onAddToList}
+              />
+            )}
+            keyExtractor={(item) => `${item.media_type}-${item.id}`}
+            contentContainerStyle={styles.listContent}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+          />
+        )}
+      </ContentContainer>
     </SafeAreaView>
   );
 }

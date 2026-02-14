@@ -5,6 +5,7 @@ import { useContext, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import { useThemeColors } from '../theme/colors';
+import { ContentContainer } from '../components/content-container';
 import type { WatchCardEntry } from './watch-card';
 
 interface WatchWinnerViewProps {
@@ -48,7 +49,8 @@ export function WatchWinnerView({
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ContentContainer maxWidth={720}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Hero Section */}
         <View style={styles.hero}>
           {backdropUrl ? (
@@ -97,33 +99,34 @@ export function WatchWinnerView({
             <Text style={[styles.errorText, { color: colors.textDangerStrong }]}>{error}</Text>
           </View>
         )}
-      </ScrollView>
+        </ScrollView>
 
-      {/* Footer Actions */}
-      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
-        <Pressable
-          style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }, markingWatched && styles.buttonDisabled]}
-          onPress={onStartOver}
-          disabled={markingWatched}
-        >
-          <Ionicons name="refresh" size={20} color={colors.text} />
-          <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Start Over</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.primaryButton, { backgroundColor: colors.primary }, markingWatched && styles.buttonDisabled]}
-          onPress={handleMarkWatched}
-          disabled={markingWatched}
-        >
-          {markingWatched ? (
-            <ActivityIndicator size="small" color={colors.textOnColor} />
-          ) : (
-            <>
-              <Ionicons name="checkmark" size={20} color={colors.textOnColor} />
-              <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Mark as Watched</Text>
-            </>
-          )}
-        </Pressable>
-      </View>
+        {/* Footer Actions */}
+        <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
+          <Pressable
+            style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }, markingWatched && styles.buttonDisabled]}
+            onPress={onStartOver}
+            disabled={markingWatched}
+          >
+            <Ionicons name="refresh" size={20} color={colors.text} />
+            <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Start Over</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.primaryButton, { backgroundColor: colors.primary }, markingWatched && styles.buttonDisabled]}
+            onPress={handleMarkWatched}
+            disabled={markingWatched}
+          >
+            {markingWatched ? (
+              <ActivityIndicator size="small" color={colors.textOnColor} />
+            ) : (
+              <>
+                <Ionicons name="checkmark" size={20} color={colors.textOnColor} />
+                <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Mark as Watched</Text>
+              </>
+            )}
+          </Pressable>
+        </View>
+      </ContentContainer>
     </SafeAreaView>
   );
 }

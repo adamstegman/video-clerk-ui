@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { useContext, useState } from 'react';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
 import { useThemeColors } from '../theme/colors';
+import { ContentContainer } from '../components/content-container';
 import type { WatchCardEntry } from './watch-card';
 
 interface WatchPickerViewProps {
@@ -27,12 +28,13 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Pick one to watch</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>You liked {liked.length}. Choose your winner:</Text>
-      </View>
+      <ContentContainer maxWidth={720}>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>Pick one to watch</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>You liked {liked.length}. Choose your winner:</Text>
+        </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
         {liked.map((entry) => {
           const posterSize = config.images.poster_sizes[1] || config.images.poster_sizes[0];
           const posterUrl =
@@ -69,20 +71,21 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
             </Pressable>
           );
         })}
-      </ScrollView>
+        </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
-        <Pressable style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }]} onPress={onStartOver}>
-          <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Start Over</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.primaryButton, { backgroundColor: colors.primary }, !selectedId && styles.buttonDisabled]}
-          onPress={handleChoose}
-          disabled={!selectedId}
-        >
-          <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Choose Winner</Text>
-        </Pressable>
-      </View>
+        <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
+          <Pressable style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }]} onPress={onStartOver}>
+            <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Start Over</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.primaryButton, { backgroundColor: colors.primary }, !selectedId && styles.buttonDisabled]}
+            onPress={handleChoose}
+            disabled={!selectedId}
+          >
+            <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Choose Winner</Text>
+          </Pressable>
+        </View>
+      </ContentContainer>
     </SafeAreaView>
   );
 }

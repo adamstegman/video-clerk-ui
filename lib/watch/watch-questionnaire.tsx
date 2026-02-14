@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors, type ThemeColors } from '../theme/colors';
+import { ContentContainer } from '../components/content-container';
 
 export interface QuestionnaireFilters {
   timeTypes: ('short-show' | 'long-show' | 'movie')[];
@@ -44,7 +45,8 @@ export function WatchQuestionnaire({
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ContentContainer maxWidth={640}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Time Section */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>How much time do you have?</Text>
@@ -121,21 +123,22 @@ export function WatchQuestionnaire({
             No entries match these filters. Try different options.
           </Text>
         )}
-      </ScrollView>
+        </ScrollView>
 
-      {/* Start Button */}
-      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
-        <Pressable
-          style={[styles.startButton, { backgroundColor: colors.primary }, !canStart && { backgroundColor: colors.disabled }]}
-          onPress={onStart}
-          disabled={!canStart}
-        >
-          <Text style={[styles.startButtonText, { color: colors.textOnColor }, !canStart && { color: colors.textTertiary }]}>
-            Start Swiping
-          </Text>
-          <Ionicons name="checkmark" size={20} color={canStart ? colors.textOnColor : colors.textTertiary} />
-        </Pressable>
-      </View>
+        {/* Start Button */}
+        <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
+          <Pressable
+            style={[styles.startButton, { backgroundColor: colors.primary }, !canStart && { backgroundColor: colors.disabled }]}
+            onPress={onStart}
+            disabled={!canStart}
+          >
+            <Text style={[styles.startButtonText, { color: colors.textOnColor }, !canStart && { color: colors.textTertiary }]}>
+              Start Swiping
+            </Text>
+            <Ionicons name="checkmark" size={20} color={canStart ? colors.textOnColor : colors.textTertiary} />
+          </Pressable>
+        </View>
+      </ContentContainer>
     </SafeAreaView>
   );
 }
