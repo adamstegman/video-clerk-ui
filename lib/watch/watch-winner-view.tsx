@@ -101,32 +101,37 @@ export function WatchWinnerView({
         )}
         </ScrollView>
 
-        {/* Footer Actions */}
-        <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
-          <Pressable
-            style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }, markingWatched && styles.buttonDisabled]}
-            onPress={onStartOver}
-            disabled={markingWatched}
-          >
-            <Ionicons name="refresh" size={20} color={colors.text} />
-            <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Start Over</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.primaryButton, { backgroundColor: colors.primary }, markingWatched && styles.buttonDisabled]}
-            onPress={handleMarkWatched}
-            disabled={markingWatched}
-          >
-            {markingWatched ? (
-              <ActivityIndicator size="small" color={colors.textOnColor} />
-            ) : (
-              <>
-                <Ionicons name="checkmark" size={20} color={colors.textOnColor} />
-                <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Mark as Watched</Text>
-              </>
-            )}
-          </Pressable>
-        </View>
       </ContentContainer>
+
+      {/* Footer Actions */}
+      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
+        <ContentContainer maxWidth={720} style={{ flex: 0 }}>
+          <View style={styles.footerButtons}>
+            <Pressable
+              style={[styles.secondaryButton, { backgroundColor: colors.surface, borderColor: colors.separator }, markingWatched && styles.buttonDisabled]}
+              onPress={onStartOver}
+              disabled={markingWatched}
+            >
+              <Ionicons name="refresh" size={20} color={colors.text} />
+              <Text style={[styles.secondaryButtonText, { color: colors.text }]}>Start Over</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.primaryButton, { backgroundColor: colors.primary }, markingWatched && styles.buttonDisabled]}
+              onPress={handleMarkWatched}
+              disabled={markingWatched}
+            >
+              {markingWatched ? (
+                <ActivityIndicator size="small" color={colors.textOnColor} />
+              ) : (
+                <>
+                  <Ionicons name="checkmark" size={20} color={colors.textOnColor} />
+                  <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Mark as Watched</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+        </ContentContainer>
+      </View>
     </SafeAreaView>
   );
 }
@@ -228,11 +233,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footer: {
+    borderTopWidth: 1,
+  },
+  footerButtons: {
     flexDirection: 'row',
     gap: 12,
     paddingHorizontal: 24,
     paddingVertical: 16,
-    borderTopWidth: 1,
   },
   primaryButton: {
     flex: 1,

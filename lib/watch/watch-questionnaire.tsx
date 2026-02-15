@@ -125,20 +125,25 @@ export function WatchQuestionnaire({
         )}
         </ScrollView>
 
-        {/* Start Button */}
-        <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
-          <Pressable
-            style={[styles.startButton, { backgroundColor: colors.primary }, !canStart && { backgroundColor: colors.disabled }]}
-            onPress={onStart}
-            disabled={!canStart}
-          >
-            <Text style={[styles.startButtonText, { color: colors.textOnColor }, !canStart && { color: colors.textTertiary }]}>
-              Start Swiping
-            </Text>
-            <Ionicons name="checkmark" size={20} color={canStart ? colors.textOnColor : colors.textTertiary} />
-          </Pressable>
-        </View>
       </ContentContainer>
+
+      {/* Start Button */}
+      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.separator }]}>
+        <ContentContainer maxWidth={640} style={{ flex: 0 }}>
+          <View style={styles.footerContent}>
+            <Pressable
+              style={[styles.startButton, { backgroundColor: colors.primary }, !canStart && { backgroundColor: colors.disabled }]}
+              onPress={onStart}
+              disabled={!canStart}
+            >
+              <Text style={[styles.startButtonText, { color: colors.textOnColor }, !canStart && { color: colors.textTertiary }]}>
+                Start Swiping
+              </Text>
+              <Ionicons name="checkmark" size={20} color={canStart ? colors.textOnColor : colors.textTertiary} />
+            </Pressable>
+          </View>
+        </ContentContainer>
+      </View>
     </SafeAreaView>
   );
 }
@@ -286,9 +291,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footer: {
+    borderTopWidth: 1,
+  },
+  footerContent: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-    borderTopWidth: 1,
   },
   startButton: {
     flexDirection: 'row',
