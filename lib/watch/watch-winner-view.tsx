@@ -124,7 +124,7 @@ export function WatchWinnerView({
               ) : (
                 <>
                   <Ionicons name="checkmark" size={20} color={colors.textOnColor} />
-                  <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Mark as Watched</Text>
+                  <Text style={[styles.primaryButtonText, { color: colors.textOnColor }]}>Mark Watched</Text>
                 </>
               )}
             </Pressable>

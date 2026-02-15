@@ -190,7 +190,7 @@ describe('WatchPage', () => {
     );
 
     expect(screen.getByText('Winner')).toBeTruthy();
-    expect(screen.getByText(/Mark as Watched/i)).toBeTruthy();
+    expect(screen.getByText(/Mark Watched/i)).toBeTruthy();
   });
 
   it('shows no matches state when deck is empty and no likes', () => {
