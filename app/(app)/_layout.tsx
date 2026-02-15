@@ -94,6 +94,7 @@ export default function AppLayout() {
                       },
                 }}
               >
+                {/* Keep in sync with NAV_ITEMS in lib/components/sidebar.tsx */}
                 <Tabs.Screen
                   name="watch/index"
                   options={{

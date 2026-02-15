@@ -7,6 +7,7 @@ interface SidebarProps {
   currentRoute: string;
 }
 
+// Keep in sync with Tabs.Screen definitions in app/(app)/_layout.tsx
 const NAV_ITEMS = [
   { route: '/watch', label: 'Watch', icon: 'play' as const },
   { route: '/list', label: 'List', icon: 'list' as const },
