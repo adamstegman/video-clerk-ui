@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useContext, useState } from 'react';
 import { TMDBConfigurationContext } from '../tmdb-api/tmdb-configuration';
@@ -27,7 +26,7 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
+    <View style={[styles.container, { backgroundColor: colors.page }]}>
       <ContentContainer maxWidth={720}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>Pick one to watch</Text>
@@ -91,7 +90,7 @@ export function WatchPickerView({ liked, onChooseWinner, onStartOver }: WatchPic
           </View>
         </ContentContainer>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
