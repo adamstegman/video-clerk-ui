@@ -10,12 +10,14 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import type { ReactNode } from 'react';
+import type { ViewStyle } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface SwipeableCardProps {
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
+  style?: ViewStyle;
   children: ReactNode;
 }
 
@@ -25,6 +27,7 @@ const SPRING_CONFIG = { stiffness: 300, damping: 20 };
 export function SwipeableCard({
   onSwipeLeft,
   onSwipeRight,
+  style,
   children,
 }: SwipeableCardProps) {
   const translateX = useSharedValue(0);
@@ -86,7 +89,7 @@ export function SwipeableCard({
 
   return (
     <GestureDetector gesture={pan}>
-      <Animated.View style={cardStyle}>{children}</Animated.View>
+      <Animated.View style={[cardStyle, style]}>{children}</Animated.View>
     </GestureDetector>
   );
 }

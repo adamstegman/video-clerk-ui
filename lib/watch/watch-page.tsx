@@ -188,6 +188,7 @@ export function WatchPage({
             return (
               <SwipeableCard
                 key={entry.id}
+                style={{ zIndex: 100 }}
                 onSwipeLeft={() => onSwipeLeft(entry)}
                 onSwipeRight={() => onSwipeRight(entry)}
               >
