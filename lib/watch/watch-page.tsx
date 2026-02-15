@@ -14,7 +14,17 @@ const SPRING_CONFIG = { damping: 20, stiffness: 200 };
 
 const MAX_VISIBLE_INDEX = 2;
 
-function StackedCard({ entry, index }: { entry: WatchCardEntry; index: number }) {
+function DeckCard({
+  entry,
+  index,
+  onSwipeLeft,
+  onSwipeRight,
+}: {
+  entry: WatchCardEntry;
+  index: number;
+  onSwipeLeft: () => void;
+  onSwipeRight: () => void;
+}) {
   // Cards beyond index 2 are hidden behind the last visible card
   const clampedIndex = Math.min(index, MAX_VISIBLE_INDEX);
   const translateY = useSharedValue(clampedIndex * STACK_OFFSET);
@@ -30,9 +40,17 @@ function StackedCard({ entry, index }: { entry: WatchCardEntry; index: number })
     zIndex: 100 - index,
   }));
 
+  const isTop = index === 0;
+
   return (
     <Animated.View style={[styles.stackedCard, animatedStyle]}>
-      <WatchCard entry={entry} />
+      {isTop ? (
+        <SwipeableCard onSwipeLeft={onSwipeLeft} onSwipeRight={onSwipeRight}>
+          <WatchCard entry={entry} />
+        </SwipeableCard>
+      ) : (
+        <WatchCard entry={entry} />
+      )}
     </Animated.View>
   );
 }
@@ -184,21 +202,14 @@ export function WatchPage({
         {[...visibleDeck].reverse().map((entry, renderIndex) => {
           const deckIndex = visibleDeck.length - 1 - renderIndex;
 
-          if (deckIndex === 0) {
-            return (
-              <SwipeableCard
-                key={entry.id}
-                style={{ zIndex: 100 }}
-                onSwipeLeft={() => onSwipeLeft(entry)}
-                onSwipeRight={() => onSwipeRight(entry)}
-              >
-                <WatchCard entry={entry} />
-              </SwipeableCard>
-            );
-          }
-
           return (
-            <StackedCard key={entry.id} entry={entry} index={deckIndex} />
+            <DeckCard
+              key={entry.id}
+              entry={entry}
+              index={deckIndex}
+              onSwipeLeft={() => onSwipeLeft(entry)}
+              onSwipeRight={() => onSwipeRight(entry)}
+            />
           );
         })}
       </View>
