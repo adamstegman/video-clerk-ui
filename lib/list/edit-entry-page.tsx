@@ -5,10 +5,13 @@ import { ContentContainer } from '../components/content-container';
 import { EntryHeader } from './entry-header';
 import { WatchedStatusSection } from './watched-status-section';
 import { TagsSection } from './tags-section';
+import { RuntimeSection } from './runtime-section';
 import { EntryActions } from './entry-actions';
 
 export interface EditEntryData {
   id: number;
+  tmdbId: number | null;
+  mediaType: string | null;
   title: string;
   releaseYear: string;
   posterPath: string | null;
@@ -28,12 +31,14 @@ interface EditEntryPageProps {
   availableTags: EditEntryTag[];
   tagQuery: string;
   watched: boolean;
+  runtime: number | null;
   saving: boolean;
   deleting: boolean;
   onToggleTag: (tag: EditEntryTag) => void;
   onTagQueryChange: (value: string) => void;
   onCreateTag: (value: string) => void;
   onWatchedChange: (value: boolean) => void;
+  onRuntimeChange: (value: number | null) => void;
   onSave: () => void;
   onDelete: () => void;
 }
@@ -46,12 +51,14 @@ export function EditEntryPage({
   availableTags,
   tagQuery,
   watched,
+  runtime,
   saving,
   deleting,
   onToggleTag,
   onTagQueryChange,
   onCreateTag,
   onWatchedChange,
+  onRuntimeChange,
   onSave,
   onDelete,
 }: EditEntryPageProps) {
@@ -87,6 +94,11 @@ export function EditEntryPage({
           <WatchedStatusSection
             watched={watched}
             onWatchedChange={onWatchedChange}
+          />
+
+          <RuntimeSection
+            runtime={runtime}
+            onRuntimeChange={onRuntimeChange}
           />
 
           <TagsSection

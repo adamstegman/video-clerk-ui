@@ -22,6 +22,7 @@ export function EditEntryPageContainer() {
   const [availableTags, setAvailableTags] = useState<EditEntryTag[]>([]);
   const [tagQuery, setTagQuery] = useState('');
   const [watched, setWatched] = useState(false);
+  const [runtime, setRuntime] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -45,9 +46,12 @@ export function EditEntryPageContainer() {
               added_at,
               watched_at,
               tmdb_details (
+                tmdb_id,
+                media_type,
                 poster_path,
                 name,
-                release_date
+                release_date,
+                runtime
               ),
               entry_tags (
                 tags (
@@ -102,12 +106,15 @@ export function EditEntryPageContainer() {
 
       setEntry({
         id: row.id,
+        tmdbId: details?.tmdb_id ?? null,
+        mediaType: details?.media_type ?? null,
         title: details?.name || 'Untitled',
         releaseYear: getReleaseYear(details?.release_date ?? null),
         posterPath: details?.poster_path ?? null,
       });
       setSelectedTags(tags);
       setWatched(Boolean(row.watched_at));
+      setRuntime(details?.runtime ?? null);
     } catch (err) {
       setEntry(null);
       setError(err instanceof Error ? err.message : 'Failed to load entry');
@@ -256,6 +263,15 @@ export function EditEntryPageContainer() {
 
       if (watchedError) throw watchedError;
 
+      if (entry.tmdbId != null && entry.mediaType != null) {
+        const { error: runtimeError } = await supabase
+          .from('tmdb_details')
+          .update({ runtime })
+          .eq('tmdb_id', entry.tmdbId)
+          .eq('media_type', entry.mediaType);
+        if (runtimeError) throw runtimeError;
+      }
+
       const { error: clearError } = await supabase.from('entry_tags').delete().eq('entry_id', entryId);
       if (clearError) throw clearError;
 
@@ -276,7 +292,7 @@ export function EditEntryPageContainer() {
     } finally {
       setSaving(false);
     }
-  }, [entry, entryId, ensureTagExists, router, selectedTags, tagQuery, watched]);
+  }, [entry, entryId, ensureTagExists, router, runtime, selectedTags, tagQuery, watched]);
 
   const handleDelete = useCallback(async () => {
     if (!entryId || deleting) return;
@@ -351,12 +367,14 @@ export function EditEntryPageContainer() {
       availableTags={filteredAvailableTags}
       tagQuery={tagQuery}
       watched={watched}
+      runtime={runtime}
       saving={saving}
       deleting={deleting}
       onToggleTag={handleToggleTag}
       onTagQueryChange={setTagQuery}
       onCreateTag={handleCreateTag}
       onWatchedChange={setWatched}
+      onRuntimeChange={setRuntime}
       onSave={handleSave}
       onDelete={handleDelete}
     />

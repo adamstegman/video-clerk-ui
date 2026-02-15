@@ -210,6 +210,181 @@ describe('Application-level: Edit Entry Page', () => {
     }
   });
 
+  it('updates runtime in tmdb_details when saving', async () => {
+    const admin = createAdminClient();
+    const testUser = await createTestUser(admin);
+    const { client: authed, userId } = testUser;
+
+    try {
+      // Create a test entry with runtime 139
+      await authed.rpc('save_tmdb_result_to_list', {
+        p_tmdb_id: 680,
+        p_media_type: 'movie',
+        p_title: 'Pulp Fiction',
+        p_adult: false,
+        p_backdrop_path: null,
+        p_poster_path: null,
+        p_original_language: 'en',
+        p_overview: 'Test',
+        p_popularity: 100.0,
+        p_vote_average: 8.9,
+        p_vote_count: 1000,
+        p_original_name: 'Pulp Fiction',
+        p_release_date: '1994-09-10',
+        p_origin_country: ['US'],
+        p_genre_ids: [18, 80],
+        p_genre_names: ['Drama', 'Crime'],
+        p_runtime: 154,
+      });
+
+      // Verify initial runtime
+      const { data: initialDetails, error: initialError } = await authed
+        .from('tmdb_details')
+        .select('runtime')
+        .eq('tmdb_id', 680)
+        .eq('media_type', 'movie')
+        .single();
+
+      expect(initialError).toBeNull();
+      expect(initialDetails!.runtime).toBe(154);
+
+      // Update runtime to a new value
+      const { error: updateError } = await authed
+        .from('tmdb_details')
+        .update({ runtime: 160 })
+        .eq('tmdb_id', 680)
+        .eq('media_type', 'movie');
+
+      expect(updateError).toBeNull();
+
+      // Verify updated runtime
+      const { data: updatedDetails, error: fetchError } = await authed
+        .from('tmdb_details')
+        .select('runtime')
+        .eq('tmdb_id', 680)
+        .eq('media_type', 'movie')
+        .single();
+
+      expect(fetchError).toBeNull();
+      expect(updatedDetails!.runtime).toBe(160);
+
+    } finally {
+      await cleanupTestUser(admin, userId);
+    }
+  });
+
+  it('clears runtime in tmdb_details when set to null', async () => {
+    const admin = createAdminClient();
+    const testUser = await createTestUser(admin);
+    const { client: authed, userId } = testUser;
+
+    try {
+      // Create a test entry with runtime
+      await authed.rpc('save_tmdb_result_to_list', {
+        p_tmdb_id: 155,
+        p_media_type: 'movie',
+        p_title: 'The Dark Knight',
+        p_adult: false,
+        p_backdrop_path: null,
+        p_poster_path: null,
+        p_original_language: 'en',
+        p_overview: 'Test',
+        p_popularity: 100.0,
+        p_vote_average: 9.0,
+        p_vote_count: 1000,
+        p_original_name: 'The Dark Knight',
+        p_release_date: '2008-07-18',
+        p_origin_country: ['US'],
+        p_genre_ids: [28, 80],
+        p_genre_names: ['Action', 'Crime'],
+        p_runtime: 152,
+      });
+
+      // Clear runtime
+      const { error: updateError } = await authed
+        .from('tmdb_details')
+        .update({ runtime: null })
+        .eq('tmdb_id', 155)
+        .eq('media_type', 'movie');
+
+      expect(updateError).toBeNull();
+
+      // Verify runtime is null
+      const { data: updatedDetails, error: fetchError } = await authed
+        .from('tmdb_details')
+        .select('runtime')
+        .eq('tmdb_id', 155)
+        .eq('media_type', 'movie')
+        .single();
+
+      expect(fetchError).toBeNull();
+      expect(updatedDetails!.runtime).toBeNull();
+
+    } finally {
+      await cleanupTestUser(admin, userId);
+    }
+  });
+
+  it('loads runtime from tmdb_details when fetching entry', async () => {
+    const admin = createAdminClient();
+    const testUser = await createTestUser(admin);
+    const { client: authed, userId } = testUser;
+
+    try {
+      const groupId = await getGroupId(authed);
+
+      // Create a test entry with runtime
+      await authed.rpc('save_tmdb_result_to_list', {
+        p_tmdb_id: 13,
+        p_media_type: 'movie',
+        p_title: 'Forrest Gump',
+        p_adult: false,
+        p_backdrop_path: null,
+        p_poster_path: null,
+        p_original_language: 'en',
+        p_overview: 'Test',
+        p_popularity: 100.0,
+        p_vote_average: 8.8,
+        p_vote_count: 1000,
+        p_original_name: 'Forrest Gump',
+        p_release_date: '1994-07-06',
+        p_origin_country: ['US'],
+        p_genre_ids: [18, 35],
+        p_genre_names: ['Drama', 'Comedy'],
+        p_runtime: 142,
+      });
+
+      // Fetch entry with runtime included in tmdb_details select
+      const { data: entry, error: fetchError } = await authed
+        .from('entries')
+        .select(
+          `
+            id,
+            tmdb_details (
+              tmdb_id,
+              media_type,
+              runtime
+            )
+          `
+        )
+        .eq('group_id', groupId)
+        .limit(1)
+        .single();
+
+      expect(fetchError).toBeNull();
+      expect(entry).not.toBeNull();
+
+      const details = Array.isArray(entry!.tmdb_details)
+        ? entry!.tmdb_details[0]
+        : entry!.tmdb_details;
+      expect(details).not.toBeNull();
+      expect(details!.runtime).toBe(142);
+
+    } finally {
+      await cleanupTestUser(admin, userId);
+    }
+  });
+
   it('creates custom tags on the fly when saving', async () => {
     const admin = createAdminClient();
     const testUser = await createTestUser(admin);
