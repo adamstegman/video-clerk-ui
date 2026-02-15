@@ -17,7 +17,10 @@ export function Sidebar({ currentRoute }: SidebarProps) {
   const colors = useThemeColors();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.tabBar, borderRightColor: colors.separator }]}>
+    <View
+      role="tablist"
+      style={[styles.container, { backgroundColor: colors.tabBar, borderRightColor: colors.separator }]}
+    >
       {NAV_ITEMS.map((item) => {
         const isActive = currentRoute.startsWith(item.route);
         return (
@@ -50,6 +53,8 @@ function SidebarItem({
 }) {
   return (
     <Pressable
+      role="tab"
+      aria-selected={isActive}
       style={[styles.item, isActive && { backgroundColor: colors.primarySubtle }]}
       onPress={onPress}
     >
