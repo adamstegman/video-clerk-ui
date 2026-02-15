@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors, type ThemeColors } from '../theme/colors';
 import { ContentContainer } from '../components/content-container';
@@ -44,7 +43,7 @@ export function WatchQuestionnaire({
   const canStart = matchingCount > 0;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
+    <View style={[styles.container, { backgroundColor: colors.page }]}>
       <ContentContainer maxWidth={640}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Time Section */}
@@ -144,7 +143,7 @@ export function WatchQuestionnaire({
           </View>
         </ContentContainer>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

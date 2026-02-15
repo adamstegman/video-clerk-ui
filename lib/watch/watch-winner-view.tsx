@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useContext, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -48,7 +47,7 @@ export function WatchWinnerView({
       : null;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
+    <View style={[styles.container, { backgroundColor: colors.page }]}>
       <ContentContainer maxWidth={720}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Hero Section */}
@@ -132,7 +131,7 @@ export function WatchWinnerView({
           </View>
         </ContentContainer>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
