@@ -22,7 +22,7 @@ export function Sidebar({ currentRoute }: SidebarProps) {
       style={[styles.container, { backgroundColor: colors.tabBar, borderRightColor: colors.separator }]}
     >
       {NAV_ITEMS.map((item) => {
-        const isActive = currentRoute.startsWith(item.route);
+        const isActive = currentRoute === item.route || currentRoute.startsWith(`${item.route}/`);
         return (
           <SidebarItem
             key={item.route}
