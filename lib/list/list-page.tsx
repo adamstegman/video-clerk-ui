@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useThemeColors } from '../theme/colors';
+import { ContentContainer } from '../components/content-container';
 import { SwipeableEntryRow } from './swipeable-entry-row';
 import type { SavedEntryRowData } from './saved-entry-row';
 
@@ -67,19 +68,21 @@ export function ListPage({ entries, loading, error, refreshing, onRefresh, onDel
 
   return (
     <GestureHandlerRootView style={[styles.container, { backgroundColor: colors.surface }]}>
-      <FlatList
-        data={entries}
-        renderItem={renderItem}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.separator }]} />}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
-      />
-      <Pressable style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => router.push('/(app)/list/add')}>
-        <Ionicons name="add" color={colors.textOnColor} size={24} />
-      </Pressable>
+      <ContentContainer maxWidth={720}>
+        <FlatList
+          data={entries}
+          renderItem={renderItem}
+          keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={styles.listContent}
+          ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.separator }]} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+          }
+        />
+        <Pressable style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => router.push('/(app)/list/add')}>
+          <Ionicons name="add" color={colors.textOnColor} size={24} />
+        </Pressable>
+      </ContentContainer>
     </GestureHandlerRootView>
   );
 }

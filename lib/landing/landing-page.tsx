@@ -1,13 +1,13 @@
-import { View, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '../theme/colors';
+import { useIsWide } from '../utils/responsive';
 import { HeroSection } from './hero-section';
 import { FeatureCard } from './feature-card';
 
 export function LandingPage() {
-  const { width } = useWindowDimensions();
-  const isWide = width >= 768;
+  const isWide = useIsWide();
   const colors = useThemeColors();
 
   return (

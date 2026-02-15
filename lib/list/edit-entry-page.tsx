@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColors } from '../theme/colors';
+import { ContentContainer } from '../components/content-container';
 import { EntryHeader } from './entry-header';
 import { WatchedStatusSection } from './watched-status-section';
 import { TagsSection } from './tags-section';
@@ -79,30 +80,32 @@ export function EditEntryPage({
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <EntryHeader entry={entry} />
+      <ContentContainer maxWidth={640}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <EntryHeader entry={entry} />
 
-        <WatchedStatusSection
-          watched={watched}
-          onWatchedChange={onWatchedChange}
-        />
+          <WatchedStatusSection
+            watched={watched}
+            onWatchedChange={onWatchedChange}
+          />
 
-        <TagsSection
-          selectedTags={selectedTags}
-          availableTags={availableTags}
-          tagQuery={tagQuery}
-          onToggleTag={onToggleTag}
-          onTagQueryChange={onTagQueryChange}
-          onCreateTag={onCreateTag}
-        />
+          <TagsSection
+            selectedTags={selectedTags}
+            availableTags={availableTags}
+            tagQuery={tagQuery}
+            onToggleTag={onToggleTag}
+            onTagQueryChange={onTagQueryChange}
+            onCreateTag={onCreateTag}
+          />
 
-        <EntryActions
-          saving={saving}
-          deleting={deleting}
-          onSave={onSave}
-          onDelete={onDelete}
-        />
-      </ScrollView>
+          <EntryActions
+            saving={saving}
+            deleting={deleting}
+            onSave={onSave}
+            onDelete={onDelete}
+          />
+        </ScrollView>
+      </ContentContainer>
     </SafeAreaView>
   );
 }

@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { User } from '@supabase/supabase-js';
 import { useThemeColors } from '../theme/colors';
+import { ContentContainer } from '../components/content-container';
 import { ProfileSection } from './profile-section';
 import { GroupSection } from './group-section';
 import type { GroupMember, PendingInvite } from './group-section';
@@ -44,10 +45,11 @@ export function SettingsPage({
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
-      <ScrollView style={styles.content}>
-        <ProfileSection email={user?.email} />
+      <ContentContainer maxWidth={640}>
+        <ScrollView style={styles.content}>
+          <ProfileSection email={user?.email} />
 
-        <GroupSection
+          <GroupSection
           currentUserId={user?.id}
           groupMembers={groupMembers}
           loadingMembers={loadingMembers}
@@ -65,13 +67,14 @@ export function SettingsPage({
 
         <AccountSection onSignOut={onSignOut} />
 
-        <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.textTertiary }]}>Video Clerk v1.0.0</Text>
-          <Text style={[styles.footerText, { color: colors.textTertiary }]}>
-            This application uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.
-          </Text>
-        </View>
-      </ScrollView>
+          <View style={styles.footer}>
+            <Text style={[styles.footerText, { color: colors.textTertiary }]}>Video Clerk v1.0.0</Text>
+            <Text style={[styles.footerText, { color: colors.textTertiary }]}>
+              This application uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.
+            </Text>
+          </View>
+        </ScrollView>
+      </ContentContainer>
     </SafeAreaView>
   );
 }
