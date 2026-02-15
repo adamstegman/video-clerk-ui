@@ -27,7 +27,7 @@ function StackedCard({ entry, index }: { entry: WatchCardEntry; index: number })
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }, { scale: scale.value }],
-    zIndex: -index,
+    zIndex: 100 - index,
   }));
 
   return (
