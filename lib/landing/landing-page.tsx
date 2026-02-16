@@ -1,5 +1,4 @@
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '../theme/colors';
 import { useIsWide } from '../utils/responsive';
@@ -11,7 +10,7 @@ export function LandingPage() {
   const colors = useThemeColors();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]}>
+    <View style={[styles.container, { backgroundColor: colors.page }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <HeroSection isWide={isWide} />
@@ -38,7 +37,7 @@ export function LandingPage() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
