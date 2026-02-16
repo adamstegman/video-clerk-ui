@@ -26,7 +26,7 @@ function CustomHeader({ title, headerLeft, headerRight, colors }: CustomHeaderPr
   return (
     <View style={[styles.header, { backgroundColor: colors.primaryHeader, paddingTop: insets.top }]}>
       <View style={styles.headerSide}>{headerLeft}</View>
-      <Text style={[styles.headerTitle, { color: colors.textOnColor }]} numberOfLines={1}>{title}</Text>
+      <Text role="heading" style={[styles.headerTitle, { color: colors.textOnColor }]} numberOfLines={1}>{title}</Text>
       <View style={styles.headerSide}>{headerRight}</View>
     </View>
   );
