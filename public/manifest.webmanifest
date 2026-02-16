@@ -9,7 +9,7 @@
   "theme_color": "#6366f1",
   "icons": [
     {
-      "src": "/tv-minimal-play.light.svg",
+      "src": "/pwa-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
