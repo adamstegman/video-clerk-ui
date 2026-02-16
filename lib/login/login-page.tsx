@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -27,66 +27,70 @@ export function LoginPage({
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]}>
-      <Link href="/" asChild>
-        <Pressable style={styles.logo}>
-          <Ionicons name="tv-outline" size={22} color={colors.primaryHeader} />
-          <Text style={[styles.logoText, { color: colors.textPrimary }]}>Video Clerk</Text>
-        </Pressable>
-      </Link>
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+          <Link href="/" asChild>
+            <Pressable style={styles.logo}>
+              <Ionicons name="tv-outline" size={22} color={colors.primaryHeader} />
+              <Text style={[styles.logoText, { color: colors.textPrimary }]}>Video Clerk</Text>
+            </Pressable>
+          </Link>
 
-      <View style={styles.formWrapper}>
-        <View style={[styles.card, { backgroundColor: colors.authCard, borderColor: colors.separator }]}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>Login</Text>
-          <Text style={[styles.description, { color: colors.textSecondary }]}>
-            Enter your email below to login to your account
-          </Text>
+          <View style={styles.formWrapper}>
+            <View style={[styles.card, { backgroundColor: colors.authCard, borderColor: colors.separator }]}>
+              <Text style={[styles.title, { color: colors.textPrimary }]}>Login</Text>
+              <Text style={[styles.description, { color: colors.textSecondary }]}>
+                Enter your email below to login to your account
+              </Text>
 
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.textLabel }]}>Email</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary, outlineColor: colors.primary }]}
-              placeholder="me@example.com"
-              placeholderTextColor={colors.textTertiary}
-              value={email}
-              onChangeText={onEmailChange}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-            />
-          </View>
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.label, { color: colors.textLabel }]}>Email</Text>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary, outlineColor: colors.primary }]}
+                  placeholder="me@example.com"
+                  placeholderTextColor={colors.textTertiary}
+                  value={email}
+                  onChangeText={onEmailChange}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  autoComplete="email"
+                />
+              </View>
 
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.label, { color: colors.textLabel }]}>Password</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary, outlineColor: colors.primary }]}
-              placeholder=""
-              value={password}
-              onChangeText={onPasswordChange}
-              secureTextEntry
-              autoComplete="password"
-            />
-          </View>
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.label, { color: colors.textLabel }]}>Password</Text>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.authInput, borderColor: colors.borderInput, color: colors.textPrimary, outlineColor: colors.primary }]}
+                  placeholder=""
+                  value={password}
+                  onChangeText={onPasswordChange}
+                  secureTextEntry
+                  autoComplete="password"
+                />
+              </View>
 
-          {error && (
-            <View style={[styles.errorBox, { backgroundColor: colors.dangerSubtle, borderColor: colors.borderDanger }]}>
-              <Text style={[styles.errorText, { color: colors.textDangerStrong }]}>{error}</Text>
+              {error && (
+                <View style={[styles.errorBox, { backgroundColor: colors.dangerSubtle, borderColor: colors.borderDanger }]}>
+                  <Text style={[styles.errorText, { color: colors.textDangerStrong }]}>{error}</Text>
+                </View>
+              )}
+
+              <Pressable
+                testID="login-button"
+                style={[styles.button, { backgroundColor: colors.primaryHeader }, loading && { backgroundColor: colors.primaryDisabled }]}
+                onPress={onSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color={colors.textOnColor} />
+                ) : (
+                  <Text style={[styles.buttonText, { color: colors.textOnColor }]}>Login</Text>
+                )}
+              </Pressable>
             </View>
-          )}
-
-          <Pressable
-            testID="login-button"
-            style={[styles.button, { backgroundColor: colors.primaryHeader }, loading && { backgroundColor: colors.primaryDisabled }]}
-            onPress={onSubmit}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color={colors.textOnColor} />
-            ) : (
-              <Text style={[styles.buttonText, { color: colors.textOnColor }]}>Login</Text>
-            )}
-          </Pressable>
-        </View>
-      </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -95,14 +99,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   logo: {
-    position: 'absolute',
-    top: 48,
-    left: 24,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    zIndex: 1,
+    paddingTop: 48,
+    paddingLeft: 24,
   },
   logoText: {
     fontSize: 20,
