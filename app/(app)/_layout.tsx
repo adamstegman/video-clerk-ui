@@ -87,9 +87,9 @@ export default function AppLayout() {
                     : {
                         borderTopWidth: 1,
                         borderTopColor: colors.separator,
-                        height: 65,
+                        height: 80,
                         paddingTop: 4,
-                        paddingBottom: 4,
+                        paddingBottom: 16,
                         backgroundColor: colors.tabBar,
                       },
                 }}
