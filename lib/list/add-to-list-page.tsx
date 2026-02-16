@@ -1,5 +1,5 @@
-import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator, Pressable } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColors } from '../theme/colors';
 import { ContentContainer } from '../components/content-container';
 import type { TMDBConfigurationState } from '../tmdb-api/tmdb-configuration';
@@ -38,18 +38,31 @@ export function AddToListPage({
   const colors = useThemeColors();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.page }]} edges={['bottom']}>
+    <View style={[styles.container, { backgroundColor: colors.page }]}>
       <ContentContainer maxWidth={720}>
         <View style={[styles.searchContainer, { borderBottomColor: colors.separator }]}>
-          <TextInput
-            style={[styles.searchInput, { backgroundColor: colors.input, color: colors.textPrimary, outlineColor: colors.primary }]}
-            placeholder="Search movies and TV shows..."
-            value={query}
-            onChangeText={onQueryChange}
-            autoFocus
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+          <View style={styles.searchInputWrapper}>
+            <TextInput
+              style={[styles.searchInput, { backgroundColor: colors.input, color: colors.textPrimary, outlineColor: colors.primary }]}
+              placeholder="Search movies and TV shows..."
+              value={query}
+              onChangeText={onQueryChange}
+              autoFocus
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+            {query.length > 0 && (
+              <Pressable
+                onPress={() => onQueryChange('')}
+                style={styles.clearButton}
+                accessibilityLabel="Clear search"
+                accessibilityRole="button"
+              >
+                <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
+              </Pressable>
+            )}
+          </View>
         </View>
 
         {loading && (
@@ -89,12 +102,13 @@ export function AddToListPage({
               />
             )}
             keyExtractor={(item) => `${item.media_type}-${item.id}`}
+            keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.listContent}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
         )}
       </ContentContainer>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -107,11 +121,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
   },
+  searchInputWrapper: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
   searchInput: {
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingLeft: 16,
+    paddingRight: 40,
     borderRadius: 12,
     fontSize: 16,
+  },
+  clearButton: {
+    position: 'absolute',
+    right: 12,
+    padding: 4,
   },
   centerContainer: {
     flex: 1,
