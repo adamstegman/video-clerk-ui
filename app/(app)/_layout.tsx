@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Tabs, router, usePathname } from 'expo-router';
-import { ActivityIndicator, View, StyleSheet, Pressable } from 'react-native';
+import { ActivityIndicator, View, Text, StyleSheet, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { supabase } from '../../lib/supabase/client';
 import { TMDBAPIProvider } from '../../lib/tmdb-api/tmdb-api-provider';
@@ -10,6 +11,26 @@ import { useThemeColors } from '../../lib/theme/colors';
 import { useIsWide } from '../../lib/utils/responsive';
 import { Sidebar } from '../../lib/components/sidebar';
 import type { User } from '@supabase/supabase-js';
+import type { ThemeColors } from '../../lib/theme/colors';
+
+interface CustomHeaderProps {
+  title: string;
+  headerLeft?: React.ReactNode;
+  headerRight?: React.ReactNode;
+  colors: ThemeColors;
+}
+
+function CustomHeader({ title, headerLeft, headerRight, colors }: CustomHeaderProps) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View style={[styles.header, { backgroundColor: colors.primaryHeader, paddingTop: insets.top }]}>
+      <View style={styles.headerSide}>{headerLeft}</View>
+      <Text style={[styles.headerTitle, { color: colors.textOnColor }]} numberOfLines={1}>{title}</Text>
+      <View style={styles.headerSide}>{headerRight}</View>
+    </View>
+  );
+}
 
 export default function AppLayout() {
   const colors = useThemeColors();
@@ -63,15 +84,14 @@ export default function AppLayout() {
               <Tabs
                 screenOptions={{
                   headerShown: true,
-                  headerTitleAlign: 'center',
-                  headerStyle: {
-                    backgroundColor: colors.primaryHeader,
-                  },
-                  headerTintColor: colors.textOnColor,
-                  headerTitleStyle: {
-                    color: colors.textOnColor,
-                    fontWeight: '700',
-                  },
+                  header: ({ options }) => (
+                    <CustomHeader
+                      title={options.headerTitle as string ?? options.title ?? ''}
+                      headerLeft={options.headerLeft?.({ canGoBack: true, tintColor: colors.textOnColor })}
+                      headerRight={options.headerRight?.({ canGoBack: true, tintColor: colors.textOnColor })}
+                      colors={colors}
+                    />
+                  ),
                   sceneStyle: {
                     backgroundColor: colors.page,
                   },
@@ -168,5 +188,24 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 8,
+    paddingHorizontal: 4,
+    minHeight: 48,
+  },
+  headerSide: {
+    width: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 17,
+    fontWeight: '700',
   },
 });
