@@ -986,6 +986,7 @@ The `docs/solutions/` directory contains institutional knowledge — lessons lea
 |----------|---------|
 | [`workflow-issues/commit-push-on-open-pr`](docs/solutions/workflow-issues/commit-push-on-open-pr-System-20260206.md) | Always commit and push when the current branch has an open PR |
 | [`workflow-issues/update-docs-on-every-commit`](docs/solutions/workflow-issues/update-docs-on-every-commit-System-20260210.md) | Before each commit, verify that any docs changed in the PR still match the code |
+| [`integration-issues/ios-pwa-expo-router`](docs/solutions/integration-issues/ios-pwa-expo-router-20260217.md) | iOS PWA requires `output: "static"` in app.json, must NOT use `viewport-fit=cover`, body background colors the status bar |
 
 ### Solution file format
 

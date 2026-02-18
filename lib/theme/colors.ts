@@ -1,6 +1,6 @@
 import { useColorScheme } from 'react-native';
 
-const lightColors = {
+export const lightColors = {
   // Backgrounds
   page: '#ffffff',
   surface: '#f4f4f5',
